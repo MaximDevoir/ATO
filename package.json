@@ -1,0 +1,30 @@
+{
+  "name": "UMaestro",
+  "private": true,
+  "packageManager": "pnpm@10.29.3",
+  "scripts": {
+    "prepare": "husky",
+    "format": "biome check packages .changeset README.md package.json pnpm-workspace.yaml nx.json tsconfig.base.json biome.json vitest.workspace.ts commitlint.config.cjs --write",
+    "format:check": "biome check packages .changeset README.md package.json pnpm-workspace.yaml nx.json tsconfig.base.json biome.json vitest.workspace.ts commitlint.config.cjs",
+    "lint": "nx run-many -t lint --all",
+    "typecheck": "nx run-many -t typecheck --all",
+    "test": "nx run-many -t test --all",
+    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish",
+    "commitlint": "commitlint"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.6",
+    "@changesets/cli": "2.30.0",
+    "@commitlint/cli": "20.4.3",
+    "@commitlint/config-conventional": "20.4.3",
+    "@types/node": "25.4.0",
+    "husky": "9.1.7",
+    "nx": "22.5.4",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3",
+    "vitest": "4.0.18"
+  }
+}
