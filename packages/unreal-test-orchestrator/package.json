@@ -1,0 +1,28 @@
+{
+  "name": "@UMaestro/UnrealTestOrchestrator",
+  "version": "0.1.0",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@UMaestro/UnrealLag": "file:../unreal-lag",
+    "@types/yargs": "17.0.35",
+    "yargs": "18.0.0"
+  },
+  "scripts": {
+    "lint": "biome lint .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts"
+  }
+}

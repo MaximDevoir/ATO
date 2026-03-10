@@ -1,0 +1,1122 @@
+import { type BindInfo, UnrealLag } from '@UMaestro/UnrealLag';
+import type { ChildProcess } from 'node:child_process';
+import * as path from 'node:path';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
+import { checkExistsSync } from './UnrealTestOrchestrator._helpers';
+import { spawnProcess, waitForUdpPort } from './UnrealTestOrchestrator.helpers';
+import type {
+  ClientOptions,
+  E2ECommandLineContext,
+  E2ECommandLineOptions,
+  E2ERuntimeOptions,
+  ProcessLaunchOptions,
+  ServerOptions,
+  UnrealLagProxyOptions,
+} from './UnrealTestOrchestrator.options';
+
+interface UnrealTestOrchestratorInit {
+  runtimeOptions?: E2ERuntimeOptions;
+  commandLineContext?: E2ECommandLineContext;
+}
+
+interface ResolvedServerOptions extends ServerOptions {
+  exe: string;
+}
+
+interface ResolvedClientOptions extends ClientOptions {
+  exe: string;
+  host: string;
+}
+
+interface ResolvedPreviewCommand {
+  exe: string;
+  args: string[];
+  command: string;
+}
+
+interface ResolvedPreview {
+  server: ResolvedPreviewCommand;
+  clients: ResolvedPreviewCommand[];
+  unrealLag?: {
+    bindAddress: string;
+    bindPort: number;
+    serverProfile: string;
+    clientProfile: string;
+    targetServerPort: number;
+    timeoutSeconds: number;
+  };
+}
+
+interface ResolvedLaunchPlan {
+  effectivePort: number;
+  effectiveTimeout: number;
+  server: ResolvedServerOptions;
+  clients: ResolvedClientOptions[];
+  preview: ResolvedPreview;
+  dryRun: boolean;
+}
+
+interface ParsedCommandLineArguments {
+  UERoot: string;
+  Project: string;
+  clients?: number;
+  port?: number;
+  timeout?: number;
+  serverExe?: string;
+  clientExe?: string;
+  dryRun: boolean;
+}
+
+const FAILURE_EXIT_CODE = 1;
+
+type ProcessExitResult = number | 'timeout';
+
+type AutomationTerminalResult = 'Success' | 'Fail' | 'Error' | 'NotRun' | 'Unknown';
+
+export interface AutomationCompletedTest {
+  result: AutomationTerminalResult;
+  name: string;
+  path: string;
+}
+
+export interface AutomationObservationState {
+  expectAutomation: boolean;
+  foundTests: number | null;
+  testsPerformed: number | null;
+  sawQueueEmpty: boolean;
+  successfulTests: number;
+  unsuccessfulTests: AutomationCompletedTest[];
+}
+
+interface MonitoredProcess {
+  label: string;
+  process: ChildProcess;
+  automation: AutomationObservationState;
+  exitPromise: Promise<ProcessExitResult>;
+}
+
+interface ProcessOutcome {
+  label: string;
+  rawExitResult: ProcessExitResult;
+  effectiveExitCode: number;
+  reason: string;
+  automation: AutomationObservationState;
+}
+
+function promiseProcessExitOrTimeout(processHandle: ChildProcess, timeoutSeconds: number, onTimeout: () => void) {
+  return new Promise<ProcessExitResult>((resolve) => {
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      try {
+        onTimeout();
+      } catch {}
+      resolve('timeout');
+    }, timeoutSeconds * 1000);
+
+    processHandle.once('exit', (code) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(typeof code === 'number' ? code : 0);
+    });
+
+    processHandle.once('error', (error) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      console.error('Process error', error);
+      resolve(-1);
+    });
+  });
+}
+
+export function createAutomationObservationState(expectAutomation: boolean): AutomationObservationState {
+  return {
+    expectAutomation,
+    foundTests: null,
+    testsPerformed: null,
+    sawQueueEmpty: false,
+    successfulTests: 0,
+    unsuccessfulTests: [],
+  };
+}
+
+function stripLogTimePrefix(line: string) {
+  return line.replace(/^\[\d{1,2}:\d{2}:\d{2} [AP]M]\s*/, '');
+}
+
+const foundAutomationTestsPattern =
+  /LogAutomationCommandLine:\s+Display:\s+Found\s+(\d+)\s+automation tests based on\s+'/i;
+const automationQueueEmptyPattern =
+  /LogAutomationCommandLine:\s+Display:\s+\.\.\.Automation Test Queue Empty\s+(\d+)\s+tests performed\./i;
+const automationCompletedPattern =
+  /LogAutomationController:\s+(?:Display|Error):\s+Test Completed\. Result=\{([^}]*)}\s+Name=\{([^}]*)}\s+Path=\{([^}]*)}/i;
+const clientLabelPattern = /^CLIENT\s+(\d+)$/i;
+
+function toAutomationTerminalResult(rawResult: string): AutomationTerminalResult {
+  switch (rawResult.trim()) {
+    case 'Success':
+      return 'Success';
+    case 'Fail':
+      return 'Fail';
+    case 'Error':
+      return 'Error';
+    case 'NotRun':
+      return 'NotRun';
+    default:
+      return 'Unknown';
+  }
+}
+
+function applyFoundTestsLogLine(state: AutomationObservationState, normalized: string) {
+  const match = foundAutomationTestsPattern.exec(normalized);
+  if (!match) {
+    return;
+  }
+  state.foundTests = Number.parseInt(match[1] ?? '', 10);
+}
+
+function applyQueueEmptyLogLine(state: AutomationObservationState, normalized: string) {
+  const match = automationQueueEmptyPattern.exec(normalized);
+  if (!match) {
+    return;
+  }
+  state.sawQueueEmpty = true;
+  state.testsPerformed = Number.parseInt(match[1] ?? '', 10);
+}
+
+function applyCompletedTestLogLine(state: AutomationObservationState, normalized: string) {
+  const match = automationCompletedPattern.exec(normalized);
+  if (!match) {
+    return;
+  }
+
+  const terminalResult = toAutomationTerminalResult(match[1] ?? '');
+  if (terminalResult === 'Success') {
+    state.successfulTests += 1;
+    return;
+  }
+
+  state.unsuccessfulTests.push({
+    result: terminalResult,
+    name: (match[2] ?? '').trim(),
+    path: (match[3] ?? '').trim(),
+  });
+}
+
+export function observeAutomationLogLine(state: AutomationObservationState, line: string) {
+  if (!state.expectAutomation) {
+    return;
+  }
+
+  const normalized = stripLogTimePrefix(line);
+  applyFoundTestsLogLine(state, normalized);
+  applyQueueEmptyLogLine(state, normalized);
+  applyCompletedTestLogLine(state, normalized);
+}
+
+export function getAutomationTotals(state: AutomationObservationState) {
+  const completedCount = state.successfulTests + state.unsuccessfulTests.length;
+  const total = state.testsPerformed ?? completedCount;
+  const passed = Math.min(state.successfulTests, total);
+  return {
+    passed,
+    total,
+  };
+}
+
+function formatAutomationSuccessReason(testsPerformed: number | null) {
+  if (testsPerformed === null) {
+    return 'automation passed';
+  }
+  const suffix = testsPerformed === 1 ? '' : 's';
+  return `automation passed (${testsPerformed} test${suffix} performed)`;
+}
+
+function resolveProcessOutcome(rawExitResult: ProcessExitResult, automation: AutomationObservationState) {
+  if (rawExitResult === 'timeout') {
+    return {
+      effectiveExitCode: FAILURE_EXIT_CODE,
+      reason: 'process timed out',
+    };
+  }
+  if (rawExitResult !== 0) {
+    return {
+      effectiveExitCode: rawExitResult,
+      reason: `process exited with code ${rawExitResult}`,
+    };
+  }
+  if (!automation.expectAutomation) {
+    return {
+      effectiveExitCode: 0,
+      reason: 'process exited cleanly',
+    };
+  }
+
+  const failedResult = automation.unsuccessfulTests[0]?.result;
+  if (failedResult) {
+    return {
+      effectiveExitCode: FAILURE_EXIT_CODE,
+      reason: `automation completed with result ${failedResult}`,
+    };
+  }
+  if (!automation.sawQueueEmpty) {
+    return {
+      effectiveExitCode: FAILURE_EXIT_CODE,
+      reason: 'automation queue did not finish',
+    };
+  }
+  if (automation.foundTests !== null && automation.foundTests <= 0) {
+    return {
+      effectiveExitCode: FAILURE_EXIT_CODE,
+      reason: 'no matching automation tests were found',
+    };
+  }
+  if (automation.testsPerformed === null) {
+    return {
+      effectiveExitCode: FAILURE_EXIT_CODE,
+      reason: 'automation queue did not report tests performed',
+    };
+  }
+  if (automation.testsPerformed <= 0) {
+    return {
+      effectiveExitCode: FAILURE_EXIT_CODE,
+      reason: 'automation queue completed with 0 tests performed',
+    };
+  }
+
+  return {
+    effectiveExitCode: 0,
+    reason: formatAutomationSuccessReason(automation.testsPerformed),
+  };
+}
+
+export function resolveProcessExitCode(rawExitResult: ProcessExitResult, automation: AutomationObservationState) {
+  return resolveProcessOutcome(rawExitResult, automation).effectiveExitCode;
+}
+
+export function resolveProcessExitReason(rawExitResult: ProcessExitResult, automation: AutomationObservationState) {
+  return resolveProcessOutcome(rawExitResult, automation).reason;
+}
+
+function summarizeProcessOutcome(
+  label: string,
+  rawExitResult: ProcessExitResult,
+  automation: AutomationObservationState,
+): ProcessOutcome {
+  const resolved = resolveProcessOutcome(rawExitResult, automation);
+  return {
+    label,
+    rawExitResult,
+    effectiveExitCode: resolved.effectiveExitCode,
+    reason: resolved.reason,
+    automation,
+  };
+}
+
+function summarizeStartupFailureOutcome(
+  label: string,
+  rawExitResult: ProcessExitResult,
+  automation: AutomationObservationState,
+  status: number | 'timeout' | 'bind-failed',
+): ProcessOutcome {
+  const effectiveExitCode = rawExitResult === 'timeout' || rawExitResult === 0 ? FAILURE_EXIT_CODE : rawExitResult;
+  let reason = 'exited before binding UDP port';
+  if (status === 'bind-failed') {
+    reason = 'failed to bind UDP port';
+  } else if (status === 'timeout') {
+    reason = 'startup timeout';
+  }
+
+  return {
+    label,
+    rawExitResult,
+    effectiveExitCode,
+    reason,
+    automation,
+  };
+}
+
+function formatRuntimeIdentifier(label: string) {
+  if (label === 'SERVER') {
+    return 'Server';
+  }
+  const match = clientLabelPattern.exec(label);
+  if (match) {
+    return `Client ${match[1]}`;
+  }
+  return label;
+}
+
+function formatExitReason(reason: string) {
+  if (reason === 'process exited cleanly') {
+    return 'clean';
+  }
+  if (reason.startsWith('automation passed')) {
+    return 'passed';
+  }
+  return reason;
+}
+
+function formatProcessExitLine(outcome: ProcessOutcome) {
+  return `${formatRuntimeIdentifier(outcome.label).padEnd(8, ' ')} | ${outcome.effectiveExitCode} | ${formatExitReason(outcome.reason)}`;
+}
+
+export function formatAutomationSummaryLine(label: string, automation: AutomationObservationState) {
+  if (!automation.expectAutomation) {
+    return undefined;
+  }
+  const totals = getAutomationTotals(automation);
+  return `${formatRuntimeIdentifier(label)} | Passed ${totals.passed}/${totals.total}`;
+}
+
+function formatUnsuccessfulAutomationTestLine(label: string, test: AutomationCompletedTest) {
+  return `${formatRuntimeIdentifier(label)} | Result={${test.result}} Name={${test.name}} Path={${test.path}}`;
+}
+
+function printOrchestrationSummary(outcomes: ProcessOutcome[]) {
+  if (outcomes.length === 0) {
+    return;
+  }
+  console.log('Orchestration Complete');
+
+  const automationOutcomes = outcomes.filter((outcome) => outcome.automation.expectAutomation);
+  if (automationOutcomes.length > 0) {
+    console.log('Test Summary');
+    for (const outcome of automationOutcomes) {
+      const summaryLine = formatAutomationSummaryLine(outcome.label, outcome.automation);
+      if (summaryLine) {
+        console.log(summaryLine);
+      }
+      for (const test of outcome.automation.unsuccessfulTests) {
+        console.log(formatUnsuccessfulAutomationTestLine(outcome.label, test));
+      }
+    }
+    console.log('');
+  }
+
+  console.log('Exit Codes');
+  for (const outcome of outcomes) {
+    console.log(formatProcessExitLine(outcome));
+  }
+}
+
+function hasAutomationCommands(launchOptions: Pick<ProcessLaunchOptions, 'execTests' | 'execCmds'>) {
+  if ((launchOptions.execTests?.length ?? 0) > 0) {
+    return true;
+  }
+
+  return (launchOptions.execCmds ?? []).some((command) => /\bAutomation\s+RunTests?\b/i.test(command));
+}
+
+function buildExecTestsCommand(execTests?: string[]) {
+  const formattedTests = (execTests ?? [])
+    .map((testName) => testName.trim())
+    .filter((testName) => testName.length > 0)
+    .map((testName) => `${testName.endsWith('$') ? testName.slice(0, -1) : testName}$`);
+
+  if (formattedTests.length === 0) {
+    return undefined;
+  }
+
+  return `Automation RunTests ${formattedTests.join('+')}`;
+}
+
+function buildExecCmdsArg(execCmds?: string[], execTests?: string[]): string | undefined {
+  const commands = (execCmds ?? []).filter((command) => command.trim().length > 0);
+  const runTestsCommand = buildExecTestsCommand(execTests);
+  if (runTestsCommand) {
+    commands.push(runTestsCommand);
+  }
+  if (commands.length === 0) return undefined;
+  return commands.join('; ');
+}
+
+function quoteValue(value: string) {
+  const escaped = value.replaceAll('"', String.raw`\"`);
+  return `"${escaped}"`;
+}
+
+function formatCommand(exe: string | undefined, args: string[]) {
+  const formattedArgs = args.map((arg) => {
+    const equalsIndex = arg.indexOf('=');
+    if (equalsIndex > 0) {
+      const key = arg.slice(0, equalsIndex);
+      const value = arg.slice(equalsIndex + 1);
+      const lowerKey = key.toLowerCase();
+      if (lowerKey === '-testexit' || lowerKey === '-execmds') {
+        if (value.length === 0) return key;
+        return `${key}=${quoteValue(value)}`;
+      }
+      if (/\s/.test(value)) {
+        return `${key}=${quoteValue(value)}`;
+      }
+      return arg;
+    }
+
+    if (/\s/.test(arg) || arg === '') {
+      return quoteValue(arg);
+    }
+    return arg;
+  });
+
+  return `${exe ?? '<unspecified-exe>'} ${formattedArgs.join(' ')}`.trim();
+}
+
+interface ParsedArgEntry {
+  tokens: string[];
+  optionName?: string;
+}
+
+function normalizeOptionName(raw: string): string | undefined {
+  const trimmed = raw.trim();
+  if (!trimmed) return undefined;
+
+  const firstToken = trimmed.split(/\s+/, 1)[0] ?? '';
+  const tokenWithoutValue = firstToken.split('=', 1)[0] ?? '';
+  const stripped = tokenWithoutValue.replace(/^-+/, '');
+  if (!stripped) return undefined;
+
+  if (tokenWithoutValue.startsWith('-')) {
+    return stripped.toLowerCase();
+  }
+
+  if (/^[A-Za-z][A-Za-z0-9._-]*$/.test(stripped)) {
+    return stripped.toLowerCase();
+  }
+
+  return undefined;
+}
+
+function hasInlineOptionValue(raw: string) {
+  const trimmed = raw.trim();
+  if (!trimmed) return false;
+  const firstWhitespace = trimmed.search(/\s/);
+  if (firstWhitespace <= 0) {
+    return trimmed.includes('=');
+  }
+  return true;
+}
+
+function parseArgEntries(args: string[]): ParsedArgEntry[] {
+  const entries: ParsedArgEntry[] = [];
+
+  for (let index = 0; index < args.length; index++) {
+    const current = args[index];
+    const optionName = normalizeOptionName(current);
+    if (!optionName) {
+      entries.push({ tokens: [current] });
+      continue;
+    }
+
+    const tokens = [current];
+    const next = args[index + 1];
+    const nextLooksLikeOption = next ? next.trim().startsWith('-') || hasInlineOptionValue(next) : false;
+    if (!hasInlineOptionValue(current) && next !== undefined && !nextLooksLikeOption) {
+      tokens.push(next);
+      index += 1;
+    }
+
+    entries.push({ tokens, optionName });
+  }
+
+  return entries;
+}
+
+function filterExcludedArgEntries(entries: ParsedArgEntry[], excludeArgs: string[]) {
+  const excludedOptionNames = new Set(
+    excludeArgs.map(normalizeOptionName).filter((value): value is string => value !== undefined),
+  );
+
+  if (excludedOptionNames.size === 0) return entries;
+  return entries.filter((entry) => !entry.optionName || !excludedOptionNames.has(entry.optionName));
+}
+
+function keepLastNamedArgEntries(entries: ParsedArgEntry[]) {
+  const lastIndexByOption = new Map<string, number>();
+  entries.forEach((entry, index) => {
+    if (entry.optionName) {
+      lastIndexByOption.set(entry.optionName, index);
+    }
+  });
+
+  return entries.filter((entry, index) => !entry.optionName || lastIndexByOption.get(entry.optionName) === index);
+}
+
+function flattenArgEntries(entries: ParsedArgEntry[]) {
+  return entries.flatMap((entry) => entry.tokens);
+}
+
+function resolveLaunchExtraArgs(launchOptions: ProcessLaunchOptions) {
+  const parsedEntries = parseArgEntries(launchOptions.extraArgs ?? []);
+  const filteredEntries = filterExcludedArgEntries(parsedEntries, launchOptions.excludeArgs ?? []);
+  const dedupedEntries = keepLastNamedArgEntries(filteredEntries);
+  return flattenArgEntries(dedupedEntries);
+}
+
+function dedupeFinalNamedArgs(positionals: string[], args: string[]) {
+  const parsedEntries = parseArgEntries(args);
+  const dedupedEntries = keepLastNamedArgEntries(parsedEntries);
+  return positionals.concat(flattenArgEntries(dedupedEntries));
+}
+
+function buildProcessArgs(positionals: string[], launchOptions: ProcessLaunchOptions) {
+  const args = positionals.concat(resolveLaunchExtraArgs(launchOptions));
+  const execCmds = buildExecCmdsArg(launchOptions.execCmds, launchOptions.execTests);
+  if (execCmds) {
+    args.push(`-ExecCmds=${execCmds}`);
+  }
+  if (launchOptions.testExit) {
+    args.push(`-testexit=${launchOptions.testExit}`);
+  }
+  return dedupeFinalNamedArgs(positionals, args.slice(positionals.length));
+}
+
+function buildServerArgs(serverOptions: ServerOptions) {
+  return buildProcessArgs([serverOptions.project], serverOptions);
+}
+
+function buildClientArgs(clientOptions: ClientOptions, hostOverride?: string) {
+  return buildProcessArgs([clientOptions.project, hostOverride ?? clientOptions.host ?? '127.0.0.1'], clientOptions);
+}
+
+function cloneClientOptions(client: ClientOptions): ClientOptions {
+  return {
+    ...client,
+    extraArgs: [...(client.extraArgs ?? [])],
+    excludeArgs: [...(client.excludeArgs ?? [])],
+    execCmds: [...(client.execCmds ?? [])],
+    execTests: client.execTests ? [...client.execTests] : [],
+  };
+}
+
+function findFirstExisting(candidates: string[]) {
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    if (checkExistsSync(candidate)) return candidate;
+  }
+  return candidates.find(Boolean) ?? '';
+}
+
+export class UnrealTestOrchestrator {
+  static fromCommandLine(options: E2ECommandLineOptions = {}) {
+    const cli = yargs(hideBin(options.argv ?? process.argv));
+
+    const argv = cli
+      .option('UERoot', {
+        type: 'string',
+        demandOption: true,
+        description: 'Path to the Unreal Engine installation root (Engine directory). Example: D:/uei/UE5.7.3/Engine',
+      })
+      .option('Project', {
+        type: 'string',
+        demandOption: true,
+        description: 'Path to the .uproject to run tests against. Example: D:/ue-projects/inv/inv.uproject',
+      })
+      .option('clients', {
+        type: 'number',
+        description: 'Number of client instances to spawn',
+      })
+      .option('port', {
+        type: 'number',
+        description:
+          'UDP port the server should bind to; the orchestrator waits for this port before launching clients',
+      })
+      .option('timeout', {
+        type: 'number',
+        description: 'Seconds to wait for the server to bind the UDP port before failing',
+      })
+      .option('serverExe', {
+        type: 'string',
+        description:
+          'Optional override path to the server executable; otherwise the orchestrator probes common project locations',
+      })
+      .option('clientExe', {
+        type: 'string',
+        description:
+          'Optional override path to the client executable; otherwise the orchestrator probes common engine locations',
+      })
+      .option('dryRun', {
+        type: 'boolean',
+        default: false,
+        description: 'Print planned actions and exit without spawning processes (useful for CI validation)',
+      })
+      .help()
+      .parseSync() as unknown as ParsedCommandLineArguments;
+
+    const projectPath = argv.Project;
+    return new UnrealTestOrchestrator({
+      commandLineContext: {
+        ueRoot: argv.UERoot,
+        projectPath,
+        projectRoot: path.dirname(projectPath),
+      },
+      runtimeOptions: {
+        clientCount: argv.clients ?? options.clientCount,
+        port: argv.port ?? options.port,
+        timeoutSeconds: argv.timeout ?? options.timeoutSeconds,
+        serverExe: argv.serverExe ?? options.serverExe,
+        clientExe: argv.clientExe ?? options.clientExe,
+        dryRun: argv.dryRun ?? options.dryRun,
+      },
+    });
+  }
+
+  serverOptions?: ServerOptions;
+  clients: ClientOptions[] = [];
+  serverProc?: ChildProcess;
+  unrealLagOptions?: UnrealLagProxyOptions;
+  unrealLag?: UnrealLag;
+  unrealLagBindInfo?: BindInfo;
+
+  private runtimeOptions: E2ERuntimeOptions;
+  private readonly commandLineContext?: E2ECommandLineContext;
+
+  constructor(init: UnrealTestOrchestratorInit = {}) {
+    this.runtimeOptions = { ...init.runtimeOptions };
+    this.commandLineContext = init.commandLineContext;
+  }
+
+  get ueRoot() {
+    return this.commandLineContext?.ueRoot ?? '';
+  }
+
+  get projectPath() {
+    return this.commandLineContext?.projectPath ?? this.serverOptions?.project ?? this.clients[0]?.project ?? '';
+  }
+
+  get projectRoot() {
+    return this.commandLineContext?.projectRoot ?? (this.projectPath ? path.dirname(this.projectPath) : '');
+  }
+
+  configureRuntime(opts: E2ERuntimeOptions) {
+    this.runtimeOptions = {
+      ...this.runtimeOptions,
+      ...opts,
+    };
+  }
+
+  configureServer(opts: ServerOptions) {
+    this.serverOptions = opts;
+  }
+
+  configureUnrealLag(opts: UnrealLagProxyOptions) {
+    this.unrealLagOptions = opts;
+  }
+
+  addClient(opts: ClientOptions) {
+    this.clients.push(opts);
+  }
+
+  preview() {
+    if (!this.serverOptions) return undefined;
+    return this.resolveLaunchPlan().preview;
+  }
+
+  async start(): Promise<number> {
+    if (!this.serverOptions) {
+      console.error('Server options not configured');
+      return 2;
+    }
+
+    let plan: ResolvedLaunchPlan;
+    try {
+      plan = this.resolveLaunchPlan();
+    } catch (error) {
+      console.error(error instanceof Error ? error.message : error);
+      return 8;
+    }
+
+    if (plan.dryRun) {
+      this.printDryRunPreview(plan.preview);
+      return 0;
+    }
+
+    if (!this.validateExecutables(plan)) {
+      return 2;
+    }
+
+    return this.startResolvedPlan(plan);
+  }
+
+  private resolveLaunchPlan(): ResolvedLaunchPlan {
+    if (!this.serverOptions) {
+      throw new Error('Server options not configured');
+    }
+
+    const effectivePort = this.runtimeOptions.port ?? this.serverOptions.port ?? 7777;
+    const effectiveTimeout = this.runtimeOptions.timeoutSeconds ?? this.serverOptions.timeoutSeconds ?? 60;
+    const server = this.resolveServerOptions();
+    const clients = this.resolveClientOptions();
+
+    return {
+      effectivePort,
+      effectiveTimeout,
+      server,
+      clients,
+      preview: this.buildPreview(server, clients, effectivePort, effectiveTimeout),
+      dryRun: this.runtimeOptions.dryRun ?? false,
+    };
+  }
+
+  private resolveServerOptions(): ResolvedServerOptions {
+    if (!this.serverOptions) {
+      throw new Error('Server options not configured');
+    }
+
+    return {
+      ...this.serverOptions,
+      exe: findFirstExisting(this.getServerCandidates(this.serverOptions)),
+    };
+  }
+
+  private resolveClientOptions(): ResolvedClientOptions[] {
+    const expandedClients = this.expandClientTemplates();
+    return expandedClients.map((client) => ({
+      ...client,
+      exe: findFirstExisting(this.getClientCandidates(client)),
+      host: client.host ?? '127.0.0.1',
+    }));
+  }
+
+  private expandClientTemplates(): ClientOptions[] {
+    if (this.clients.length === 0) return [];
+
+    const targetCount = this.runtimeOptions.clientCount ?? this.clients.length;
+    if (targetCount <= 0) return [];
+    if (this.clients.length === targetCount) {
+      return this.clients.map(cloneClientOptions);
+    }
+    if (this.clients.length === 1) {
+      return Array.from({ length: targetCount }, () => cloneClientOptions(this.clients[0]));
+    }
+    if (this.clients.length > targetCount) {
+      return this.clients.slice(0, targetCount).map(cloneClientOptions);
+    }
+
+    throw new Error(
+      `Configured ${this.clients.length} client templates, but runtime clientCount=${targetCount}. Provide exactly 1 template to replicate, or ${targetCount} explicit client entries.`,
+    );
+  }
+
+  private getServerCandidates(serverOptions: ServerOptions) {
+    const projectRoot = path.dirname(serverOptions.project);
+    return [
+      this.runtimeOptions.serverExe ?? '',
+      serverOptions.exe ?? '',
+      path.join(projectRoot, 'Binaries', 'Win64', 'invServer.exe'),
+      path.join(projectRoot, 'Binaries', 'Win64', `${path.basename(projectRoot)}Server.exe`),
+    ];
+  }
+
+  private getClientCandidates(clientOptions: ClientOptions) {
+    return [
+      this.runtimeOptions.clientExe ?? '',
+      clientOptions.exe ?? '',
+      path.join(this.ueRoot, 'Binaries', 'Win64', 'UnrealEditor-Cmd.exe'),
+      path.join(this.ueRoot, 'Engine', 'Binaries', 'Win64', 'UnrealEditor-Cmd.exe'),
+      path.join(this.ueRoot, '..', 'Engine', 'Binaries', 'Win64', 'UnrealEditor-Cmd.exe'),
+    ];
+  }
+
+  private buildPreview(
+    serverOptions: ResolvedServerOptions,
+    clients: ResolvedClientOptions[],
+    port: number,
+    timeoutSeconds: number,
+  ): ResolvedPreview {
+    const serverArgs = buildServerArgs(serverOptions);
+    const unrealLagPreview = this.buildUnrealLagPreview(port, timeoutSeconds);
+    const proxyHost = unrealLagPreview
+      ? this.formatProxyHost(unrealLagPreview.bindAddress, unrealLagPreview.bindPort)
+      : undefined;
+
+    const serverPreview = {
+      exe: serverOptions.exe,
+      args: serverArgs,
+      command: formatCommand(serverOptions.exe, serverArgs),
+    };
+
+    const clientPreviews = clients.map((client) => {
+      const args = buildClientArgs(client, proxyHost);
+      return {
+        exe: client.exe,
+        args,
+        command: formatCommand(client.exe, args),
+      };
+    });
+
+    return {
+      server: serverPreview,
+      clients: clientPreviews,
+      unrealLag: unrealLagPreview,
+    };
+  }
+
+  private buildUnrealLagPreview(port: number, timeoutSeconds: number) {
+    if (!this.unrealLagOptions) return undefined;
+
+    return {
+      bindAddress: this.unrealLagOptions.bindAddress ?? '127.0.0.1',
+      bindPort: this.unrealLagOptions.bindPort ?? 0,
+      serverProfile: this.unrealLagOptions.serverProfile ?? 'Good',
+      clientProfile: this.unrealLagOptions.clientProfile ?? 'Good',
+      targetServerPort: port,
+      timeoutSeconds,
+    };
+  }
+
+  private formatProxyHost(bindAddress: string, bindPort: number) {
+    const displayPort = bindPort === 0 ? '<runtime-port>' : bindPort;
+    return `${bindAddress}:${displayPort}`;
+  }
+
+  private printDryRunPreview(preview: ResolvedPreview) {
+    if (preview.unrealLag) {
+      console.log('[DRYRUN] UnrealLag ->', JSON.stringify(preview.unrealLag));
+    }
+    console.log('[DRYRUN] Server ->', preview.server.command);
+    console.log('[DRYRUN-ARGS] Server ARGS:', JSON.stringify(preview.server.args));
+    preview.clients.forEach((client, index) => {
+      console.log(`[DRYRUN] Client ${index + 1} -> ${client.command}`);
+      console.log(`[DRYRUN-ARGS] Client ${index + 1} ARGS:`, JSON.stringify(client.args));
+    });
+  }
+
+  private validateExecutables(plan: ResolvedLaunchPlan) {
+    if (!checkExistsSync(plan.server.exe)) {
+      console.error(`Server executable not found: ${plan.server.exe}`);
+      return false;
+    }
+
+    for (const client of plan.clients) {
+      if (!checkExistsSync(client.exe)) {
+        console.error(`Client executable not found: ${client.exe}`);
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private createMonitoredProcess(
+    exe: string,
+    args: string[],
+    label: string,
+    timeoutSeconds: number,
+    expectAutomation: boolean,
+  ) {
+    const automation = createAutomationObservationState(expectAutomation);
+    const process = spawnProcess(exe, args, label, {
+      onStdoutLine: (line) => observeAutomationLogLine(automation, line),
+      onStderrLine: (line) => observeAutomationLogLine(automation, line),
+    });
+    const exitPromise = promiseProcessExitOrTimeout(process, timeoutSeconds, () => {
+      console.error(`${label} exceeded maxLifetime (${timeoutSeconds}s); killing process`);
+      try {
+        if (process && !process.killed) process.kill();
+      } catch {}
+    });
+
+    return {
+      label,
+      process,
+      automation,
+      exitPromise,
+    } satisfies MonitoredProcess;
+  }
+
+  private async startResolvedPlan(plan: ResolvedLaunchPlan): Promise<number> {
+    const outcomes: ProcessOutcome[] = [];
+    let serverMonitor: MonitoredProcess | undefined;
+    const clientMonitors: MonitoredProcess[] = [];
+
+    try {
+      const serverMaxLifetime = plan.server.maxLifetime ?? 600;
+      const proxyClientHost = await this.startUnrealLag(plan.effectivePort);
+
+      const serverArgs = buildServerArgs(plan.server);
+      console.log(`[SPAWN] SERVER -> ${formatCommand(plan.server.exe, serverArgs)}`);
+      console.log('[SPAWN-ARGS] SERVER ARGS:', JSON.stringify(serverArgs));
+      serverMonitor = this.createMonitoredProcess(
+        plan.server.exe,
+        serverArgs,
+        'SERVER',
+        serverMaxLifetime,
+        hasAutomationCommands(plan.server),
+      );
+      this.serverProc = serverMonitor.process;
+
+      const serverPid = this.serverProc.pid ?? -1;
+      if (serverPid <= 0) {
+        console.error('Failed to obtain server PID');
+        outcomes.push({
+          label: 'SERVER',
+          rawExitResult: -1,
+          effectiveExitCode: FAILURE_EXIT_CODE,
+          reason: 'failed to obtain server pid',
+          automation: serverMonitor.automation,
+        });
+        return FAILURE_EXIT_CODE;
+      }
+
+      const serverStatus = await this.waitForServerReady(
+        serverPid,
+        plan.effectivePort,
+        plan.effectiveTimeout,
+        serverMonitor.exitPromise,
+      );
+      if (serverStatus !== 'bound') {
+        try {
+          if (this.serverProc && !this.serverProc.killed) this.serverProc.kill();
+        } catch {}
+        const finalServerExit = await serverMonitor.exitPromise;
+        outcomes.push(
+          summarizeStartupFailureOutcome('SERVER', finalServerExit, serverMonitor.automation, serverStatus),
+        );
+        return this.handleServerStartupFailure(serverStatus);
+      }
+
+      const clientOutcomes = await this.spawnClientsAndWait(
+        plan.clients,
+        proxyClientHost,
+        clientMonitors,
+        serverMonitor,
+      );
+      outcomes.push(...clientOutcomes);
+
+      try {
+        if (this.serverProc && !this.serverProc.killed) this.serverProc.kill();
+      } catch {}
+
+      const finalServerExit = await serverMonitor.exitPromise;
+      outcomes.unshift(summarizeProcessOutcome('SERVER', finalServerExit, serverMonitor.automation));
+      return outcomes.some((outcome) => outcome.effectiveExitCode !== 0) ? FAILURE_EXIT_CODE : 0;
+    } finally {
+      try {
+        if (this.serverProc && !this.serverProc.killed) this.serverProc.kill();
+      } catch {}
+      await this.stopUnrealLag();
+      printOrchestrationSummary(outcomes);
+    }
+  }
+
+  private async startUnrealLag(effectivePort: number) {
+    if (!this.unrealLagOptions) {
+      return undefined;
+    }
+
+    this.unrealLag = new UnrealLag({
+      bindAddress: this.unrealLagOptions.bindAddress ?? '127.0.0.1',
+      bindPort: this.unrealLagOptions.bindPort ?? 0,
+      server: {
+        address: '127.0.0.1',
+        port: effectivePort,
+        selection: { profile: this.unrealLagOptions.serverProfile ?? 'Good' },
+      },
+      defaultClient: { profile: this.unrealLagOptions.clientProfile ?? 'Good' },
+      autoCreateClients: true,
+    });
+    this.unrealLagBindInfo = await this.unrealLag.start();
+    const proxyClientHost = `${this.unrealLagBindInfo.address}:${this.unrealLagBindInfo.port}`;
+    console.log(
+      `[SPAWN] UNREALLAG -> proxy listening on ${proxyClientHost} (server profile=${this.unrealLagOptions.serverProfile ?? 'Good'}, client profile=${this.unrealLagOptions.clientProfile ?? 'Good'})`,
+    );
+    return proxyClientHost;
+  }
+
+  private async stopUnrealLag() {
+    await this.unrealLag?.stop();
+  }
+
+  private async waitForServerReady(
+    serverPid: number,
+    port: number,
+    timeoutSeconds: number,
+    serverExitPromise: Promise<ProcessExitResult>,
+  ) {
+    const serverBindPromise = (async () => {
+      try {
+        await waitForUdpPort(serverPid, port, timeoutSeconds);
+        console.log('Server bound UDP port', port);
+        return 'bound' as const;
+      } catch (error) {
+        console.error('Server failed to bind UDP port', error);
+        return 'bind-failed' as const;
+      }
+    })();
+
+    return Promise.race([serverBindPromise, serverExitPromise]);
+  }
+
+  private async handleServerStartupFailure(status: number | 'timeout' | 'bind-failed') {
+    if (status === 'bind-failed' || status === 'timeout') {
+      console.error('Server failed to come up in time or exceeded lifetime');
+    } else {
+      console.error('Server exited before binding the expected UDP port', status);
+    }
+    try {
+      if (this.serverProc && !this.serverProc.killed) this.serverProc.kill();
+    } catch {}
+    await this.stopUnrealLag();
+    return FAILURE_EXIT_CODE;
+  }
+
+  private async spawnClientsAndWait(
+    clients: ResolvedClientOptions[],
+    proxyClientHost: string | undefined,
+    clientMonitors: MonitoredProcess[],
+    serverMonitor?: MonitoredProcess,
+  ) {
+    for (let index = 0; index < clients.length; index++) {
+      const client = clients[index];
+      const args = buildClientArgs(client, proxyClientHost);
+      const prefix = `CLIENT ${index + 1}`;
+      console.log(`[SPAWN] ${prefix} -> ${formatCommand(client.exe, args)}`);
+      console.log(`[SPAWN-ARGS] ${prefix} ARGS:`, JSON.stringify(args));
+      clientMonitors.push(
+        this.createMonitoredProcess(
+          client.exe,
+          args,
+          prefix,
+          client.maxLifetime ?? 300,
+          (client.execTests?.length ?? 0) > 0,
+        ),
+      );
+    }
+
+    if (clientMonitors.length === 0) {
+      return [];
+    }
+
+    const allClientExitResults = Promise.all(clientMonitors.map((monitor) => monitor.exitPromise));
+    if (serverMonitor) {
+      const completion = await Promise.race([
+        allClientExitResults.then((results) => ({ kind: 'clients' as const, results })),
+        serverMonitor.exitPromise.then((serverExit) => ({ kind: 'server' as const, serverExit })),
+      ]);
+
+      if (completion.kind === 'server') {
+        const pendingClients = clientMonitors.filter((monitor) => !monitor.process.killed);
+        if (pendingClients.length > 0) {
+          console.error(
+            `SERVER exited before all clients completed (${completion.serverExit}); terminating remaining clients`,
+          );
+        }
+        for (const monitor of pendingClients) {
+          try {
+            monitor.process.kill();
+          } catch {}
+        }
+      }
+    }
+
+    const rawClientResults = await allClientExitResults;
+    return rawClientResults.map((rawExitResult, index) =>
+      summarizeProcessOutcome(clientMonitors[index].label, rawExitResult, clientMonitors[index].automation),
+    );
+  }
+}
