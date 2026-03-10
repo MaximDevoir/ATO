@@ -15,6 +15,8 @@ import type {
   UnrealLagProxyOptions,
 } from './UnrealTestOrchestrator.options';
 
+export { RuntimePresets } from './UnrealTestOrchestrator.options';
+
 interface UnrealTestOrchestratorInit {
   runtimeOptions?: E2ERuntimeOptions;
   commandLineContext?: E2ECommandLineContext;
