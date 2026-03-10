@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "tui": {
+    "enabled": false
+  },
+  "namedInputs": {
+    "sharedGlobals": [
+      "{workspaceRoot}/biome.json",
+      "{workspaceRoot}/tsconfig.base.json",
+      "{workspaceRoot}/vitest.workspace.ts"
+    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"]
+  },
+  "targetDefaults": {
+    "lint": {
+      "inputs": ["default", "^default"]
+    },
+    "typecheck": {
+      "inputs": ["default", "^default"]
+    },
+    "test": {
+      "inputs": ["default", "^default"]
+    }
+  }
+}
