@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022"],
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "verbatimModuleSyntax": true,
+    "types": ["node"],
+    "paths": {
+      "@UMaestro/UnrealLag": ["./packages/unreal-lag/src/index.ts"],
+      "@UMaestro/UnrealTestOrchestrator": ["./packages/unreal-test-orchestrator/src/index.ts"]
+    }
+  }
+}
