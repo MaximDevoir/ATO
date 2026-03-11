@@ -1,6 +1,5 @@
 export * from './example';
 export * from './exampleConfig';
-export * from './priority';
 export * from './profiles';
 export * from './random';
 export * from './resolve';

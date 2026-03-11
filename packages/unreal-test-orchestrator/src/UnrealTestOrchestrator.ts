@@ -1,4 +1,4 @@
-import { type BindInfo, UnrealLag } from '@UMaestro/UnrealLag';
+import { type BindInfo, logWarningIfNetworkProfileUnstable, UnrealLag, UnrealLagProfiles } from '@UMaestro/UnrealLag';
 import type { ChildProcess } from 'node:child_process';
 import * as path from 'node:path';
 import yargs from 'yargs';
@@ -1011,21 +1011,35 @@ export class UnrealTestOrchestrator {
       return undefined;
     }
 
+    const serverProfileName = this.unrealLagOptions.serverProfile ?? 'Good';
+    const clientProfileName = this.unrealLagOptions.clientProfile ?? 'Good';
+
     this.unrealLag = new UnrealLag({
       bindAddress: this.unrealLagOptions.bindAddress ?? '127.0.0.1',
       bindPort: this.unrealLagOptions.bindPort ?? 0,
       server: {
         address: '127.0.0.1',
         port: effectivePort,
-        selection: { profile: this.unrealLagOptions.serverProfile ?? 'Good' },
+        selection: { profile: serverProfileName },
       },
-      defaultClient: { profile: this.unrealLagOptions.clientProfile ?? 'Good' },
+      defaultClient: { profile: clientProfileName },
       autoCreateClients: true,
     });
     this.unrealLagBindInfo = await this.unrealLag.start();
+
+    // Warn if chosen profiles may cause ATC coordination issues
+    const allProfiles = { ...UnrealLagProfiles, ...this.unrealLagOptions } as Record<string, unknown>;
+    for (const name of [serverProfileName, clientProfileName]) {
+      const profile =
+        (allProfiles as Record<string, unknown>)[name] ?? (UnrealLagProfiles as Record<string, unknown>)[name];
+      if (profile && typeof profile === 'object' && 'inbound' in profile && 'outbound' in profile) {
+        logWarningIfNetworkProfileUnstable(profile as Parameters<typeof logWarningIfNetworkProfileUnstable>[0]);
+      }
+    }
+
     const proxyClientHost = `${this.unrealLagBindInfo.address}:${this.unrealLagBindInfo.port}`;
     console.log(
-      `[SPAWN] UNREALLAG -> proxy listening on ${proxyClientHost} (server profile=${this.unrealLagOptions.serverProfile ?? 'Good'}, client profile=${this.unrealLagOptions.clientProfile ?? 'Good'})`,
+      `[SPAWN] UNREALLAG -> proxy listening on ${proxyClientHost} (server profile=${serverProfileName}, client profile=${clientProfileName})`,
     );
     return proxyClientHost;
   }

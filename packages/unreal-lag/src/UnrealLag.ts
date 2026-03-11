@@ -2,7 +2,6 @@ import * as dgram from 'node:dgram';
 import { EventEmitter } from 'node:events';
 import type { AddressInfo } from 'node:net';
 
-import { hasPriorityMarker } from './priority';
 import { UnrealLagProfiles } from './profiles';
 import { RandomSource } from './random';
 import { evaluateRoute, resolvePeerSelection } from './resolve';
@@ -433,12 +432,6 @@ export class UnrealLag extends EventEmitter {
     destinationAddress: string,
     destinationPort: number,
   ) {
-    if (hasPriorityMarker(payload)) {
-      this.log(`priorityBypass | sender=${sender.id} | receiver=${receiver.id} | bytes=${payload.length}`);
-      void this.sendImmediately(sender, receiver, viaSocket, payload, destinationAddress, destinationPort);
-      return;
-    }
-
     const decision = evaluateRoute(sender.config, receiver.config, this.random);
     if (decision.drop) {
       this.stats.dropped += 1;
@@ -472,31 +465,6 @@ export class UnrealLag extends EventEmitter {
       });
       this.stats.scheduled += 1;
     }
-  }
-
-  private async sendImmediately(
-    sender: RuntimePeer,
-    receiver: RuntimePeer,
-    viaSocket: dgram.Socket,
-    payload: Buffer,
-    destinationAddress: string,
-    destinationPort: number,
-  ) {
-    await new Promise<void>((resolve) => {
-      viaSocket.send(Buffer.from(payload), destinationPort, destinationAddress, (error) => {
-        if (error) {
-          this.error(
-            `error | kind=prioritySendFailed | sender=${sender.id} | receiver=${receiver.id} | destination=${destinationAddress}:${destinationPort}`,
-            error,
-          );
-          this.stats.dropped += 1;
-        } else {
-          this.stats.forwarded += 1;
-          this.getOrCreatePeerStats(sender.id).forwarded += 1;
-        }
-        resolve();
-      });
-    });
   }
 
   private async releaseScheduledItem(item: ScheduledItem<ScheduledDatagram>) {

@@ -7,16 +7,12 @@ conditions using:
 
 - sender outbound rules
 - receiver inbound rules
-- a fixed priority marker that bypasses emulation entirely when present anywhere in the packet payload
 
 So for any packet from `peerA -> peerB`:
 
 ```ts
 finalDelay = sample(peerA.outbound) + sample(peerB.inbound)
 ```
-
-> Priority packets are the exception: if UnrealLag finds the 8-byte marker anywhere in the UDP payload, it forwards the
-> packet immediately and skips loss, duplication, latency, jitter, and scheduler delay.
 
 ## Goals
 
@@ -38,25 +34,21 @@ finalDelay = sample(peerA.outbound) + sample(peerB.inbound)
 
 Peers are configured directly through those profiles and optional partial overrides.
 
+## Network Stability Warning
+
+When using UnrealLag with the Awesome Test Coordinator (ATC), high-latency or
+high-loss profiles can cause coordination messages to arrive very slowly or be
+dropped entirely. Call `logWarningIfNetworkProfileUnstable(profile)` at startup
+to get a heads-up when a profile exceeds safe thresholds (packet loss > 15%,
+latency > 200 ms, or duplication > 5%).
+
 ## Peer lifecycle
 
-- A `Peer` is any process connection to the poxy. This includes the server and any client.
+- A `Peer` is any process connection to the proxy. This includes the server and any client.
 - Clients are auto-created on the first packet by default.
 - Each auto-created client gets its own upstream socket to the real server.
 - Any in-transit packets for a removed peer are dropped when they reach the scheduler release point.
 
-## Priority packets
-
-Use this exact 8-byte marker anywhere inside the UDP payload when a packet must bypass UnrealLag emulation:
-
-`0xB7 0x86 0x12 0x26 0xF9 0x11 0xE4 0x4E`
-
-Detection rules:
-
-- UnrealLag reads each packet payload for the priority marker.
-- Priority packets are forwarded immediately and unchanged; the marker is not stripped.
-- Priority packets bypass packet loss, duplication, latency, jitter, and scheduler delay in both directions.
-- Normal peer validation still applies.
 
 ## Orchestrator integration
 
