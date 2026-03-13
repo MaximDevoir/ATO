@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  ATO,
   createAutomationObservationState,
   formatAutomationSummaryLine,
   getAutomationTotals,
@@ -7,11 +8,10 @@ import {
   RuntimePresets,
   resolveProcessExitCode,
   resolveProcessExitReason,
-  UnrealTestOrchestrator,
-} from '../src/UnrealTestOrchestrator';
+} from '../src/ATO';
 
 function createPreview() {
-  const orchestrator = new UnrealTestOrchestrator({
+  const orchestrator = new ATO({
     commandLineContext: {
       ueRoot: 'D:/uei/UE5.7.3/Engine',
       projectPath: 'D:/ue-projects/inv/inv.uproject',
@@ -31,7 +31,7 @@ function createPreview() {
   }
   return { orchestrator, server, client, preview };
 }
-function getPreview(orchestrator: UnrealTestOrchestrator) {
+function getPreview(orchestrator: ATO) {
   const preview = orchestrator.preview();
   expect(preview).toBeTruthy();
   if (!preview) {
@@ -50,7 +50,7 @@ function expectArgMissingByPrefix(args: string[], expectedMissingPrefix: string)
     `did not expect an arg starting with ${expectedMissingPrefix} in ${JSON.stringify(args)}`,
   ).toBe(false);
 }
-describe('UnrealTestOrchestrator', () => {
+describe('ATO', () => {
   it('removes excluded option names case-insensitively', () => {
     const { orchestrator, server, client } = createPreview();
     server.extraArgs = ['--version=3.0', '-VerSiOn', '--verSion', '14', '--verSion 15', '--help', '--height=100'];
@@ -129,7 +129,7 @@ describe('UnrealTestOrchestrator', () => {
     ]);
   });
   it('automatically appends ATC bootstrap tests by default', () => {
-    const orchestrator = new UnrealTestOrchestrator({
+    const orchestrator = new ATO({
       commandLineContext: {
         ueRoot: 'D:/uei/UE5.7.3/Engine',
         projectPath: 'D:/ue-projects/inv/inv.uproject',
@@ -151,7 +151,7 @@ describe('UnrealTestOrchestrator', () => {
     expect(preview.clients[0].args).toContain('-ExecCmds=Automation RunTests ATC.ClientBootstrap.0$');
   });
   it('does not auto-append ATC bootstrap tests when disabled', () => {
-    const orchestrator = new UnrealTestOrchestrator({
+    const orchestrator = new ATO({
       commandLineContext: {
         ueRoot: 'D:/uei/UE5.7.3/Engine',
         projectPath: 'D:/ue-projects/inv/inv.uproject',
@@ -177,7 +177,7 @@ describe('UnrealTestOrchestrator', () => {
     expectArgMissingByPrefix(preview.clients[0].args, '-ExecCmds=Automation RunTests ATC.ClientBootstrap');
   });
   it('avoids duplicating explicit ATC bootstrap tests that are already present', () => {
-    const orchestrator = new UnrealTestOrchestrator({
+    const orchestrator = new ATO({
       commandLineContext: {
         ueRoot: 'D:/uei/UE5.7.3/Engine',
         projectPath: 'D:/ue-projects/inv/inv.uproject',

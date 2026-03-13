@@ -1,5 +1,5 @@
 {
-  "name": "@UMaestro/UnrealTestOrchestrator",
+  "name": "@UMaestro/ATO",
   "version": "0.1.0",
   "type": "module",
   "sideEffects": false,

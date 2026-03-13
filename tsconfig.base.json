@@ -14,7 +14,7 @@
     "types": ["node"],
     "paths": {
       "@UMaestro/UnrealLag": ["./packages/unreal-lag/src/index.ts"],
-      "@UMaestro/UnrealTestOrchestrator": ["./packages/unreal-test-orchestrator/src/index.ts"]
+      "@UMaestro/ATO": ["./packages/ato/src/index.ts"]
     }
   }
 }

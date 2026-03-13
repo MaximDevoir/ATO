@@ -5,8 +5,8 @@ import type { ChildProcess } from 'node:child_process';
 import * as path from 'node:path';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { checkExistsSync } from './UnrealTestOrchestrator._helpers';
-import { spawnProcess, waitForUdpPort } from './UnrealTestOrchestrator.helpers';
+import { checkExistsSync } from './ATO._helpers';
+import { spawnProcess, waitForUdpPort } from './ATO.helpers';
 import type {
   ClientOptions,
   E2ECommandLineContext,
@@ -15,11 +15,11 @@ import type {
   ProcessLaunchOptions,
   ServerOptions,
   UnrealLagProxyOptions,
-} from './UnrealTestOrchestrator.options';
+} from './ATO.options';
 
-export { RuntimePresets } from './UnrealTestOrchestrator.options';
+export { RuntimePresets } from './ATO.options';
 
-interface UnrealTestOrchestratorInit {
+interface ATOInit {
   runtimeOptions?: E2ERuntimeOptions;
   commandLineContext?: E2ECommandLineContext;
 }
@@ -676,7 +676,7 @@ function findFirstExisting(candidates: string[]) {
   return candidates.find(Boolean) ?? '';
 }
 
-export class UnrealTestOrchestrator {
+export class ATO {
   /**
    * Imports and applies options supplied from the CLI
    */
@@ -726,7 +726,7 @@ export class UnrealTestOrchestrator {
       .parseSync() as unknown as ParsedCommandLineArguments;
 
     const projectPath = argv.Project;
-    return new UnrealTestOrchestrator({
+    return new ATO({
       commandLineContext: {
         ueRoot: argv.UERoot,
         projectPath,
@@ -753,7 +753,7 @@ export class UnrealTestOrchestrator {
   private runtimeOptions: E2ERuntimeOptions;
   private readonly commandLineContext?: E2ECommandLineContext;
 
-  constructor(init: UnrealTestOrchestratorInit = {}) {
+  constructor(init: ATOInit = {}) {
     this.runtimeOptions = { ...init.runtimeOptions };
     this.commandLineContext = init.commandLineContext;
   }

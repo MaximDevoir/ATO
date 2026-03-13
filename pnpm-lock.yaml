@@ -39,19 +39,19 @@ importers:
         specifier: 4.0.18
         version: 4.0.18(@types/node@25.4.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2)
 
-  packages/unreal-lag: {}
-
-  packages/unreal-test-orchestrator:
+  packages/ato:
     dependencies:
       '@UMaestro/UnrealLag':
         specifier: file:../unreal-lag
-        version: link:../unreal-lag
+        version: unreal-lag@file:packages/unreal-lag
       '@types/yargs':
         specifier: 17.0.35
         version: 17.0.35
       yargs:
         specifier: 18.0.0
         version: 18.0.0
+
+  packages/unreal-lag: {}
 
 packages:
 
@@ -1679,6 +1679,9 @@ packages:
   universalify@0.1.2:
     resolution: {integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==}
     engines: {node: '>= 4.0.0'}
+
+  unreal-lag@file:packages/unreal-lag:
+    resolution: {directory: packages/unreal-lag, type: directory}
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
@@ -3351,6 +3354,8 @@ snapshots:
   undici-types@7.18.2: {}
 
   universalify@0.1.2: {}
+
+  unreal-lag@file:packages/unreal-lag: {}
 
   util-deprecate@1.0.2: {}
 

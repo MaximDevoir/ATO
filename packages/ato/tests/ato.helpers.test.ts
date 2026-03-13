@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { simplifyUnrealLogLine } from '../src/UnrealTestOrchestrator.helpers';
+import { simplifyUnrealLogLine } from '../src/ATO.helpers';
 
 describe('simplifyUnrealLogLine', () => {
   it('simplifies Unreal timestamps and removes the batch field', () => {
