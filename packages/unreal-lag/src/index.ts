@@ -1,9 +1,10 @@
 export * from './example';
 export * from './exampleConfig';
-export * from './profiles';
+export type { UnrealLagBuiltinProfileName, UnrealLagProfileName } from './profiles';
+export { logWarningIfNetworkProfileUnstable, UnrealLagProfiles } from './profiles';
 export * from './random';
 export * from './resolve';
 export * from './scheduler';
 export * from './sequence';
 export * from './types';
-export * from './UnrealLag';
+export { UnrealLag } from './UnrealLag';

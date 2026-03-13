@@ -11,6 +11,18 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./profiles": {
+      "types": "./src/profiles.ts",
+      "default": "./src/profiles.ts"
+    },
+    "./types": {
+      "types": "./src/types.ts",
+      "default": "./src/types.ts"
+    },
+    "./UnrealLag": {
+      "types": "./src/UnrealLag.ts",
+      "default": "./src/UnrealLag.ts"
     }
   },
   "types": "./src/index.ts",

@@ -1,4 +1,6 @@
-import { type BindInfo, logWarningIfNetworkProfileUnstable, UnrealLag, UnrealLagProfiles } from '@UMaestro/UnrealLag';
+import { logWarningIfNetworkProfileUnstable, UnrealLagProfiles } from '@UMaestro/UnrealLag/profiles';
+import type { BindInfo } from '@UMaestro/UnrealLag/types';
+import { UnrealLag } from '@UMaestro/UnrealLag/UnrealLag';
 import type { ChildProcess } from 'node:child_process';
 import * as path from 'node:path';
 import yargs from 'yargs';
