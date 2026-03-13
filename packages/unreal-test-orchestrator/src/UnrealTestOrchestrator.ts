@@ -55,6 +55,8 @@ interface ResolvedPreview {
 
 interface ResolvedLaunchPlan {
   effectivePort: number;
+  // The number of seconds we will wait for each process (server and clients) to boot up and signal to the test
+  // coordinator within ATC that they are ready to begin testing.
   effectiveTimeout: number;
   server: ResolvedServerOptions;
   clients: ResolvedClientOptions[];
