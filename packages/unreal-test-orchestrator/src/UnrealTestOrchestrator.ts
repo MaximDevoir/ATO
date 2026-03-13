@@ -579,8 +579,16 @@ function buildProcessArgs(positionals: string[], launchOptions: ProcessLaunchOpt
   return dedupeFinalNamedArgs(positionals, args.slice(positionals.length));
 }
 
-function buildServerArgs(serverOptions: ServerOptions) {
-  return buildProcessArgs([serverOptions.project], serverOptions);
+function buildServerArgs(serverOptions: ServerOptions, port?: number) {
+  const extraArgs = [...(serverOptions.extraArgs ?? [])];
+  if (port !== undefined) {
+    extraArgs.push(`-port=${port}`);
+  }
+
+  return buildProcessArgs([serverOptions.project], {
+    ...serverOptions,
+    extraArgs,
+  });
 }
 
 function buildClientArgs(clientOptions: ClientOptions, hostOverride?: string) {
@@ -832,7 +840,7 @@ export class UnrealTestOrchestrator {
     port: number,
     timeoutSeconds: number,
   ): ResolvedPreview {
-    const serverArgs = buildServerArgs(serverOptions);
+    const serverArgs = buildServerArgs(serverOptions, port);
     const unrealLagPreview = this.buildUnrealLagPreview(port, timeoutSeconds);
     const proxyHost = unrealLagPreview
       ? this.formatProxyHost(unrealLagPreview.bindAddress, unrealLagPreview.bindPort)
@@ -942,7 +950,7 @@ export class UnrealTestOrchestrator {
       const serverMaxLifetime = plan.server.maxLifetime ?? 600;
       const proxyClientHost = await this.startUnrealLag(plan.effectivePort);
 
-      const serverArgs = buildServerArgs(plan.server);
+      const serverArgs = buildServerArgs(plan.server, plan.effectivePort);
       console.log(`[SPAWN] SERVER -> ${formatCommand(plan.server.exe, serverArgs)}`);
       console.log('[SPAWN-ARGS] SERVER ARGS:', JSON.stringify(serverArgs));
       serverMonitor = this.createMonitoredProcess(
