@@ -75,6 +75,7 @@ interface ParsedCommandLineArguments {
 
 const FAILURE_EXIT_CODE = 1;
 const ATC_CLIENT_BOOTSTRAP_TEST = 'ATC.ClientBootstrap';
+const ATC_CLIENT_BOOTSTRAP_FINISH_TEST = 'ZZZ.ATC.ClientBootstrap.Finish';
 const MAX_EXPLICIT_ATC_CLIENT_BOOTSTRAP_CLIENTS = 32;
 
 type ProcessExitResult = number | 'timeout';
@@ -608,9 +609,33 @@ function cloneClientOptions(client: ClientOptions): ClientOptions {
   };
 }
 
+function shouldAutomaticallyApplyBootstrapTests(launchOptions: ProcessLaunchOptions) {
+  return launchOptions.automaticallyApplyBootstrapTestsCmds !== false;
+}
+
+function isATCClientBootstrapTest(execTest: string) {
+  return execTest === ATC_CLIENT_BOOTSTRAP_TEST || /^ATC\.ClientBootstrap\.\d+$/.test(execTest);
+}
+
+function appendUniqueExecTest(execTests: string[], execTest: string) {
+  return execTests.includes(execTest) ? execTests : execTests.concat(execTest);
+}
+
+function resolveATCServerBootstrapTests(serverOptions: ServerOptions) {
+  const execTests = [...(serverOptions.execTests ?? [])];
+  if (!shouldAutomaticallyApplyBootstrapTests(serverOptions)) {
+    return execTests;
+  }
+
+  return appendUniqueExecTest(execTests, ATC_CLIENT_BOOTSTRAP_FINISH_TEST);
+}
+
 function resolveATCClientBootstrapTests(execTests: string[] | undefined, clientIndex: number) {
-  if (!execTests || execTests.length === 0) {
-    return [];
+  const resolvedExecTests = [...(execTests ?? [])];
+  const hasExplicitBootstrapTest = resolvedExecTests.some(isATCClientBootstrapTest);
+
+  if (!hasExplicitBootstrapTest) {
+    resolvedExecTests.push(ATC_CLIENT_BOOTSTRAP_TEST);
   }
 
   const explicitBootstrapTest =
@@ -618,7 +643,9 @@ function resolveATCClientBootstrapTests(execTests: string[] | undefined, clientI
       ? `${ATC_CLIENT_BOOTSTRAP_TEST}.${clientIndex}`
       : ATC_CLIENT_BOOTSTRAP_TEST;
 
-  return execTests.map((execTest) => (execTest === ATC_CLIENT_BOOTSTRAP_TEST ? explicitBootstrapTest : execTest));
+  return resolvedExecTests.map((execTest) =>
+    execTest === ATC_CLIENT_BOOTSTRAP_TEST ? explicitBootstrapTest : execTest,
+  );
 }
 
 function findFirstExisting(candidates: string[]) {
@@ -797,6 +824,7 @@ export class UnrealTestOrchestrator {
 
     return {
       ...this.serverOptions,
+      execTests: resolveATCServerBootstrapTests(this.serverOptions),
       exe: findFirstExisting(this.getServerCandidates(this.serverOptions)),
     };
   }
@@ -806,7 +834,9 @@ export class UnrealTestOrchestrator {
     return expandedClients.map((client, clientIndex) => ({
       ...client,
       clientIndex,
-      execTests: resolveATCClientBootstrapTests(client.execTests, clientIndex),
+      execTests: shouldAutomaticallyApplyBootstrapTests(client)
+        ? resolveATCClientBootstrapTests(client.execTests, clientIndex)
+        : [...(client.execTests ?? [])],
       exe: findFirstExisting(this.getClientCandidates(client)),
       host: client.host ?? '127.0.0.1',
     }));

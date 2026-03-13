@@ -29,6 +29,9 @@ export interface ProcessLaunchOptions {
   execTests: string[];
   // array of commands pass into ExecCmds option.
   execCmds: string[];
+  // Whether to automatically inject ATC bootstrap and shutdown tests into the test queue.
+  // Defaults to true in RuntimePresets and can be disabled per process when not running ATC.
+  automaticallyApplyBootstrapTestsCmds?: boolean;
 }
 
 export interface ServerOptions extends ProcessLaunchOptions {
@@ -72,6 +75,7 @@ export const RuntimePresets = {
       testExit: 'Automation Test Queue Empty',
       execTests: [],
       execCmds: [],
+      automaticallyApplyBootstrapTestsCmds: true,
     };
   },
   Client(projectPath: string, host = '127.0.0.1', clientExe?: string): ClientOptions {
@@ -85,6 +89,7 @@ export const RuntimePresets = {
       execTests: [],
       execCmds: [],
       testExit: 'Automation Test Queue Empty',
+      automaticallyApplyBootstrapTestsCmds: true,
     };
   },
 };

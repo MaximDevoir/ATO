@@ -4,11 +4,11 @@ import {
   formatAutomationSummaryLine,
   getAutomationTotals,
   observeAutomationLogLine,
+  RuntimePresets,
   resolveProcessExitCode,
   resolveProcessExitReason,
   UnrealTestOrchestrator,
 } from '../src/UnrealTestOrchestrator';
-import { RuntimePresets } from '../src/UnrealTestOrchestrator.options';
 
 function createPreview() {
   const orchestrator = new UnrealTestOrchestrator({
@@ -20,6 +20,8 @@ function createPreview() {
   });
   const server = RuntimePresets.Server(orchestrator.projectPath, 'D:/fake/invServer.exe');
   const client = RuntimePresets.Client(orchestrator.projectPath, '127.0.0.1', 'D:/fake/UnrealEditor-Cmd.exe');
+  server.automaticallyApplyBootstrapTestsCmds = false;
+  client.automaticallyApplyBootstrapTestsCmds = false;
   orchestrator.configureServer(server);
   orchestrator.addClient(client);
   const preview = orchestrator.preview();
@@ -126,8 +128,80 @@ describe('UnrealTestOrchestrator', () => {
       '-testexit=Automation Test Queue Empty',
     ]);
   });
+  it('automatically appends ATC bootstrap tests by default', () => {
+    const orchestrator = new UnrealTestOrchestrator({
+      commandLineContext: {
+        ueRoot: 'D:/uei/UE5.7.3/Engine',
+        projectPath: 'D:/ue-projects/inv/inv.uproject',
+        projectRoot: 'D:/ue-projects/inv',
+      },
+    });
+    const server = RuntimePresets.Server(orchestrator.projectPath, 'D:/fake/invServer.exe');
+    server.execTests.push('AwesomeInventory.ATCMacro.Test');
+    const client = RuntimePresets.Client(orchestrator.projectPath, '127.0.0.1', 'D:/fake/UnrealEditor-Cmd.exe');
+
+    orchestrator.configureServer(server);
+    orchestrator.addClient(client);
+
+    const preview = getPreview(orchestrator);
+
+    expect(preview.server.args).toContain(
+      '-ExecCmds=Automation RunTests AwesomeInventory.ATCMacro.Test$+ZZZ.ATC.ClientBootstrap.Finish$',
+    );
+    expect(preview.clients[0].args).toContain('-ExecCmds=Automation RunTests ATC.ClientBootstrap.0$');
+  });
+  it('does not auto-append ATC bootstrap tests when disabled', () => {
+    const orchestrator = new UnrealTestOrchestrator({
+      commandLineContext: {
+        ueRoot: 'D:/uei/UE5.7.3/Engine',
+        projectPath: 'D:/ue-projects/inv/inv.uproject',
+        projectRoot: 'D:/ue-projects/inv',
+      },
+    });
+    const server = RuntimePresets.Server(orchestrator.projectPath, 'D:/fake/invServer.exe');
+    server.execTests.push('AwesomeInventory.ATCMacro.Test');
+    server.automaticallyApplyBootstrapTestsCmds = false;
+    const client = RuntimePresets.Client(orchestrator.projectPath, '127.0.0.1', 'D:/fake/UnrealEditor-Cmd.exe');
+    client.automaticallyApplyBootstrapTestsCmds = false;
+
+    orchestrator.configureServer(server);
+    orchestrator.addClient(client);
+
+    const preview = getPreview(orchestrator);
+
+    expect(preview.server.args).toContain('-ExecCmds=Automation RunTests AwesomeInventory.ATCMacro.Test$');
+    expectArgMissing(
+      preview.server.args,
+      '-ExecCmds=Automation RunTests AwesomeInventory.ATCMacro.Test$+ZZZ.ATC.ClientBootstrap.Finish$',
+    );
+    expectArgMissingByPrefix(preview.clients[0].args, '-ExecCmds=Automation RunTests ATC.ClientBootstrap');
+  });
+  it('avoids duplicating explicit ATC bootstrap tests that are already present', () => {
+    const orchestrator = new UnrealTestOrchestrator({
+      commandLineContext: {
+        ueRoot: 'D:/uei/UE5.7.3/Engine',
+        projectPath: 'D:/ue-projects/inv/inv.uproject',
+        projectRoot: 'D:/ue-projects/inv',
+      },
+    });
+    const server = RuntimePresets.Server(orchestrator.projectPath, 'D:/fake/invServer.exe');
+    server.execTests.push('AwesomeInventory.ATCMacro.Test', 'ZZZ.ATC.ClientBootstrap.Finish');
+    const client = RuntimePresets.Client(orchestrator.projectPath, '127.0.0.1', 'D:/fake/UnrealEditor-Cmd.exe');
+    client.execTests.push('ATC.ClientBootstrap');
+
+    orchestrator.configureServer(server);
+    orchestrator.addClient(client);
+
+    const preview = getPreview(orchestrator);
+    const serverExecCmds = preview.server.args.find((arg) => arg.startsWith('-ExecCmds='));
+    const clientExecCmds = preview.clients[0].args.find((arg) => arg.startsWith('-ExecCmds='));
+
+    expect(serverExecCmds?.match(/ZZZ\.ATC\.ClientBootstrap\.Finish\$/g)).toHaveLength(1);
+    expect(clientExecCmds?.match(/ATC\.ClientBootstrap\.0\$/g)).toHaveLength(1);
+  });
   it('rewrites ATC bootstrap tests to the matching client slot for the first 32 clients', () => {
     const { orchestrator, client } = createPreview();
+    client.automaticallyApplyBootstrapTestsCmds = true;
     client.execTests = ['ATC.ClientBootstrap'];
     orchestrator.configureRuntime({ clientCount: 33 });
     const preview = getPreview(orchestrator);
