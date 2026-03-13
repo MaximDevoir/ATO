@@ -90,6 +90,7 @@ export interface AutomationCompletedTest {
 
 export interface AutomationObservationState {
   expectAutomation: boolean;
+  sawReadyToStartAutomation: boolean;
   foundTests: number | null;
   testsPerformed: number | null;
   sawQueueEmpty: boolean;
@@ -144,6 +145,7 @@ function promiseProcessExitOrTimeout(processHandle: ChildProcess, timeoutSeconds
 export function createAutomationObservationState(expectAutomation: boolean): AutomationObservationState {
   return {
     expectAutomation,
+    sawReadyToStartAutomation: false,
     foundTests: null,
     testsPerformed: null,
     sawQueueEmpty: false,
@@ -158,6 +160,7 @@ function stripLogTimePrefix(line: string) {
 
 const foundAutomationTestsPattern =
   /LogAutomationCommandLine:\s+Display:\s+Found\s+(\d+)\s+automation tests based on\s+'/i;
+const automationReadyPattern = /LogAutomationCommandLine:\s+Display:\s+Ready to start automation/i;
 const automationQueueEmptyPattern =
   /LogAutomationCommandLine:\s+Display:\s+\.\.\.Automation Test Queue Empty\s+(\d+)\s+tests performed\./i;
 const automationCompletedPattern =
@@ -185,6 +188,12 @@ function applyFoundTestsLogLine(state: AutomationObservationState, normalized: s
     return;
   }
   state.foundTests = Number.parseInt(match[1] ?? '', 10);
+}
+
+function applyReadyToStartAutomationLogLine(state: AutomationObservationState, normalized: string) {
+  if (automationReadyPattern.test(normalized)) {
+    state.sawReadyToStartAutomation = true;
+  }
 }
 
 function applyQueueEmptyLogLine(state: AutomationObservationState, normalized: string) {
@@ -221,6 +230,7 @@ export function observeAutomationLogLine(state: AutomationObservationState, line
   }
 
   const normalized = stripLogTimePrefix(line);
+  applyReadyToStartAutomationLogLine(state, normalized);
   applyFoundTestsLogLine(state, normalized);
   applyQueueEmptyLogLine(state, normalized);
   applyCompletedTestLogLine(state, normalized);
@@ -648,6 +658,14 @@ function resolveATCClientBootstrapTests(execTests: string[] | undefined, clientI
   );
 }
 
+function isATCBootstrapOrchestration(server: ResolvedServerOptions, clients: ResolvedClientOptions[]) {
+  return (
+    clients.length > 0 &&
+    server.execTests.includes(ATC_CLIENT_BOOTSTRAP_FINISH_TEST) &&
+    clients.every((client) => client.execTests.some(isATCClientBootstrapTest))
+  );
+}
+
 function findFirstExisting(candidates: string[]) {
   for (const candidate of candidates) {
     if (!candidate) continue;
@@ -1001,6 +1019,23 @@ export class UnrealTestOrchestrator {
       const serverMaxLifetime = plan.server.maxLifetime ?? 600;
       const proxyClientHost = await this.startUnrealLag(plan.effectivePort);
 
+      if (isATCBootstrapOrchestration(plan.server, plan.clients)) {
+        this.spawnClients(plan.clients, proxyClientHost, clientMonitors);
+        const readyClients = await this.waitForClientsAutomationReady(
+          clientMonitors,
+          Math.max(plan.effectiveTimeout, 120),
+        );
+        if (!readyClients) {
+          for (const monitor of clientMonitors) {
+            try {
+              if (!monitor.process.killed) monitor.process.kill();
+            } catch {}
+          }
+          outcomes.push(...(await this.waitForClientMonitors(clientMonitors)));
+          return FAILURE_EXIT_CODE;
+        }
+      }
+
       const serverArgs = buildServerArgs(plan.server, plan.effectivePort);
       console.log(`[SPAWN] SERVER -> ${formatCommand(plan.server.exe, serverArgs)}`);
       console.log('[SPAWN-ARGS] SERVER ARGS:', JSON.stringify(serverArgs));
@@ -1043,12 +1078,11 @@ export class UnrealTestOrchestrator {
         return this.handleServerStartupFailure(serverStatus);
       }
 
-      const clientOutcomes = await this.spawnClientsAndWait(
-        plan.clients,
-        proxyClientHost,
-        clientMonitors,
-        serverMonitor,
-      );
+      if (clientMonitors.length === 0) {
+        this.spawnClients(plan.clients, proxyClientHost, clientMonitors);
+      }
+
+      const clientOutcomes = await this.waitForClientMonitors(clientMonitors, serverMonitor);
       outcomes.push(...clientOutcomes);
 
       try {
@@ -1142,11 +1176,10 @@ export class UnrealTestOrchestrator {
     return FAILURE_EXIT_CODE;
   }
 
-  private async spawnClientsAndWait(
+  private spawnClients(
     clients: ResolvedClientOptions[],
     proxyClientHost: string | undefined,
     clientMonitors: MonitoredProcess[],
-    serverMonitor?: MonitoredProcess,
   ) {
     for (let index = 0; index < clients.length; index++) {
       const client = clients[index];
@@ -1164,7 +1197,32 @@ export class UnrealTestOrchestrator {
         ),
       );
     }
+  }
 
+  private async waitForClientsAutomationReady(clientMonitors: MonitoredProcess[], timeoutSeconds: number) {
+    const deadline = Date.now() + timeoutSeconds * 1000;
+
+    while (Date.now() < deadline) {
+      if (clientMonitors.every((monitor) => monitor.automation.sawReadyToStartAutomation)) {
+        return true;
+      }
+
+      const anyExited = await Promise.race([
+        Promise.all(clientMonitors.map((monitor) => monitor.exitPromise.then((exit) => exit !== 0))).then((results) =>
+          results.some(Boolean),
+        ),
+        new Promise<false>((resolve) => setTimeout(() => resolve(false), 250)),
+      ]);
+      if (anyExited) {
+        return false;
+      }
+    }
+
+    console.error(`Timed out waiting for ${clientMonitors.length} client(s) to reach automation-ready state`);
+    return false;
+  }
+
+  private async waitForClientMonitors(clientMonitors: MonitoredProcess[], serverMonitor?: MonitoredProcess) {
     if (clientMonitors.length === 0) {
       return [];
     }
