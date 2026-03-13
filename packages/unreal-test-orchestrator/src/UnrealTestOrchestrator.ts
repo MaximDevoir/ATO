@@ -1100,7 +1100,7 @@ export class UnrealTestOrchestrator {
     for (let index = 0; index < clients.length; index++) {
       const client = clients[index];
       const args = buildClientArgs(client, proxyClientHost);
-      const prefix = `CLIENT ${index + 1}`;
+      const prefix = `CLIENT ${index}`;
       console.log(`[SPAWN] ${prefix} -> ${formatCommand(client.exe, args)}`);
       console.log(`[SPAWN-ARGS] ${prefix} ARGS:`, JSON.stringify(args));
       clientMonitors.push(
