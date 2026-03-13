@@ -657,6 +657,9 @@ function findFirstExisting(candidates: string[]) {
 }
 
 export class UnrealTestOrchestrator {
+  /**
+   * Imports and applies options supplied from the CLI
+   */
   static fromCommandLine(options: E2ECommandLineOptions = {}) {
     const cli = yargs(hideBin(options.argv ?? process.argv));
 
@@ -1069,8 +1072,8 @@ export class UnrealTestOrchestrator {
       return undefined;
     }
 
-    const serverProfileName = this.unrealLagOptions.serverProfile ?? 'Good';
-    const clientProfileName = this.unrealLagOptions.clientProfile ?? 'Good';
+    const serverProfileName = this.unrealLagOptions.serverProfile ?? 'NoLag';
+    const clientProfileName = this.unrealLagOptions.clientProfile ?? 'NoLag';
 
     this.unrealLag = new UnrealLag({
       bindAddress: this.unrealLagOptions.bindAddress ?? '127.0.0.1',
