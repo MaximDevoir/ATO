@@ -60,6 +60,7 @@ describe('UnrealTestOrchestrator', () => {
       'D:/ue-projects/inv/inv.uproject',
       '--help',
       '--height=100',
+      '-port=7777',
       '-testexit=Automation Test Queue Empty',
     ]);
     expect(preview.clients[0].args).toEqual([
@@ -125,6 +126,24 @@ describe('UnrealTestOrchestrator', () => {
       '-testexit=Automation Test Queue Empty',
     ]);
   });
+  it('rewrites ATC bootstrap tests to the matching client slot for the first 32 clients', () => {
+    const { orchestrator, client } = createPreview();
+    client.execTests = ['ATC.ClientBootstrap'];
+    orchestrator.configureRuntime({ clientCount: 33 });
+    const preview = getPreview(orchestrator);
+
+    expect(preview.clients[0].args).toContain('-ExecCmds=Automation RunTests ATC.ClientBootstrap.0$');
+    expect(preview.clients[31].args).toContain('-ExecCmds=Automation RunTests ATC.ClientBootstrap.31$');
+    expect(preview.clients[32].args).toContain('-ExecCmds=Automation RunTests ATC.ClientBootstrap$');
+  });
+  it('preserves already-explicit ATC bootstrap test names', () => {
+    const { orchestrator, client } = createPreview();
+    client.execTests = ['ATC.ClientBootstrap.7'];
+
+    const preview = getPreview(orchestrator);
+
+    expect(preview.clients[0].args).toContain('-ExecCmds=Automation RunTests ATC.ClientBootstrap.7$');
+  });
   it('lets generated args override earlier user-supplied ones', () => {
     const { orchestrator, server } = createPreview();
     server.extraArgs = ['--testexit=User Override', '--ExecCmds=Automation RunTest Old'];
@@ -135,6 +154,7 @@ describe('UnrealTestOrchestrator', () => {
     const preview = getPreview(orchestrator);
     expect(preview.server.args).toEqual([
       'D:/ue-projects/inv/inv.uproject',
+      '-port=7777',
       '-ExecCmds=Automation List; Automation RunTests AwesomeInventory$',
       '-testexit=Automation Test Queue Empty',
     ]);

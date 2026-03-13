@@ -29,6 +29,7 @@ interface ResolvedServerOptions extends ServerOptions {
 }
 
 interface ResolvedClientOptions extends ClientOptions {
+  clientIndex: number;
   exe: string;
   host: string;
 }
@@ -73,6 +74,8 @@ interface ParsedCommandLineArguments {
 }
 
 const FAILURE_EXIT_CODE = 1;
+const ATC_CLIENT_BOOTSTRAP_TEST = 'ATC.ClientBootstrap';
+const MAX_EXPLICIT_ATC_CLIENT_BOOTSTRAP_CLIENTS = 32;
 
 type ProcessExitResult = number | 'timeout';
 
@@ -605,6 +608,19 @@ function cloneClientOptions(client: ClientOptions): ClientOptions {
   };
 }
 
+function resolveATCClientBootstrapTests(execTests: string[] | undefined, clientIndex: number) {
+  if (!execTests || execTests.length === 0) {
+    return [];
+  }
+
+  const explicitBootstrapTest =
+    clientIndex < MAX_EXPLICIT_ATC_CLIENT_BOOTSTRAP_CLIENTS
+      ? `${ATC_CLIENT_BOOTSTRAP_TEST}.${clientIndex}`
+      : ATC_CLIENT_BOOTSTRAP_TEST;
+
+  return execTests.map((execTest) => (execTest === ATC_CLIENT_BOOTSTRAP_TEST ? explicitBootstrapTest : execTest));
+}
+
 function findFirstExisting(candidates: string[]) {
   for (const candidate of candidates) {
     if (!candidate) continue;
@@ -787,8 +803,10 @@ export class UnrealTestOrchestrator {
 
   private resolveClientOptions(): ResolvedClientOptions[] {
     const expandedClients = this.expandClientTemplates();
-    return expandedClients.map((client) => ({
+    return expandedClients.map((client, clientIndex) => ({
       ...client,
+      clientIndex,
+      execTests: resolveATCClientBootstrapTests(client.execTests, clientIndex),
       exe: findFirstExisting(this.getClientCandidates(client)),
       host: client.host ?? '127.0.0.1',
     }));
