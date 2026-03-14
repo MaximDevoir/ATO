@@ -62,7 +62,7 @@ interface ResolvedLaunchPlan {
   server: ResolvedServerOptions;
   clients: ResolvedClientOptions[];
   atcOrchestratorMode: ATCOrchestratorLaunchMode;
-  logicalClientCount: number;
+  externalClientCount: number;
   preview: ResolvedPreview;
   dryRun: boolean;
 }
@@ -722,7 +722,7 @@ function usesDedicatedServerExecutable(mode: ATCOrchestratorLaunchMode) {
   return mode === 'DedicatedServer';
 }
 
-function resolveLogicalClientCount(
+function resolveExternalClientCount(
   mode: ATCOrchestratorLaunchMode,
   runtimeClientCount: number | undefined,
   configuredClientTemplates: number,
@@ -731,31 +731,19 @@ function resolveLogicalClientCount(
     return 0;
   }
 
-  if (mode === 'ListenServer') {
-    if (runtimeClientCount !== undefined) {
-      return Math.max(runtimeClientCount, 1);
-    }
-
-    return Math.max(configuredClientTemplates + 1, 1);
-  }
-
   return runtimeClientCount ?? configuredClientTemplates;
 }
 
-function resolveRemoteClientCount(mode: ATCOrchestratorLaunchMode, logicalClientCount: number) {
-  if (mode === 'ListenServer') {
-    return Math.max(logicalClientCount - 1, 0);
-  }
-
+function resolveRemoteClientCount(mode: ATCOrchestratorLaunchMode, externalClientCount: number) {
   if (mode === 'Standalone' || mode === 'PIE') {
     return 0;
   }
 
-  return Math.max(logicalClientCount, 0);
+  return Math.max(externalClientCount, 0);
 }
 
 function resolveFirstRemoteBootstrapIndex(mode: ATCOrchestratorLaunchMode) {
-  return mode === 'ListenServer' ? 1 : 0;
+  return 0;
 }
 
 function resolveATCServerBootstrapTests(serverOptions: ServerOptions, orchestratorMode: ATCOrchestratorLaunchMode) {
@@ -826,7 +814,7 @@ export class ATO {
       })
       .option('clients', {
         type: 'number',
-        description: 'Number of client instances to spawn',
+        description: 'Number of external client instances to spawn for DedicatedServer / ListenServer runs',
       })
       .option('port', {
         type: 'number',
@@ -974,12 +962,12 @@ export class ATO {
       this.runtimeOptions.atcOrchestratorMode,
       this.runtimeOptions.clientCount ?? this.clients.length,
     );
-    const logicalClientCount = resolveLogicalClientCount(
+    const externalClientCount = resolveExternalClientCount(
       atcOrchestratorMode,
       this.runtimeOptions.clientCount,
       this.clients.length,
     );
-    const remoteClientCount = resolveRemoteClientCount(atcOrchestratorMode, logicalClientCount);
+    const remoteClientCount = resolveRemoteClientCount(atcOrchestratorMode, externalClientCount);
     const expandedClients = this.expandClientTemplates(remoteClientCount);
     const server = this.resolveServerOptions(atcOrchestratorMode);
     const clients = this.resolveClientOptions(expandedClients, atcOrchestratorMode);
@@ -990,7 +978,7 @@ export class ATO {
       server,
       clients,
       atcOrchestratorMode,
-      logicalClientCount,
+      externalClientCount,
       preview: this.buildPreview(server, clients, effectivePort, effectiveTimeout, atcOrchestratorMode),
       dryRun: this.runtimeOptions.dryRun ?? false,
     };

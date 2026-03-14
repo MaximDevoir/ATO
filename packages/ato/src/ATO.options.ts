@@ -47,6 +47,8 @@ export interface ClientOptions extends ProcessLaunchOptions {
 }
 
 export interface E2ERuntimeOptions {
+  // Number of external client processes to launch for DedicatedServer / ListenServer runs.
+  // Standalone and PIE ignore this and run with zero external ATC clients.
   clientCount?: number;
   port?: number;
   timeoutSeconds?: number;

@@ -285,7 +285,7 @@ describe('ATO', () => {
     orchestrator.configureServer(server);
     orchestrator.addClient(client);
     orchestrator.configureATCOrchestratorMode('ListenServer');
-    orchestrator.configureRuntime({ clientCount: 2 });
+    orchestrator.configureRuntime({ clientCount: 1 });
     orchestrator.configureUnrealLag({
       bindAddress: '127.0.0.1',
       bindPort: 0,
@@ -303,7 +303,7 @@ describe('ATO', () => {
       '-ExecCmds=Automation RunTests AwesomeInventory.ATCMacro.PARALLEL_TEST$+ZZZ.ATC.Orchestrator.ListenServer$+ZZZ.ATC.ClientBootstrap.Finish$',
     );
     expect(preview.clients).toHaveLength(1);
-    expect(preview.clients[0].args).toContain('-ExecCmds=Automation RunTests ATC.ClientBootstrap.1$');
+    expect(preview.clients[0].args).toContain('-ExecCmds=Automation RunTests ATC.ClientBootstrap.0$');
     expect(preview.unrealLag).toBeTruthy();
   });
   it('still appends ?listen when an explicit listen startup map is provided', () => {
@@ -322,7 +322,7 @@ describe('ATO', () => {
     orchestrator.configureServer(server);
     orchestrator.addClient(client);
     orchestrator.configureATCOrchestratorMode('ListenServer');
-    orchestrator.configureRuntime({ clientCount: 2 });
+    orchestrator.configureRuntime({ clientCount: 1 });
 
     const preview = getPreview(orchestrator);
 
