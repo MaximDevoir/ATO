@@ -128,7 +128,7 @@ describe('ATO', () => {
       '-testexit=Automation Test Queue Empty',
     ]);
   });
-  it('automatically appends ATC bootstrap tests by default', () => {
+  it('automatically appends ATC dedicated orchestrator identity and bootstrap tests by default', () => {
     const orchestrator = new ATO({
       commandLineContext: {
         ueRoot: 'D:/uei/UE5.7.3/Engine',
@@ -146,7 +146,7 @@ describe('ATO', () => {
     const preview = getPreview(orchestrator);
 
     expect(preview.server.args).toContain(
-      '-ExecCmds=Automation RunTests AwesomeInventory.ATCMacro.Test$+ZZZ.ATC.ClientBootstrap.Finish$',
+      '-ExecCmds=Automation RunTests AwesomeInventory.ATCMacro.Test$+ZZZ.ATC.Orchestrator.DedicatedServer$+ZZZ.ATC.ClientBootstrap.Finish$',
     );
     expect(preview.clients[0].args).toContain('-ExecCmds=Automation RunTests ATC.ClientBootstrap.0$');
   });
@@ -172,7 +172,7 @@ describe('ATO', () => {
     expect(preview.server.args).toContain('-ExecCmds=Automation RunTests AwesomeInventory.ATCMacro.Test$');
     expectArgMissing(
       preview.server.args,
-      '-ExecCmds=Automation RunTests AwesomeInventory.ATCMacro.Test$+ZZZ.ATC.ClientBootstrap.Finish$',
+      '-ExecCmds=Automation RunTests AwesomeInventory.ATCMacro.Test$+ZZZ.ATC.Orchestrator.DedicatedServer$+ZZZ.ATC.ClientBootstrap.Finish$',
     );
     expectArgMissingByPrefix(preview.clients[0].args, '-ExecCmds=Automation RunTests ATC.ClientBootstrap');
   });
@@ -185,7 +185,11 @@ describe('ATO', () => {
       },
     });
     const server = RuntimePresets.Server(orchestrator.projectPath, 'D:/fake/invServer.exe');
-    server.execTests.push('AwesomeInventory.ATCMacro.Test', 'ZZZ.ATC.ClientBootstrap.Finish');
+    server.execTests.push(
+      'AwesomeInventory.ATCMacro.Test',
+      'ZZZ.ATC.Orchestrator.DedicatedServer',
+      'ZZZ.ATC.ClientBootstrap.Finish',
+    );
     const client = RuntimePresets.Client(orchestrator.projectPath, '127.0.0.1', 'D:/fake/UnrealEditor-Cmd.exe');
     client.execTests.push('ATC.ClientBootstrap');
 
@@ -196,6 +200,7 @@ describe('ATO', () => {
     const serverExecCmds = preview.server.args.find((arg) => arg.startsWith('-ExecCmds='));
     const clientExecCmds = preview.clients[0].args.find((arg) => arg.startsWith('-ExecCmds='));
 
+    expect(serverExecCmds?.match(/ZZZ\.ATC\.Orchestrator\.DedicatedServer\$/g)).toHaveLength(1);
     expect(serverExecCmds?.match(/ZZZ\.ATC\.ClientBootstrap\.Finish\$/g)).toHaveLength(1);
     expect(clientExecCmds?.match(/ATC\.ClientBootstrap\.0\$/g)).toHaveLength(1);
   });
@@ -217,6 +222,111 @@ describe('ATO', () => {
     const preview = getPreview(orchestrator);
 
     expect(preview.clients[0].args).toContain('-ExecCmds=Automation RunTests ATC.ClientBootstrap.7$');
+  });
+  it('uses standalone ATC orchestrator identity when configured without dedicated clients', () => {
+    const orchestrator = new ATO({
+      commandLineContext: {
+        ueRoot: 'D:/uei/UE5.7.3/Engine',
+        projectPath: 'D:/ue-projects/inv/inv.uproject',
+        projectRoot: 'D:/ue-projects/inv',
+      },
+    });
+    const server = RuntimePresets.Server(orchestrator.projectPath, 'D:/fake/invServer.exe');
+    server.execTests.push('AwesomeInventory.ATCMacro.Test');
+
+    orchestrator.configureServer(server);
+    orchestrator.configureATCOrchestratorMode('Standalone');
+
+    const preview = getPreview(orchestrator);
+
+    expect(preview.server.args).toContain(
+      '-ExecCmds=Automation RunTests AwesomeInventory.ATCMacro.Test$+ZZZ.ATC.Orchestrator.Standalone$',
+    );
+    expect(preview.server.args).toContain('-game');
+    expectArgMissing(preview.server.args, '-port=7777');
+    expect(preview.clients).toHaveLength(0);
+  });
+  it('suppresses UnrealLag preview for standalone orchestration', () => {
+    const orchestrator = new ATO({
+      commandLineContext: {
+        ueRoot: 'D:/uei/UE5.7.3/Engine',
+        projectPath: 'D:/ue-projects/inv/inv.uproject',
+        projectRoot: 'D:/ue-projects/inv',
+      },
+    });
+    const server = RuntimePresets.Server(orchestrator.projectPath, 'D:/fake/inv.exe');
+    server.execTests.push('AwesomeInventoryStandalone.BasicStandaloneTest');
+
+    orchestrator.configureServer(server);
+    orchestrator.configureATCOrchestratorMode('Standalone');
+    orchestrator.configureUnrealLag({
+      bindAddress: '127.0.0.1',
+      bindPort: 0,
+      serverProfile: 'Bad',
+      clientProfile: 'Bad',
+    });
+
+    const preview = getPreview(orchestrator);
+
+    expect(preview.unrealLag).toBeUndefined();
+  });
+  it('uses ATC-managed listen orchestration without requiring a startup map', () => {
+    const orchestrator = new ATO({
+      commandLineContext: {
+        ueRoot: 'D:/uei/UE5.7.3/Engine',
+        projectPath: 'D:/ue-projects/inv/inv.uproject',
+        projectRoot: 'D:/ue-projects/inv',
+      },
+    });
+    const server = RuntimePresets.Server(orchestrator.projectPath, 'D:/fake/UnrealEditor-Cmd.exe');
+    server.execTests.push('AwesomeInventory.ATCMacro.PARALLEL_TEST');
+    const client = RuntimePresets.Client(orchestrator.projectPath, '127.0.0.1', 'D:/fake/UnrealEditor-Cmd.exe');
+
+    orchestrator.configureServer(server);
+    orchestrator.addClient(client);
+    orchestrator.configureATCOrchestratorMode('ListenServer');
+    orchestrator.configureRuntime({ clientCount: 2 });
+    orchestrator.configureUnrealLag({
+      bindAddress: '127.0.0.1',
+      bindPort: 0,
+      serverProfile: 'Bad',
+      clientProfile: 'Bad',
+    });
+
+    const preview = getPreview(orchestrator);
+
+    expect(preview.server.args[0]).toBe('D:/ue-projects/inv/inv.uproject');
+    expect(preview.server.args.some((arg) => arg.includes('?listen'))).toBe(false);
+    expect(preview.server.args).toContain('-game');
+    expect(preview.server.args).toContain('-port=7777');
+    expect(preview.server.args).toContain(
+      '-ExecCmds=Automation RunTests AwesomeInventory.ATCMacro.PARALLEL_TEST$+ZZZ.ATC.Orchestrator.ListenServer$+ZZZ.ATC.ClientBootstrap.Finish$',
+    );
+    expect(preview.clients).toHaveLength(1);
+    expect(preview.clients[0].args).toContain('-ExecCmds=Automation RunTests ATC.ClientBootstrap.1$');
+    expect(preview.unrealLag).toBeTruthy();
+  });
+  it('still appends ?listen when an explicit listen startup map is provided', () => {
+    const orchestrator = new ATO({
+      commandLineContext: {
+        ueRoot: 'D:/uei/UE5.7.3/Engine',
+        projectPath: 'D:/ue-projects/inv/inv.uproject',
+        projectRoot: 'D:/ue-projects/inv',
+      },
+    });
+    const server = RuntimePresets.Server(orchestrator.projectPath, 'D:/fake/UnrealEditor-Cmd.exe');
+    server.startupMap = '/Game/ThirdPerson/Lvl_ThirdPerson';
+    server.execTests.push('AwesomeInventory.ATCMacro.PARALLEL_TEST');
+    const client = RuntimePresets.Client(orchestrator.projectPath, '127.0.0.1', 'D:/fake/UnrealEditor-Cmd.exe');
+
+    orchestrator.configureServer(server);
+    orchestrator.addClient(client);
+    orchestrator.configureATCOrchestratorMode('ListenServer');
+    orchestrator.configureRuntime({ clientCount: 2 });
+
+    const preview = getPreview(orchestrator);
+
+    expect(preview.server.args).toContain('/Game/ThirdPerson/Lvl_ThirdPerson?listen');
   });
   it('lets generated args override earlier user-supplied ones', () => {
     const { orchestrator, server } = createPreview();
@@ -255,6 +365,9 @@ describe('ATO', () => {
     );
     expect(getAutomationTotals(automation)).toEqual({ passed: 1, total: 1 });
     expect(formatAutomationSummaryLine('CLIENT 1', automation)).toBe('Client 1 | Passed 1/1');
+    expect(formatAutomationSummaryLine('DEDICATED', automation)).toBe('Dedicated | Passed 1/1');
+    expect(formatAutomationSummaryLine('LISTEN', automation)).toBe('Listen | Passed 1/1');
+    expect(formatAutomationSummaryLine('STANDALONE', automation)).toBe('Standalone | Passed 1/1');
     expect(resolveProcessExitCode(0, automation)).toBe(0);
     expect(resolveProcessExitReason(0, automation)).toBe('automation passed (1 test performed)');
   });

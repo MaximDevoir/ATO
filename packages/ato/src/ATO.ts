@@ -8,6 +8,7 @@ import { hideBin } from 'yargs/helpers';
 import { checkExistsSync } from './ATO._helpers';
 import { spawnProcess, waitForUdpPort } from './ATO.helpers';
 import type {
+  ATCOrchestratorLaunchMode,
   ClientOptions,
   E2ECommandLineContext,
   E2ECommandLineOptions,
@@ -60,6 +61,8 @@ interface ResolvedLaunchPlan {
   effectiveTimeout: number;
   server: ResolvedServerOptions;
   clients: ResolvedClientOptions[];
+  atcOrchestratorMode: ATCOrchestratorLaunchMode;
+  logicalClientCount: number;
   preview: ResolvedPreview;
   dryRun: boolean;
 }
@@ -72,12 +75,19 @@ interface ParsedCommandLineArguments {
   timeout?: number;
   serverExe?: string;
   clientExe?: string;
+  atcOrchestratorMode?: ATCOrchestratorLaunchMode;
   dryRun: boolean;
 }
 
 const FAILURE_EXIT_CODE = 1;
 const ATC_CLIENT_BOOTSTRAP_TEST = 'ATC.ClientBootstrap';
 const ATC_CLIENT_BOOTSTRAP_FINISH_TEST = 'ZZZ.ATC.ClientBootstrap.Finish';
+const ATC_ORCHESTRATOR_TESTS: Record<ATCOrchestratorLaunchMode, string> = {
+  DedicatedServer: 'ZZZ.ATC.Orchestrator.DedicatedServer',
+  ListenServer: 'ZZZ.ATC.Orchestrator.ListenServer',
+  Standalone: 'ZZZ.ATC.Orchestrator.Standalone',
+  PIE: 'ZZZ.ATC.Orchestrator.PIE',
+};
 const MAX_EXPLICIT_ATC_CLIENT_BOOTSTRAP_CLIENTS = 32;
 
 type ProcessExitResult = number | 'timeout';
@@ -361,6 +371,18 @@ function summarizeStartupFailureOutcome(
 }
 
 function formatRuntimeIdentifier(label: string) {
+  if (label === 'DEDICATED') {
+    return 'Dedicated';
+  }
+  if (label === 'LISTEN') {
+    return 'Listen';
+  }
+  if (label === 'STANDALONE') {
+    return 'Standalone';
+  }
+  if (label === 'PIE') {
+    return 'PIE';
+  }
   if (label === 'SERVER') {
     return 'Server';
   }
@@ -382,7 +404,7 @@ function formatExitReason(reason: string) {
 }
 
 function formatProcessExitLine(outcome: ProcessOutcome) {
-  return `${formatRuntimeIdentifier(outcome.label).padEnd(8, ' ')} | ${outcome.effectiveExitCode} | ${formatExitReason(outcome.reason)}`;
+  return `${formatRuntimeIdentifier(outcome.label).padEnd(10, ' ')} | ${outcome.effectiveExitCode} | ${formatExitReason(outcome.reason)}`;
 }
 
 export function formatAutomationSummaryLine(label: string, automation: AutomationObservationState) {
@@ -595,13 +617,36 @@ function buildProcessArgs(positionals: string[], launchOptions: ProcessLaunchOpt
   return dedupeFinalNamedArgs(positionals, args.slice(positionals.length));
 }
 
-function buildServerArgs(serverOptions: ServerOptions, port?: number) {
+function resolveListenStartupUrl(startupMap: string | undefined) {
+  if (!startupMap) {
+    return undefined;
+  }
+
+  return startupMap.includes('?') ? `${startupMap}&listen` : `${startupMap}?listen`;
+}
+
+function buildServerArgs(
+  serverOptions: ServerOptions,
+  port?: number,
+  atcOrchestratorMode: ATCOrchestratorLaunchMode = 'DedicatedServer',
+) {
+  const positionals = [serverOptions.project];
+  if (atcOrchestratorMode === 'ListenServer') {
+    const listenStartupUrl = resolveListenStartupUrl(serverOptions.startupMap);
+    if (listenStartupUrl) {
+      positionals.push(listenStartupUrl);
+    }
+  }
+
   const extraArgs = [...(serverOptions.extraArgs ?? [])];
+  if (atcOrchestratorMode !== 'DedicatedServer' && !extraArgs.includes('-game')) {
+    extraArgs.unshift('-game');
+  }
   if (port !== undefined) {
     extraArgs.push(`-port=${port}`);
   }
 
-  return buildProcessArgs([serverOptions.project], {
+  return buildProcessArgs(positionals, {
     ...serverOptions,
     extraArgs,
   });
@@ -633,16 +678,99 @@ function appendUniqueExecTest(execTests: string[], execTest: string) {
   return execTests.includes(execTest) ? execTests : execTests.concat(execTest);
 }
 
-function resolveATCServerBootstrapTests(serverOptions: ServerOptions) {
+function resolveATCOrchestratorMode(
+  mode: ATCOrchestratorLaunchMode | undefined,
+  resolvedClientCount: number,
+): ATCOrchestratorLaunchMode {
+  if (mode) {
+    return mode;
+  }
+
+  return resolvedClientCount > 0 ? 'DedicatedServer' : 'Standalone';
+}
+
+function shouldApplyRemoteClientBootstrap(mode: ATCOrchestratorLaunchMode) {
+  return mode === 'DedicatedServer' || mode === 'ListenServer';
+}
+
+function requiresNetworkServer(mode: ATCOrchestratorLaunchMode) {
+  return mode === 'DedicatedServer' || mode === 'ListenServer';
+}
+
+function requiresImmediateNetworkServer(serverOptions: ServerOptions, mode: ATCOrchestratorLaunchMode) {
+  if (mode === 'DedicatedServer') {
+    return true;
+  }
+
+  return mode === 'ListenServer' && !!serverOptions.startupMap;
+}
+
+function resolveOrchestratorProcessLabel(mode: ATCOrchestratorLaunchMode) {
+  switch (mode) {
+    case 'DedicatedServer':
+      return 'DEDICATED';
+    case 'ListenServer':
+      return 'LISTEN';
+    case 'Standalone':
+      return 'STANDALONE';
+    case 'PIE':
+      return 'PIE';
+  }
+}
+
+function usesDedicatedServerExecutable(mode: ATCOrchestratorLaunchMode) {
+  return mode === 'DedicatedServer';
+}
+
+function resolveLogicalClientCount(
+  mode: ATCOrchestratorLaunchMode,
+  runtimeClientCount: number | undefined,
+  configuredClientTemplates: number,
+) {
+  if (mode === 'Standalone' || mode === 'PIE') {
+    return 0;
+  }
+
+  if (mode === 'ListenServer') {
+    if (runtimeClientCount !== undefined) {
+      return Math.max(runtimeClientCount, 1);
+    }
+
+    return Math.max(configuredClientTemplates + 1, 1);
+  }
+
+  return runtimeClientCount ?? configuredClientTemplates;
+}
+
+function resolveRemoteClientCount(mode: ATCOrchestratorLaunchMode, logicalClientCount: number) {
+  if (mode === 'ListenServer') {
+    return Math.max(logicalClientCount - 1, 0);
+  }
+
+  if (mode === 'Standalone' || mode === 'PIE') {
+    return 0;
+  }
+
+  return Math.max(logicalClientCount, 0);
+}
+
+function resolveFirstRemoteBootstrapIndex(mode: ATCOrchestratorLaunchMode) {
+  return mode === 'ListenServer' ? 1 : 0;
+}
+
+function resolveATCServerBootstrapTests(serverOptions: ServerOptions, orchestratorMode: ATCOrchestratorLaunchMode) {
   const execTests = [...(serverOptions.execTests ?? [])];
   if (!shouldAutomaticallyApplyBootstrapTests(serverOptions)) {
     return execTests;
   }
 
-  return appendUniqueExecTest(execTests, ATC_CLIENT_BOOTSTRAP_FINISH_TEST);
+  const withOrchestratorIdentity = appendUniqueExecTest(execTests, ATC_ORCHESTRATOR_TESTS[orchestratorMode]);
+  return shouldApplyRemoteClientBootstrap(orchestratorMode)
+    ? appendUniqueExecTest(withOrchestratorIdentity, ATC_CLIENT_BOOTSTRAP_FINISH_TEST)
+    : withOrchestratorIdentity;
 }
 
-function resolveATCClientBootstrapTests(execTests: string[] | undefined, clientIndex: number) {
+function resolveATCClientBootstrapTests(execTests: string[] | undefined, bootstrapClientIndex: number) {
   const resolvedExecTests = [...(execTests ?? [])];
   const hasExplicitBootstrapTest = resolvedExecTests.some(isATCClientBootstrapTest);
 
@@ -651,8 +779,8 @@ function resolveATCClientBootstrapTests(execTests: string[] | undefined, clientI
   }
 
   const explicitBootstrapTest =
-    clientIndex < MAX_EXPLICIT_ATC_CLIENT_BOOTSTRAP_CLIENTS
-      ? `${ATC_CLIENT_BOOTSTRAP_TEST}.${clientIndex}`
+    bootstrapClientIndex < MAX_EXPLICIT_ATC_CLIENT_BOOTSTRAP_CLIENTS
+      ? `${ATC_CLIENT_BOOTSTRAP_TEST}.${bootstrapClientIndex}`
       : ATC_CLIENT_BOOTSTRAP_TEST;
 
   return resolvedExecTests.map((execTest) =>
@@ -663,6 +791,8 @@ function resolveATCClientBootstrapTests(execTests: string[] | undefined, clientI
 function isATCBootstrapOrchestration(server: ResolvedServerOptions, clients: ResolvedClientOptions[]) {
   return (
     clients.length > 0 &&
+    (server.execTests.includes(ATC_ORCHESTRATOR_TESTS.DedicatedServer) ||
+      server.execTests.includes(ATC_ORCHESTRATOR_TESTS.ListenServer)) &&
     server.execTests.includes(ATC_CLIENT_BOOTSTRAP_FINISH_TEST) &&
     clients.every((client) => client.execTests.some(isATCClientBootstrapTest))
   );
@@ -717,6 +847,11 @@ export class ATO {
         description:
           'Optional override path to the client executable; otherwise the orchestrator probes common engine locations',
       })
+      .option('atcOrchestratorMode', {
+        type: 'string',
+        choices: ['DedicatedServer', 'ListenServer', 'Standalone', 'PIE'],
+        description: 'Explicit ATC orchestrator identity to inject into automation bootstrap tests',
+      })
       .option('dryRun', {
         type: 'boolean',
         default: false,
@@ -738,6 +873,7 @@ export class ATO {
         timeoutSeconds: argv.timeout ?? options.timeoutSeconds,
         serverExe: argv.serverExe ?? options.serverExe,
         clientExe: argv.clientExe ?? options.clientExe,
+        atcOrchestratorMode: argv.atcOrchestratorMode ?? options.atcOrchestratorMode,
         dryRun: argv.dryRun ?? options.dryRun,
       },
     });
@@ -777,6 +913,13 @@ export class ATO {
     };
   }
 
+  configureATCOrchestratorMode(mode: ATCOrchestratorLaunchMode) {
+    this.runtimeOptions = {
+      ...this.runtimeOptions,
+      atcOrchestratorMode: mode,
+    };
+  }
+
   configureServer(opts: ServerOptions) {
     this.serverOptions = opts;
   }
@@ -809,7 +952,7 @@ export class ATO {
     }
 
     if (plan.dryRun) {
-      this.printDryRunPreview(plan.preview);
+      this.printDryRunPreview(plan.preview, plan.atcOrchestratorMode);
       return 0;
     }
 
@@ -827,49 +970,68 @@ export class ATO {
 
     const effectivePort = this.runtimeOptions.port ?? this.serverOptions.port ?? 7777;
     const effectiveTimeout = this.runtimeOptions.timeoutSeconds ?? this.serverOptions.timeoutSeconds ?? 60;
-    const server = this.resolveServerOptions();
-    const clients = this.resolveClientOptions();
+    const atcOrchestratorMode = resolveATCOrchestratorMode(
+      this.runtimeOptions.atcOrchestratorMode,
+      this.runtimeOptions.clientCount ?? this.clients.length,
+    );
+    const logicalClientCount = resolveLogicalClientCount(
+      atcOrchestratorMode,
+      this.runtimeOptions.clientCount,
+      this.clients.length,
+    );
+    const remoteClientCount = resolveRemoteClientCount(atcOrchestratorMode, logicalClientCount);
+    const expandedClients = this.expandClientTemplates(remoteClientCount);
+    const server = this.resolveServerOptions(atcOrchestratorMode);
+    const clients = this.resolveClientOptions(expandedClients, atcOrchestratorMode);
 
     return {
       effectivePort,
       effectiveTimeout,
       server,
       clients,
-      preview: this.buildPreview(server, clients, effectivePort, effectiveTimeout),
+      atcOrchestratorMode,
+      logicalClientCount,
+      preview: this.buildPreview(server, clients, effectivePort, effectiveTimeout, atcOrchestratorMode),
       dryRun: this.runtimeOptions.dryRun ?? false,
     };
   }
 
-  private resolveServerOptions(): ResolvedServerOptions {
+  private resolveServerOptions(atcOrchestratorMode: ATCOrchestratorLaunchMode): ResolvedServerOptions {
     if (!this.serverOptions) {
       throw new Error('Server options not configured');
     }
 
     return {
       ...this.serverOptions,
-      execTests: resolveATCServerBootstrapTests(this.serverOptions),
-      exe: findFirstExisting(this.getServerCandidates(this.serverOptions)),
+      execTests: resolveATCServerBootstrapTests(this.serverOptions, atcOrchestratorMode),
+      exe: findFirstExisting(this.getPrimaryCandidates(this.serverOptions, atcOrchestratorMode)),
     };
   }
 
-  private resolveClientOptions(): ResolvedClientOptions[] {
-    const expandedClients = this.expandClientTemplates();
+  private resolveClientOptions(
+    expandedClients: ClientOptions[],
+    atcOrchestratorMode: ATCOrchestratorLaunchMode,
+  ): ResolvedClientOptions[] {
+    const firstRemoteBootstrapIndex = resolveFirstRemoteBootstrapIndex(atcOrchestratorMode);
     return expandedClients.map((client, clientIndex) => ({
       ...client,
       clientIndex,
-      execTests: shouldAutomaticallyApplyBootstrapTests(client)
-        ? resolveATCClientBootstrapTests(client.execTests, clientIndex)
-        : [...(client.execTests ?? [])],
+      execTests:
+        shouldAutomaticallyApplyBootstrapTests(client) && shouldApplyRemoteClientBootstrap(atcOrchestratorMode)
+          ? resolveATCClientBootstrapTests(client.execTests, firstRemoteBootstrapIndex + clientIndex)
+          : [...(client.execTests ?? [])],
       exe: findFirstExisting(this.getClientCandidates(client)),
       host: client.host ?? '127.0.0.1',
     }));
   }
 
-  private expandClientTemplates(): ClientOptions[] {
-    if (this.clients.length === 0) return [];
-
-    const targetCount = this.runtimeOptions.clientCount ?? this.clients.length;
+  private expandClientTemplates(targetCount: number): ClientOptions[] {
     if (targetCount <= 0) return [];
+    if (this.clients.length === 0) {
+      throw new Error(
+        `Configured runtime clientCount=${targetCount}, but no client templates were added. Provide exactly 1 template to replicate, or ${targetCount} explicit client entries.`,
+      );
+    }
     if (this.clients.length === targetCount) {
       return this.clients.map(cloneClientOptions);
     }
@@ -885,13 +1047,35 @@ export class ATO {
     );
   }
 
-  private getServerCandidates(serverOptions: ServerOptions) {
+  private getPrimaryCandidates(serverOptions: ServerOptions, atcOrchestratorMode: ATCOrchestratorLaunchMode) {
+    if (usesDedicatedServerExecutable(atcOrchestratorMode)) {
+      return this.getDedicatedServerCandidates(serverOptions);
+    }
+
+    return this.getHostCandidates(serverOptions);
+  }
+
+  private getDedicatedServerCandidates(serverOptions: ServerOptions) {
     const projectRoot = path.dirname(serverOptions.project);
     return [
       this.runtimeOptions.serverExe ?? '',
       serverOptions.exe ?? '',
       path.join(projectRoot, 'Binaries', 'Win64', 'invServer.exe'),
       path.join(projectRoot, 'Binaries', 'Win64', `${path.basename(projectRoot)}Server.exe`),
+    ];
+  }
+
+  private getHostCandidates(serverOptions: ServerOptions) {
+    const projectRoot = path.dirname(serverOptions.project);
+    return [
+      this.runtimeOptions.clientExe ?? '',
+      this.runtimeOptions.serverExe ?? '',
+      serverOptions.exe ?? '',
+      path.join(this.ueRoot, 'Binaries', 'Win64', 'UnrealEditor-Cmd.exe'),
+      path.join(this.ueRoot, 'Engine', 'Binaries', 'Win64', 'UnrealEditor-Cmd.exe'),
+      path.join(this.ueRoot, '..', 'Engine', 'Binaries', 'Win64', 'UnrealEditor-Cmd.exe'),
+      path.join(projectRoot, 'Binaries', 'Win64', 'inv.exe'),
+      path.join(projectRoot, 'Binaries', 'Win64', `${path.basename(projectRoot)}.exe`),
     ];
   }
 
@@ -910,9 +1094,14 @@ export class ATO {
     clients: ResolvedClientOptions[],
     port: number,
     timeoutSeconds: number,
+    atcOrchestratorMode: ATCOrchestratorLaunchMode,
   ): ResolvedPreview {
-    const serverArgs = buildServerArgs(serverOptions, port);
-    const unrealLagPreview = this.buildUnrealLagPreview(port, timeoutSeconds);
+    const serverArgs = buildServerArgs(
+      serverOptions,
+      requiresNetworkServer(atcOrchestratorMode) ? port : undefined,
+      atcOrchestratorMode,
+    );
+    const unrealLagPreview = this.buildUnrealLagPreview(port, timeoutSeconds, atcOrchestratorMode);
     const proxyHost = unrealLagPreview
       ? this.formatProxyHost(unrealLagPreview.bindAddress, unrealLagPreview.bindPort)
       : undefined;
@@ -939,8 +1128,13 @@ export class ATO {
     };
   }
 
-  private buildUnrealLagPreview(port: number, timeoutSeconds: number) {
-    if (!this.unrealLagOptions) return undefined;
+  private buildUnrealLagPreview(
+    port: number,
+    timeoutSeconds: number,
+    atcOrchestratorMode: ATCOrchestratorLaunchMode | undefined,
+  ) {
+    if (!this.unrealLagOptions || (atcOrchestratorMode && !requiresNetworkServer(atcOrchestratorMode)))
+      return undefined;
 
     return {
       bindAddress: this.unrealLagOptions.bindAddress ?? '127.0.0.1',
@@ -957,12 +1151,13 @@ export class ATO {
     return `${bindAddress}:${displayPort}`;
   }
 
-  private printDryRunPreview(preview: ResolvedPreview) {
+  private printDryRunPreview(preview: ResolvedPreview, atcOrchestratorMode: ATCOrchestratorLaunchMode) {
+    const orchestratorLabel = resolveOrchestratorProcessLabel(atcOrchestratorMode);
     if (preview.unrealLag) {
       console.log('[DRYRUN] UnrealLag ->', JSON.stringify(preview.unrealLag));
     }
-    console.log('[DRYRUN] Server ->', preview.server.command);
-    console.log('[DRYRUN-ARGS] Server ARGS:', JSON.stringify(preview.server.args));
+    console.log(`[DRYRUN] ${orchestratorLabel} -> ${preview.server.command}`);
+    console.log(`[DRYRUN-ARGS] ${orchestratorLabel} ARGS:`, JSON.stringify(preview.server.args));
     preview.clients.forEach((client, index) => {
       console.log(`[DRYRUN] Client ${index + 1} -> ${client.command}`);
       console.log(`[DRYRUN-ARGS] Client ${index + 1} ARGS:`, JSON.stringify(client.args));
@@ -1016,10 +1211,13 @@ export class ATO {
     const outcomes: ProcessOutcome[] = [];
     let serverMonitor: MonitoredProcess | undefined;
     const clientMonitors: MonitoredProcess[] = [];
+    const orchestratorLabel = resolveOrchestratorProcessLabel(plan.atcOrchestratorMode);
 
     try {
       const serverMaxLifetime = plan.server.maxLifetime ?? 600;
-      const proxyClientHost = await this.startUnrealLag(plan.effectivePort);
+      const proxyClientHost = requiresNetworkServer(plan.atcOrchestratorMode)
+        ? await this.startUnrealLag(plan.effectivePort)
+        : undefined;
 
       if (isATCBootstrapOrchestration(plan.server, plan.clients)) {
         this.spawnClients(plan.clients, proxyClientHost, clientMonitors);
@@ -1038,13 +1236,17 @@ export class ATO {
         }
       }
 
-      const serverArgs = buildServerArgs(plan.server, plan.effectivePort);
-      console.log(`[SPAWN] SERVER -> ${formatCommand(plan.server.exe, serverArgs)}`);
-      console.log('[SPAWN-ARGS] SERVER ARGS:', JSON.stringify(serverArgs));
+      const serverArgs = buildServerArgs(
+        plan.server,
+        requiresNetworkServer(plan.atcOrchestratorMode) ? plan.effectivePort : undefined,
+        plan.atcOrchestratorMode,
+      );
+      console.log(`[SPAWN] ${orchestratorLabel} -> ${formatCommand(plan.server.exe, serverArgs)}`);
+      console.log(`[SPAWN-ARGS] ${orchestratorLabel} ARGS:`, JSON.stringify(serverArgs));
       serverMonitor = this.createMonitoredProcess(
         plan.server.exe,
         serverArgs,
-        'SERVER',
+        orchestratorLabel,
         serverMaxLifetime,
         hasAutomationCommands(plan.server),
       );
@@ -1054,7 +1256,7 @@ export class ATO {
       if (serverPid <= 0) {
         console.error('Failed to obtain server PID');
         outcomes.push({
-          label: 'SERVER',
+          label: orchestratorLabel,
           rawExitResult: -1,
           effectiveExitCode: FAILURE_EXIT_CODE,
           reason: 'failed to obtain server pid',
@@ -1063,25 +1265,33 @@ export class ATO {
         return FAILURE_EXIT_CODE;
       }
 
-      const serverStatus = await this.waitForServerReady(
-        serverPid,
-        plan.effectivePort,
-        plan.effectiveTimeout,
-        serverMonitor.exitPromise,
-      );
-      if (serverStatus !== 'bound') {
-        try {
-          if (this.serverProc && !this.serverProc.killed) this.serverProc.kill();
-        } catch {}
-        const finalServerExit = await serverMonitor.exitPromise;
-        outcomes.push(
-          summarizeStartupFailureOutcome('SERVER', finalServerExit, serverMonitor.automation, serverStatus),
+      if (requiresImmediateNetworkServer(plan.server, plan.atcOrchestratorMode)) {
+        const serverStatus = await this.waitForServerReady(
+          serverPid,
+          plan.effectivePort,
+          plan.effectiveTimeout,
+          serverMonitor.exitPromise,
         );
-        return this.handleServerStartupFailure(serverStatus);
+        if (serverStatus !== 'bound') {
+          try {
+            if (this.serverProc && !this.serverProc.killed) this.serverProc.kill();
+          } catch {}
+          const finalServerExit = await serverMonitor.exitPromise;
+          outcomes.push(
+            summarizeStartupFailureOutcome(orchestratorLabel, finalServerExit, serverMonitor.automation, serverStatus),
+          );
+          return this.handleServerStartupFailure(serverStatus);
+        }
       }
 
       if (clientMonitors.length === 0) {
-        this.spawnClients(plan.clients, proxyClientHost, clientMonitors);
+        if (plan.clients.length > 0) {
+          this.spawnClients(plan.clients, proxyClientHost, clientMonitors);
+        } else {
+          const finalServerExit = await serverMonitor.exitPromise;
+          outcomes.unshift(summarizeProcessOutcome(orchestratorLabel, finalServerExit, serverMonitor.automation));
+          return outcomes.some((outcome) => outcome.effectiveExitCode !== 0) ? FAILURE_EXIT_CODE : 0;
+        }
       }
 
       const clientOutcomes = await this.waitForClientMonitors(clientMonitors, serverMonitor);
@@ -1092,7 +1302,7 @@ export class ATO {
       } catch {}
 
       const finalServerExit = await serverMonitor.exitPromise;
-      outcomes.unshift(summarizeProcessOutcome('SERVER', finalServerExit, serverMonitor.automation));
+      outcomes.unshift(summarizeProcessOutcome(orchestratorLabel, finalServerExit, serverMonitor.automation));
       return outcomes.some((outcome) => outcome.effectiveExitCode !== 0) ? FAILURE_EXIT_CODE : 0;
     } finally {
       try {
@@ -1240,7 +1450,7 @@ export class ATO {
         const pendingClients = clientMonitors.filter((monitor) => !monitor.process.killed);
         if (pendingClients.length > 0) {
           console.error(
-            `SERVER exited before all clients completed (${completion.serverExit}); terminating remaining clients`,
+            `${serverMonitor.label} exited before all clients completed (${completion.serverExit}); terminating remaining clients`,
           );
         }
         for (const monitor of pendingClients) {

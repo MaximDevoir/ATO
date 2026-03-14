@@ -3,6 +3,8 @@ import type { UnrealLagProfileName } from '@UMaestro/UnrealLag';
 // See https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-command-line-arguments-reference for list of some arguments.
 export type ProcessArgs = string[];
 
+export type ATCOrchestratorLaunchMode = 'DedicatedServer' | 'ListenServer' | 'Standalone' | 'PIE';
+
 export interface UnrealLagProxyOptions {
   bindAddress?: string;
   bindPort?: number;
@@ -29,7 +31,7 @@ export interface ProcessLaunchOptions {
   execTests: string[];
   // array of commands pass into ExecCmds option.
   execCmds: string[];
-  // Whether to automatically inject ATC bootstrap and shutdown tests into the test queue.
+  // Whether to automatically inject ATC orchestrator/bootstrap and shutdown tests into the test queue.
   // Defaults to true in RuntimePresets and can be disabled per process when not running ATC.
   automaticallyApplyBootstrapTestsCmds?: boolean;
 }
@@ -37,6 +39,7 @@ export interface ProcessLaunchOptions {
 export interface ServerOptions extends ProcessLaunchOptions {
   port?: number; // UDP port server will bind (optional)
   timeoutSeconds?: number; // how long to wait for server UDP bind
+  startupMap?: string; // optional startup map/url for host-style launches such as listen server
 }
 
 export interface ClientOptions extends ProcessLaunchOptions {
@@ -49,6 +52,7 @@ export interface E2ERuntimeOptions {
   timeoutSeconds?: number;
   serverExe?: string;
   clientExe?: string;
+  atcOrchestratorMode?: ATCOrchestratorLaunchMode;
   dryRun?: boolean;
 }
 
