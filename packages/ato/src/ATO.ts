@@ -5,6 +5,15 @@ import type { ChildProcess } from 'node:child_process';
 import * as path from 'node:path';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
+import {
+  ATC_CLIENT_BOOTSTRAP_FINISH_TEST,
+  ATC_CLIENT_BOOTSTRAP_TEST,
+  ATC_CLIENT_REQUEST_LOG_PREFIX,
+  ATC_ORCHESTRATOR_TESTS,
+  getATCIndexedClientBootstrapTest,
+  isATCClientBootstrapTestName,
+  MAX_EXPLICIT_ATC_CLIENT_BOOTSTRAP_CLIENTS,
+} from './ATCAutomationNames';
 import { checkExistsSync } from './ATO._helpers';
 import { spawnProcess, waitForUdpPort } from './ATO.helpers';
 import type {
@@ -18,6 +27,7 @@ import type {
 } from './ATO.options';
 import { OrchestratorMode, RuntimePresets } from './ATO.options';
 
+export * from './ATCAutomationNames';
 export { OrchestratorMode, RuntimePresets } from './ATO.options';
 
 interface ATOInit {
@@ -96,16 +106,6 @@ interface ATCObservationState {
 }
 
 const FAILURE_EXIT_CODE = 1;
-const ATC_CLIENT_BOOTSTRAP_TEST = 'ATC.ClientBootstrap';
-const ATC_CLIENT_BOOTSTRAP_FINISH_TEST = 'ZZZ.ATC.ClientBootstrap.Finish';
-const ATC_ORCHESTRATOR_TESTS: Record<OrchestratorMode, string> = {
-  DedicatedServer: 'ZZZ.ATC.Orchestrator.DedicatedServer',
-  ListenServer: 'ZZZ.ATC.Orchestrator.ListenServer',
-  Standalone: 'ZZZ.ATC.Orchestrator.Standalone',
-  PIE: 'ZZZ.ATC.Orchestrator.PIE',
-};
-const MAX_EXPLICIT_ATC_CLIENT_BOOTSTRAP_CLIENTS = 32;
-const ATC_CLIENT_REQUEST_LOG_PREFIX = '[ATC_CLIENT_REQUEST]';
 
 type ProcessExitResult = number | 'timeout';
 
@@ -826,7 +826,7 @@ function shouldAutomaticallyApplyBootstrapTests(launchOptions: ProcessLaunchOpti
 }
 
 function isATCClientBootstrapTest(execTest: string) {
-  return execTest === ATC_CLIENT_BOOTSTRAP_TEST || /^ATC\.ClientBootstrap\.\d+$/.test(execTest);
+  return isATCClientBootstrapTestName(execTest);
 }
 
 function appendUniqueExecTest(execTests: string[], execTest: string) {
@@ -906,7 +906,7 @@ function resolveATCClientBootstrapTests(execTests: string[] | undefined, bootstr
 
   const explicitBootstrapTest =
     bootstrapClientIndex < MAX_EXPLICIT_ATC_CLIENT_BOOTSTRAP_CLIENTS
-      ? `${ATC_CLIENT_BOOTSTRAP_TEST}.${bootstrapClientIndex}`
+      ? getATCIndexedClientBootstrapTest(bootstrapClientIndex)
       : ATC_CLIENT_BOOTSTRAP_TEST;
 
   return resolvedExecTests.map((execTest) =>
