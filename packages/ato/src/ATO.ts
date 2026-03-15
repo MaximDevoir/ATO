@@ -729,7 +729,9 @@ function buildServerArgs(
 
   const extraArgs = [...(serverOptions.extraArgs ?? [])];
   if (atcOrchestratorMode !== 'DedicatedServer' && !extraArgs.includes('-game')) {
-    extraArgs.unshift('-game');
+    if (atcOrchestratorMode !== 'PIE') {
+      extraArgs.unshift('-game');
+    }
   }
   if (port !== undefined) {
     extraArgs.push(`-port=${port}`);
@@ -1093,7 +1095,7 @@ export class ATO {
   unrealLagBindInfo?: BindInfo;
 
   private runtimeOptions: E2ERuntimeOptions;
-  private readonly commandLineContext?: E2ECommandLineContext;
+  public readonly commandLineContext?: E2ECommandLineContext;
 
   constructor(init: ATOInit = {}) {
     this.runtimeOptions = { ...init.runtimeOptions };
