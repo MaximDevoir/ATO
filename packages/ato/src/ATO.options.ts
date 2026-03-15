@@ -80,7 +80,7 @@ export const RuntimePresets = {
     return {
       exe: serverExe,
       project: projectPath,
-      extraArgs: ['-log', '-stdout', '-FullStdOutLogOutputs', '-unattended', '-nullrhi'],
+      extraArgs: ['-log', '-stdout', '-FullStdOutLogOutputs', '-unattended', '-nullrhi', '-NoSplash'],
       excludeArgs: [],
       port: 7777,
       timeoutSeconds: 60,
