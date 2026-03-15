@@ -4,8 +4,9 @@
 
 ## Highlights
 
+- orchestrator-first native ATC runs
+- on-demand external client spin-up driven by server log metadata
 - optional `UnrealLag` proxy integration
--
 
 ## Install
 
@@ -16,18 +17,27 @@ pnpm add @UMaestro/ATO
 ## Usage
 
 ```ts
-import {ATO, RuntimePresets} from '@UMaestro/ATO';
+import {ATO, Orchestrator, OrchestratorMode} from '@UMaestro/ATO';
 
 const e2e = ATO.fromCommandLine();
-const server = RuntimePresets.Server(e2e.projectPath);
 
-server.execTests.push('MyAwesomeProject.Category.Name');
-e2e.configureServer(server);
+const dedicated = new Orchestrator(OrchestratorMode.DedicatedServer)
+  .addTests('MyAwesomeProject.Category.Name')
+  .configureUnrealLag({
+	bindAddress: '127.0.0.1',
+	bindPort: 0,
+	serverProfile: 'Bad',
+	clientProfile: 'Bad',
+  });
 
-const client = RuntimePresets.Client(e2e.projectPath);
-e2e.addClient(client);
+e2e.addOrchestrator(dedicated);
 
 const code = await e2e.start();
 
 process.exit(code);
 ```
+
+`ATO.fromCommandLine()` still accepts runtime overrides such as `--clients`, `--port`, `--timeout`, `--serverExe`, `--clientExe`, and `--dryRun`.
+For native dedicated/listen orchestrators, omitting `--clients` allows ATO to spawn external clients on demand as the server requests them.
+You can call `addOrchestrator(...)` multiple times to run several native orchestrators sequentially from one top-level ATO session.
+

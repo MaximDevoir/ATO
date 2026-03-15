@@ -3,7 +3,14 @@ import type { UnrealLagProfileName } from '@UMaestro/UnrealLag';
 // See https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-command-line-arguments-reference for list of some arguments.
 export type ProcessArgs = string[];
 
-export type ATCOrchestratorLaunchMode = 'DedicatedServer' | 'ListenServer' | 'Standalone' | 'PIE';
+export enum OrchestratorMode {
+  DedicatedServer = 'DedicatedServer',
+  ListenServer = 'ListenServer',
+  Standalone = 'Standalone',
+  PIE = 'PIE',
+}
+
+export type ATCOrchestratorLaunchMode = OrchestratorMode;
 
 export interface UnrealLagProxyOptions {
   bindAddress?: string;
@@ -47,14 +54,14 @@ export interface ClientOptions extends ProcessLaunchOptions {
 }
 
 export interface E2ERuntimeOptions {
-  // Number of external client processes to launch for DedicatedServer / ListenServer runs.
+  // Maximum number of external client processes available to launch for DedicatedServer / ListenServer runs.
+  // When omitted, ATO will spawn as many external clients as the native orchestrator requests.
   // Standalone and PIE ignore this and run with zero external ATC clients.
   clientCount?: number;
   port?: number;
   timeoutSeconds?: number;
   serverExe?: string;
   clientExe?: string;
-  atcOrchestratorMode?: ATCOrchestratorLaunchMode;
   dryRun?: boolean;
 }
 

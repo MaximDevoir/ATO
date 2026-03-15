@@ -8,7 +8,6 @@ import { hideBin } from 'yargs/helpers';
 import { checkExistsSync } from './ATO._helpers';
 import { spawnProcess, waitForUdpPort } from './ATO.helpers';
 import type {
-  ATCOrchestratorLaunchMode,
   ClientOptions,
   E2ECommandLineContext,
   E2ECommandLineOptions,
@@ -17,8 +16,9 @@ import type {
   ServerOptions,
   UnrealLagProxyOptions,
 } from './ATO.options';
+import { OrchestratorMode, RuntimePresets } from './ATO.options';
 
-export { RuntimePresets } from './ATO.options';
+export { OrchestratorMode, RuntimePresets } from './ATO.options';
 
 interface ATOInit {
   runtimeOptions?: E2ERuntimeOptions;
@@ -35,6 +35,11 @@ interface ResolvedClientOptions extends ClientOptions {
   host: string;
 }
 
+interface ResolvedClientTemplate extends ClientOptions {
+  exe: string;
+  host: string;
+}
+
 interface ResolvedPreviewCommand {
   exe: string;
   args: string[];
@@ -44,6 +49,8 @@ interface ResolvedPreviewCommand {
 interface ResolvedPreview {
   server: ResolvedPreviewCommand;
   clients: ResolvedPreviewCommand[];
+  clientTemplate?: ResolvedPreviewCommand;
+  maxExternalClients?: number | 'unbounded';
   unrealLag?: {
     bindAddress: string;
     bindPort: number;
@@ -60,11 +67,12 @@ interface ResolvedLaunchPlan {
   // coordinator within ATC that they are ready to begin testing.
   effectiveTimeout: number;
   server: ResolvedServerOptions;
-  clients: ResolvedClientOptions[];
-  atcOrchestratorMode: ATCOrchestratorLaunchMode;
-  externalClientCount: number;
+  clientTemplate?: ResolvedClientTemplate;
+  atcOrchestratorMode: OrchestratorMode;
+  maxExternalClients?: number;
   preview: ResolvedPreview;
   dryRun: boolean;
+  unrealLagOptions?: UnrealLagProxyOptions;
 }
 
 interface ParsedCommandLineArguments {
@@ -75,20 +83,29 @@ interface ParsedCommandLineArguments {
   timeout?: number;
   serverExe?: string;
   clientExe?: string;
-  atcOrchestratorMode?: ATCOrchestratorLaunchMode;
   dryRun: boolean;
+}
+
+export interface ATCClientRequestMetadata {
+  fixturePath: string;
+  requiredClients: number;
+}
+
+interface ATCObservationState {
+  requestedRemoteClients: number;
 }
 
 const FAILURE_EXIT_CODE = 1;
 const ATC_CLIENT_BOOTSTRAP_TEST = 'ATC.ClientBootstrap';
 const ATC_CLIENT_BOOTSTRAP_FINISH_TEST = 'ZZZ.ATC.ClientBootstrap.Finish';
-const ATC_ORCHESTRATOR_TESTS: Record<ATCOrchestratorLaunchMode, string> = {
+const ATC_ORCHESTRATOR_TESTS: Record<OrchestratorMode, string> = {
   DedicatedServer: 'ZZZ.ATC.Orchestrator.DedicatedServer',
   ListenServer: 'ZZZ.ATC.Orchestrator.ListenServer',
   Standalone: 'ZZZ.ATC.Orchestrator.Standalone',
   PIE: 'ZZZ.ATC.Orchestrator.PIE',
 };
 const MAX_EXPLICIT_ATC_CLIENT_BOOTSTRAP_CLIENTS = 32;
+const ATC_CLIENT_REQUEST_LOG_PREFIX = '[ATC_CLIENT_REQUEST]';
 
 type ProcessExitResult = number | 'timeout';
 
@@ -114,6 +131,7 @@ interface MonitoredProcess {
   label: string;
   process: ChildProcess;
   automation: AutomationObservationState;
+  atc: ATCObservationState;
   exitPromise: Promise<ProcessExitResult>;
 }
 
@@ -248,6 +266,40 @@ export function observeAutomationLogLine(state: AutomationObservationState, line
   applyCompletedTestLogLine(state, normalized);
 }
 
+export function parseATCClientRequestMetadataLine(line: string): ATCClientRequestMetadata | undefined {
+  const normalized = stripLogTimePrefix(line);
+  const prefixIndex = normalized.indexOf(ATC_CLIENT_REQUEST_LOG_PREFIX);
+  if (prefixIndex < 0) {
+    return undefined;
+  }
+
+  const payload = normalized.slice(prefixIndex + ATC_CLIENT_REQUEST_LOG_PREFIX.length).trim();
+  if (!payload) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(payload) as Partial<ATCClientRequestMetadata>;
+    const fixturePath = typeof parsed.fixturePath === 'string' ? parsed.fixturePath.trim() : '';
+    const requiredClients =
+      typeof parsed.requiredClients === 'number' &&
+      Number.isInteger(parsed.requiredClients) &&
+      parsed.requiredClients >= 0
+        ? parsed.requiredClients
+        : undefined;
+    if (!fixturePath || requiredClients === undefined) {
+      return undefined;
+    }
+
+    return {
+      fixturePath,
+      requiredClients,
+    };
+  } catch {
+    return undefined;
+  }
+}
+
 export function getAutomationTotals(state: AutomationObservationState) {
   const completedCount = state.successfulTests + state.unsuccessfulTests.length;
   const total = state.testsPerformed ?? completedCount;
@@ -266,7 +318,44 @@ function formatAutomationSuccessReason(testsPerformed: number | null) {
   return `automation passed (${testsPerformed} test${suffix} performed)`;
 }
 
+function hasTerminalAutomationResult(automation: AutomationObservationState) {
+  return automation.unsuccessfulTests.length > 0 || automation.sawQueueEmpty;
+}
+
 function resolveProcessOutcome(rawExitResult: ProcessExitResult, automation: AutomationObservationState) {
+  if (automation.expectAutomation && hasTerminalAutomationResult(automation)) {
+    const failedResult = automation.unsuccessfulTests[0]?.result;
+    if (failedResult) {
+      return {
+        effectiveExitCode: FAILURE_EXIT_CODE,
+        reason: `automation completed with result ${failedResult}`,
+      };
+    }
+    if (automation.foundTests !== null && automation.foundTests <= 0) {
+      return {
+        effectiveExitCode: FAILURE_EXIT_CODE,
+        reason: 'no matching automation tests were found',
+      };
+    }
+    if (automation.testsPerformed === null) {
+      return {
+        effectiveExitCode: FAILURE_EXIT_CODE,
+        reason: 'automation queue did not report tests performed',
+      };
+    }
+    if (automation.testsPerformed <= 0) {
+      return {
+        effectiveExitCode: FAILURE_EXIT_CODE,
+        reason: 'automation queue completed with 0 tests performed',
+      };
+    }
+
+    return {
+      effectiveExitCode: 0,
+      reason: formatAutomationSuccessReason(automation.testsPerformed),
+    };
+  }
+
   if (rawExitResult === 'timeout') {
     return {
       effectiveExitCode: FAILURE_EXIT_CODE,
@@ -622,13 +711,13 @@ function resolveListenStartupUrl(startupMap: string | undefined) {
     return undefined;
   }
 
-  return startupMap.includes('?') ? `${startupMap}&listen` : `${startupMap}?listen`;
+  return startupMap.includes('?') ? `${startupMap}?listen` : `${startupMap}?listen`;
 }
 
 function buildServerArgs(
   serverOptions: ServerOptions,
   port?: number,
-  atcOrchestratorMode: ATCOrchestratorLaunchMode = 'DedicatedServer',
+  atcOrchestratorMode: OrchestratorMode = OrchestratorMode.DedicatedServer,
 ) {
   const positionals = [serverOptions.project];
   if (atcOrchestratorMode === 'ListenServer') {
@@ -656,14 +745,80 @@ function buildClientArgs(clientOptions: ClientOptions, hostOverride?: string) {
   return buildProcessArgs([clientOptions.project, hostOverride ?? clientOptions.host ?? '127.0.0.1'], clientOptions);
 }
 
-function cloneClientOptions(client: ClientOptions): ClientOptions {
+function cloneProcessLaunchOptions<T extends ProcessLaunchOptions>(launchOptions: T): T {
   return {
-    ...client,
-    extraArgs: [...(client.extraArgs ?? [])],
-    excludeArgs: [...(client.excludeArgs ?? [])],
-    execCmds: [...(client.execCmds ?? [])],
-    execTests: client.execTests ? [...client.execTests] : [],
+    ...launchOptions,
+    extraArgs: [...(launchOptions.extraArgs ?? [])],
+    excludeArgs: [...(launchOptions.excludeArgs ?? [])],
+    execCmds: [...(launchOptions.execCmds ?? [])],
+    execTests: launchOptions.execTests ? [...launchOptions.execTests] : [],
+  } as T;
+}
+
+function clonePartialProcessLaunchOptions<T extends Partial<ProcessLaunchOptions>>(launchOptions?: T): T {
+  if (!launchOptions) {
+    return {} as T;
+  }
+
+  return {
+    ...launchOptions,
+    ...(launchOptions.extraArgs ? { extraArgs: [...launchOptions.extraArgs] } : {}),
+    ...(launchOptions.excludeArgs ? { excludeArgs: [...launchOptions.excludeArgs] } : {}),
+    ...(launchOptions.execCmds ? { execCmds: [...launchOptions.execCmds] } : {}),
+    ...(launchOptions.execTests ? { execTests: [...launchOptions.execTests] } : {}),
+  } as T;
+}
+
+function mergeProcessLaunchOptions<T extends ProcessLaunchOptions>(base: T, overrides?: Partial<T>): T {
+  if (!overrides) {
+    return cloneProcessLaunchOptions(base);
+  }
+
+  return {
+    ...cloneProcessLaunchOptions(base),
+    ...overrides,
+    extraArgs: overrides.extraArgs ? [...overrides.extraArgs] : [...(base.extraArgs ?? [])],
+    excludeArgs: overrides.excludeArgs ? [...overrides.excludeArgs] : [...(base.excludeArgs ?? [])],
+    execCmds: overrides.execCmds ? [...overrides.execCmds] : [...(base.execCmds ?? [])],
+    execTests: overrides.execTests ? [...overrides.execTests] : [...(base.execTests ?? [])],
+  } as T;
+}
+
+function mergePartialProcessLaunchOptions<T extends Partial<ProcessLaunchOptions>>(base: T, overrides?: Partial<T>): T {
+  if (!overrides) {
+    return clonePartialProcessLaunchOptions(base);
+  }
+
+  return {
+    ...clonePartialProcessLaunchOptions(base),
+    ...clonePartialProcessLaunchOptions(overrides),
+  } as T;
+}
+
+function mergeServerOptions(base: ServerOptions, overrides?: Partial<ServerOptions>): ServerOptions {
+  const merged = mergeProcessLaunchOptions(base, overrides);
+  return {
+    ...merged,
+    port: overrides?.port ?? base.port,
+    timeoutSeconds: overrides?.timeoutSeconds ?? base.timeoutSeconds,
+    startupMap: overrides?.startupMap ?? base.startupMap,
   };
+}
+
+function mergeClientOptions(base: ClientOptions, overrides?: Partial<ClientOptions>): ClientOptions {
+  const merged = mergeProcessLaunchOptions(base, overrides);
+  return {
+    ...merged,
+    host: overrides?.host ?? base.host,
+  };
+}
+
+function mergePartialServerOptions(base: Partial<ServerOptions>, overrides?: Partial<ServerOptions>) {
+  return mergePartialProcessLaunchOptions(base, overrides);
+}
+
+function mergePartialClientOptions(base: Partial<ClientOptions>, overrides?: Partial<ClientOptions>) {
+  return mergePartialProcessLaunchOptions(base, overrides);
 }
 
 function shouldAutomaticallyApplyBootstrapTests(launchOptions: ProcessLaunchOptions) {
@@ -678,26 +833,15 @@ function appendUniqueExecTest(execTests: string[], execTest: string) {
   return execTests.includes(execTest) ? execTests : execTests.concat(execTest);
 }
 
-function resolveATCOrchestratorMode(
-  mode: ATCOrchestratorLaunchMode | undefined,
-  resolvedClientCount: number,
-): ATCOrchestratorLaunchMode {
-  if (mode) {
-    return mode;
-  }
-
-  return resolvedClientCount > 0 ? 'DedicatedServer' : 'Standalone';
-}
-
-function shouldApplyRemoteClientBootstrap(mode: ATCOrchestratorLaunchMode) {
+function shouldApplyRemoteClientBootstrap(mode: OrchestratorMode) {
   return mode === 'DedicatedServer' || mode === 'ListenServer';
 }
 
-function requiresNetworkServer(mode: ATCOrchestratorLaunchMode) {
+function requiresNetworkServer(mode: OrchestratorMode) {
   return mode === 'DedicatedServer' || mode === 'ListenServer';
 }
 
-function requiresImmediateNetworkServer(serverOptions: ServerOptions, mode: ATCOrchestratorLaunchMode) {
+function requiresImmediateNetworkServer(serverOptions: ServerOptions, mode: OrchestratorMode) {
   if (mode === 'DedicatedServer') {
     return true;
   }
@@ -705,7 +849,7 @@ function requiresImmediateNetworkServer(serverOptions: ServerOptions, mode: ATCO
   return mode === 'ListenServer' && !!serverOptions.startupMap;
 }
 
-function resolveOrchestratorProcessLabel(mode: ATCOrchestratorLaunchMode) {
+function resolveOrchestratorProcessLabel(mode: OrchestratorMode) {
   switch (mode) {
     case 'DedicatedServer':
       return 'DEDICATED';
@@ -716,37 +860,31 @@ function resolveOrchestratorProcessLabel(mode: ATCOrchestratorLaunchMode) {
     case 'PIE':
       return 'PIE';
   }
+
+  return 'SERVER';
 }
 
-function usesDedicatedServerExecutable(mode: ATCOrchestratorLaunchMode) {
+function usesDedicatedServerExecutable(mode: OrchestratorMode) {
   return mode === 'DedicatedServer';
 }
 
-function resolveExternalClientCount(
-  mode: ATCOrchestratorLaunchMode,
-  runtimeClientCount: number | undefined,
-  configuredClientTemplates: number,
-) {
+function resolveMaxExternalClientCount(mode: OrchestratorMode, runtimeClientCount: number | undefined) {
   if (mode === 'Standalone' || mode === 'PIE') {
     return 0;
   }
 
-  return runtimeClientCount ?? configuredClientTemplates;
-}
-
-function resolveRemoteClientCount(mode: ATCOrchestratorLaunchMode, externalClientCount: number) {
-  if (mode === 'Standalone' || mode === 'PIE') {
-    return 0;
+  if (runtimeClientCount === undefined) {
+    return undefined;
   }
 
-  return Math.max(externalClientCount, 0);
+  return Math.max(runtimeClientCount, 0);
 }
 
-function resolveFirstRemoteBootstrapIndex(mode: ATCOrchestratorLaunchMode) {
+function resolveFirstRemoteBootstrapIndex() {
   return 0;
 }
 
-function resolveATCServerBootstrapTests(serverOptions: ServerOptions, orchestratorMode: ATCOrchestratorLaunchMode) {
+function resolveATCServerBootstrapTests(serverOptions: ServerOptions, orchestratorMode: OrchestratorMode) {
   const execTests = [...(serverOptions.execTests ?? [])];
   if (!shouldAutomaticallyApplyBootstrapTests(serverOptions)) {
     return execTests;
@@ -776,13 +914,34 @@ function resolveATCClientBootstrapTests(execTests: string[] | undefined, bootstr
   );
 }
 
-function isATCBootstrapOrchestration(server: ResolvedServerOptions, clients: ResolvedClientOptions[]) {
+function resolveClientLaunchOptions(
+  clientTemplate: ResolvedClientTemplate,
+  bootstrapClientIndex: number,
+  atcOrchestratorMode: OrchestratorMode,
+): ResolvedClientOptions {
+  return {
+    ...clientTemplate,
+    clientIndex: bootstrapClientIndex,
+    execTests:
+      shouldAutomaticallyApplyBootstrapTests(clientTemplate) && shouldApplyRemoteClientBootstrap(atcOrchestratorMode)
+        ? resolveATCClientBootstrapTests(
+            clientTemplate.execTests,
+            resolveFirstRemoteBootstrapIndex() + bootstrapClientIndex,
+          )
+        : [...(clientTemplate.execTests ?? [])],
+  };
+}
+
+function isATCBootstrapOrchestration(
+  server: ResolvedServerOptions,
+  clientTemplate: ResolvedClientTemplate | undefined,
+  atcOrchestratorMode: OrchestratorMode,
+) {
   return (
-    clients.length > 0 &&
-    (server.execTests.includes(ATC_ORCHESTRATOR_TESTS.DedicatedServer) ||
-      server.execTests.includes(ATC_ORCHESTRATOR_TESTS.ListenServer)) &&
-    server.execTests.includes(ATC_CLIENT_BOOTSTRAP_FINISH_TEST) &&
-    clients.every((client) => client.execTests.some(isATCClientBootstrapTest))
+    !!clientTemplate &&
+    shouldApplyRemoteClientBootstrap(atcOrchestratorMode) &&
+    server.execTests.includes(ATC_ORCHESTRATOR_TESTS[atcOrchestratorMode]) &&
+    server.execTests.includes(ATC_CLIENT_BOOTSTRAP_FINISH_TEST)
   );
 }
 
@@ -792,6 +951,72 @@ function findFirstExisting(candidates: string[]) {
     if (checkExistsSync(candidate)) return candidate;
   }
   return candidates.find(Boolean) ?? '';
+}
+
+interface OrchestratorInit {
+  runtimeOptions?: E2ERuntimeOptions;
+  server?: Partial<ServerOptions>;
+  client?: Partial<ClientOptions>;
+}
+
+export class Orchestrator {
+  readonly mode: OrchestratorMode;
+
+  private runtimeOptions: E2ERuntimeOptions;
+  private serverOverrides: Partial<ServerOptions>;
+  private clientOverrides: Partial<ClientOptions>;
+  unrealLagOptions?: UnrealLagProxyOptions;
+
+  constructor(mode: OrchestratorMode, init: OrchestratorInit = {}) {
+    this.mode = mode;
+    this.runtimeOptions = { ...init.runtimeOptions };
+    this.serverOverrides = clonePartialProcessLaunchOptions(init.server);
+    this.clientOverrides = clonePartialProcessLaunchOptions(init.client);
+  }
+
+  configureRuntime(opts: E2ERuntimeOptions) {
+    this.runtimeOptions = {
+      ...this.runtimeOptions,
+      ...opts,
+    };
+    return this;
+  }
+
+  configureServer(opts: Partial<ServerOptions>) {
+    this.serverOverrides = mergePartialServerOptions(this.serverOverrides, opts);
+    return this;
+  }
+
+  configureClient(opts: Partial<ClientOptions>) {
+    this.clientOverrides = mergePartialClientOptions(this.clientOverrides, opts);
+    return this;
+  }
+
+  configureUnrealLag(opts: UnrealLagProxyOptions) {
+    this.unrealLagOptions = opts;
+    return this;
+  }
+
+  addTests(...execTests: string[]) {
+    this.serverOverrides.execTests = [...(this.serverOverrides.execTests ?? []), ...execTests];
+    return this;
+  }
+
+  resolveRuntimeOptions() {
+    return { ...this.runtimeOptions };
+  }
+
+  buildServerOptions(projectPath: string) {
+    const server = mergeServerOptions(RuntimePresets.Server(projectPath), this.serverOverrides);
+    if (shouldApplyRemoteClientBootstrap(this.mode) && this.serverOverrides.testExit === undefined) {
+      server.testExit = undefined;
+    }
+    return server;
+  }
+
+  buildClientOptions(projectPath: string) {
+    return mergeClientOptions(RuntimePresets.Client(projectPath), this.clientOverrides);
+  }
 }
 
 export class ATO {
@@ -814,7 +1039,8 @@ export class ATO {
       })
       .option('clients', {
         type: 'number',
-        description: 'Number of external client instances to spawn for DedicatedServer / ListenServer runs',
+        description:
+          'Optional maximum number of external client instances to allow for DedicatedServer / ListenServer runs; omit to spawn on demand',
       })
       .option('port', {
         type: 'number',
@@ -834,11 +1060,6 @@ export class ATO {
         type: 'string',
         description:
           'Optional override path to the client executable; otherwise the orchestrator probes common engine locations',
-      })
-      .option('atcOrchestratorMode', {
-        type: 'string',
-        choices: ['DedicatedServer', 'ListenServer', 'Standalone', 'PIE'],
-        description: 'Explicit ATC orchestrator identity to inject into automation bootstrap tests',
       })
       .option('dryRun', {
         type: 'boolean',
@@ -861,16 +1082,13 @@ export class ATO {
         timeoutSeconds: argv.timeout ?? options.timeoutSeconds,
         serverExe: argv.serverExe ?? options.serverExe,
         clientExe: argv.clientExe ?? options.clientExe,
-        atcOrchestratorMode: argv.atcOrchestratorMode ?? options.atcOrchestratorMode,
         dryRun: argv.dryRun ?? options.dryRun,
       },
     });
   }
 
-  serverOptions?: ServerOptions;
-  clients: ClientOptions[] = [];
+  orchestrators: Orchestrator[] = [];
   serverProc?: ChildProcess;
-  unrealLagOptions?: UnrealLagProxyOptions;
   unrealLag?: UnrealLag;
   unrealLagBindInfo?: BindInfo;
 
@@ -887,11 +1105,7 @@ export class ATO {
   }
 
   get projectPath() {
-    return this.commandLineContext?.projectPath ?? this.serverOptions?.project ?? this.clients[0]?.project ?? '';
-  }
-
-  get projectRoot() {
-    return this.commandLineContext?.projectRoot ?? (this.projectPath ? path.dirname(this.projectPath) : '');
+    return this.commandLineContext?.projectPath ?? '';
   }
 
   configureRuntime(opts: E2ERuntimeOptions) {
@@ -899,165 +1113,153 @@ export class ATO {
       ...this.runtimeOptions,
       ...opts,
     };
+    return this;
   }
 
-  configureATCOrchestratorMode(mode: ATCOrchestratorLaunchMode) {
-    this.runtimeOptions = {
-      ...this.runtimeOptions,
-      atcOrchestratorMode: mode,
-    };
-  }
-
-  configureServer(opts: ServerOptions) {
-    this.serverOptions = opts;
-  }
-
-  configureUnrealLag(opts: UnrealLagProxyOptions) {
-    this.unrealLagOptions = opts;
-  }
-
-  addClient(opts: ClientOptions) {
-    this.clients.push(opts);
+  addOrchestrator(orchestrator: Orchestrator) {
+    this.orchestrators.push(orchestrator);
+    return this;
   }
 
   preview() {
-    if (!this.serverOptions) return undefined;
-    return this.resolveLaunchPlan().preview;
+    if (this.orchestrators.length === 0) {
+      return [];
+    }
+
+    return this.resolveLaunchPlans().map((plan) => plan.preview);
   }
 
   async start(): Promise<number> {
-    if (!this.serverOptions) {
-      console.error('Server options not configured');
+    if (this.orchestrators.length === 0) {
+      console.error('No orchestrators configured');
       return 2;
     }
 
-    let plan: ResolvedLaunchPlan;
+    let plans: ResolvedLaunchPlan[];
     try {
-      plan = this.resolveLaunchPlan();
+      plans = this.resolveLaunchPlans();
     } catch (error) {
       console.error(error instanceof Error ? error.message : error);
       return 8;
     }
 
-    if (plan.dryRun) {
-      this.printDryRunPreview(plan.preview, plan.atcOrchestratorMode);
-      return 0;
+    let finalExitCode = 0;
+    for (const plan of plans) {
+      if (plan.dryRun) {
+        this.printDryRunPreview(plan.preview, plan.atcOrchestratorMode);
+        continue;
+      }
+
+      if (!this.validateExecutables(plan)) {
+        return 2;
+      }
+
+      const exitCode = await this.startResolvedPlan(plan);
+      if (exitCode !== 0) {
+        finalExitCode = exitCode;
+      }
     }
 
-    if (!this.validateExecutables(plan)) {
-      return 2;
-    }
-
-    return this.startResolvedPlan(plan);
+    return finalExitCode;
   }
 
-  private resolveLaunchPlan(): ResolvedLaunchPlan {
-    if (!this.serverOptions) {
-      throw new Error('Server options not configured');
-    }
+  private resolveLaunchPlans() {
+    return this.orchestrators.map((orchestrator) => this.resolveLaunchPlan(orchestrator));
+  }
 
-    const effectivePort = this.runtimeOptions.port ?? this.serverOptions.port ?? 7777;
-    const effectiveTimeout = this.runtimeOptions.timeoutSeconds ?? this.serverOptions.timeoutSeconds ?? 60;
-    const atcOrchestratorMode = resolveATCOrchestratorMode(
-      this.runtimeOptions.atcOrchestratorMode,
-      this.runtimeOptions.clientCount ?? this.clients.length,
-    );
-    const externalClientCount = resolveExternalClientCount(
-      atcOrchestratorMode,
-      this.runtimeOptions.clientCount,
-      this.clients.length,
-    );
-    const remoteClientCount = resolveRemoteClientCount(atcOrchestratorMode, externalClientCount);
-    const expandedClients = this.expandClientTemplates(remoteClientCount);
-    const server = this.resolveServerOptions(atcOrchestratorMode);
-    const clients = this.resolveClientOptions(expandedClients, atcOrchestratorMode);
+  private resolveLaunchPlan(orchestrator: Orchestrator): ResolvedLaunchPlan {
+    const effectiveRuntimeOptions = {
+      ...this.runtimeOptions,
+      ...orchestrator.resolveRuntimeOptions(),
+    };
+    const effectivePort = effectiveRuntimeOptions.port ?? 7777;
+    const serverOptions = orchestrator.buildServerOptions(this.projectPath);
+    const effectiveTimeout = effectiveRuntimeOptions.timeoutSeconds ?? serverOptions.timeoutSeconds ?? 60;
+    const atcOrchestratorMode = orchestrator.mode;
+    const maxExternalClients = resolveMaxExternalClientCount(atcOrchestratorMode, effectiveRuntimeOptions.clientCount);
+
+    const server = this.resolveServerOptions(orchestrator, atcOrchestratorMode, effectiveRuntimeOptions);
+    const clientTemplate = this.resolveClientTemplate(orchestrator, atcOrchestratorMode, effectiveRuntimeOptions);
 
     return {
       effectivePort,
       effectiveTimeout,
       server,
-      clients,
+      clientTemplate,
       atcOrchestratorMode,
-      externalClientCount,
-      preview: this.buildPreview(server, clients, effectivePort, effectiveTimeout, atcOrchestratorMode),
-      dryRun: this.runtimeOptions.dryRun ?? false,
+      maxExternalClients,
+      preview: this.buildPreview(
+        server,
+        clientTemplate,
+        maxExternalClients,
+        effectivePort,
+        effectiveTimeout,
+        atcOrchestratorMode,
+        orchestrator.unrealLagOptions,
+      ),
+      dryRun: effectiveRuntimeOptions.dryRun ?? false,
+      unrealLagOptions: orchestrator.unrealLagOptions,
     };
   }
 
-  private resolveServerOptions(atcOrchestratorMode: ATCOrchestratorLaunchMode): ResolvedServerOptions {
-    if (!this.serverOptions) {
-      throw new Error('Server options not configured');
-    }
+  private resolveServerOptions(
+    orchestrator: Orchestrator,
+    atcOrchestratorMode: OrchestratorMode,
+    runtimeOptions: E2ERuntimeOptions,
+  ): ResolvedServerOptions {
+    const serverOptions = orchestrator.buildServerOptions(this.projectPath);
 
     return {
-      ...this.serverOptions,
-      execTests: resolveATCServerBootstrapTests(this.serverOptions, atcOrchestratorMode),
-      exe: findFirstExisting(this.getPrimaryCandidates(this.serverOptions, atcOrchestratorMode)),
+      ...serverOptions,
+      execTests: resolveATCServerBootstrapTests(serverOptions, atcOrchestratorMode),
+      exe: findFirstExisting(this.getPrimaryCandidates(serverOptions, atcOrchestratorMode, runtimeOptions)),
     };
   }
 
-  private resolveClientOptions(
-    expandedClients: ClientOptions[],
-    atcOrchestratorMode: ATCOrchestratorLaunchMode,
-  ): ResolvedClientOptions[] {
-    const firstRemoteBootstrapIndex = resolveFirstRemoteBootstrapIndex(atcOrchestratorMode);
-    return expandedClients.map((client, clientIndex) => ({
-      ...client,
-      clientIndex,
-      execTests:
-        shouldAutomaticallyApplyBootstrapTests(client) && shouldApplyRemoteClientBootstrap(atcOrchestratorMode)
-          ? resolveATCClientBootstrapTests(client.execTests, firstRemoteBootstrapIndex + clientIndex)
-          : [...(client.execTests ?? [])],
-      exe: findFirstExisting(this.getClientCandidates(client)),
-      host: client.host ?? '127.0.0.1',
-    }));
+  private resolveClientTemplate(
+    orchestrator: Orchestrator,
+    atcOrchestratorMode: OrchestratorMode,
+    runtimeOptions: E2ERuntimeOptions,
+  ) {
+    if (!shouldApplyRemoteClientBootstrap(atcOrchestratorMode)) {
+      return undefined;
+    }
+
+    const clientOptions = orchestrator.buildClientOptions(this.projectPath);
+    return {
+      ...clientOptions,
+      exe: findFirstExisting(this.getClientCandidates(clientOptions, runtimeOptions)),
+      host: clientOptions.host ?? '127.0.0.1',
+    } satisfies ResolvedClientTemplate;
   }
 
-  private expandClientTemplates(targetCount: number): ClientOptions[] {
-    if (targetCount <= 0) return [];
-    if (this.clients.length === 0) {
-      throw new Error(
-        `Configured runtime clientCount=${targetCount}, but no client templates were added. Provide exactly 1 template to replicate, or ${targetCount} explicit client entries.`,
-      );
-    }
-    if (this.clients.length === targetCount) {
-      return this.clients.map(cloneClientOptions);
-    }
-    if (this.clients.length === 1) {
-      return Array.from({ length: targetCount }, () => cloneClientOptions(this.clients[0]));
-    }
-    if (this.clients.length > targetCount) {
-      return this.clients.slice(0, targetCount).map(cloneClientOptions);
-    }
-
-    throw new Error(
-      `Configured ${this.clients.length} client templates, but runtime clientCount=${targetCount}. Provide exactly 1 template to replicate, or ${targetCount} explicit client entries.`,
-    );
-  }
-
-  private getPrimaryCandidates(serverOptions: ServerOptions, atcOrchestratorMode: ATCOrchestratorLaunchMode) {
+  private getPrimaryCandidates(
+    serverOptions: ServerOptions,
+    atcOrchestratorMode: OrchestratorMode,
+    runtimeOptions: E2ERuntimeOptions,
+  ) {
     if (usesDedicatedServerExecutable(atcOrchestratorMode)) {
-      return this.getDedicatedServerCandidates(serverOptions);
+      return this.getDedicatedServerCandidates(serverOptions, runtimeOptions);
     }
 
-    return this.getHostCandidates(serverOptions);
+    return this.getHostCandidates(serverOptions, runtimeOptions);
   }
 
-  private getDedicatedServerCandidates(serverOptions: ServerOptions) {
+  private getDedicatedServerCandidates(serverOptions: ServerOptions, runtimeOptions: E2ERuntimeOptions) {
     const projectRoot = path.dirname(serverOptions.project);
     return [
-      this.runtimeOptions.serverExe ?? '',
+      runtimeOptions.serverExe ?? '',
       serverOptions.exe ?? '',
       path.join(projectRoot, 'Binaries', 'Win64', 'invServer.exe'),
       path.join(projectRoot, 'Binaries', 'Win64', `${path.basename(projectRoot)}Server.exe`),
     ];
   }
 
-  private getHostCandidates(serverOptions: ServerOptions) {
+  private getHostCandidates(serverOptions: ServerOptions, runtimeOptions: E2ERuntimeOptions) {
     const projectRoot = path.dirname(serverOptions.project);
     return [
-      this.runtimeOptions.clientExe ?? '',
-      this.runtimeOptions.serverExe ?? '',
+      runtimeOptions.clientExe ?? '',
+      runtimeOptions.serverExe ?? '',
       serverOptions.exe ?? '',
       path.join(this.ueRoot, 'Binaries', 'Win64', 'UnrealEditor-Cmd.exe'),
       path.join(this.ueRoot, 'Engine', 'Binaries', 'Win64', 'UnrealEditor-Cmd.exe'),
@@ -1067,9 +1269,9 @@ export class ATO {
     ];
   }
 
-  private getClientCandidates(clientOptions: ClientOptions) {
+  private getClientCandidates(clientOptions: ClientOptions, runtimeOptions: E2ERuntimeOptions) {
     return [
-      this.runtimeOptions.clientExe ?? '',
+      runtimeOptions.clientExe ?? '',
       clientOptions.exe ?? '',
       path.join(this.ueRoot, 'Binaries', 'Win64', 'UnrealEditor-Cmd.exe'),
       path.join(this.ueRoot, 'Engine', 'Binaries', 'Win64', 'UnrealEditor-Cmd.exe'),
@@ -1079,17 +1281,19 @@ export class ATO {
 
   private buildPreview(
     serverOptions: ResolvedServerOptions,
-    clients: ResolvedClientOptions[],
+    clientTemplate: ResolvedClientTemplate | undefined,
+    maxExternalClients: number | undefined,
     port: number,
     timeoutSeconds: number,
-    atcOrchestratorMode: ATCOrchestratorLaunchMode,
+    atcOrchestratorMode: OrchestratorMode,
+    unrealLagOptions: UnrealLagProxyOptions | undefined,
   ): ResolvedPreview {
     const serverArgs = buildServerArgs(
       serverOptions,
       requiresNetworkServer(atcOrchestratorMode) ? port : undefined,
       atcOrchestratorMode,
     );
-    const unrealLagPreview = this.buildUnrealLagPreview(port, timeoutSeconds, atcOrchestratorMode);
+    const unrealLagPreview = this.buildUnrealLagPreview(port, timeoutSeconds, atcOrchestratorMode, unrealLagOptions);
     const proxyHost = unrealLagPreview
       ? this.formatProxyHost(unrealLagPreview.bindAddress, unrealLagPreview.bindPort)
       : undefined;
@@ -1100,18 +1304,36 @@ export class ATO {
       command: formatCommand(serverOptions.exe, serverArgs),
     };
 
-    const clientPreviews = clients.map((client) => {
-      const args = buildClientArgs(client, proxyHost);
-      return {
-        exe: client.exe,
-        args,
-        command: formatCommand(client.exe, args),
-      };
-    });
+    const clientTemplatePreview = clientTemplate
+      ? (() => {
+          const client = resolveClientLaunchOptions(clientTemplate, 0, atcOrchestratorMode);
+          const args = buildClientArgs(client, proxyHost);
+          return {
+            exe: client.exe,
+            args,
+            command: formatCommand(client.exe, args),
+          } satisfies ResolvedPreviewCommand;
+        })()
+      : undefined;
+
+    const clientPreviews =
+      clientTemplate && maxExternalClients !== undefined
+        ? Array.from({ length: maxExternalClients }, (_, clientIndex) => {
+            const client = resolveClientLaunchOptions(clientTemplate, clientIndex, atcOrchestratorMode);
+            const args = buildClientArgs(client, proxyHost);
+            return {
+              exe: client.exe,
+              args,
+              command: formatCommand(client.exe, args),
+            } satisfies ResolvedPreviewCommand;
+          })
+        : [];
 
     return {
       server: serverPreview,
       clients: clientPreviews,
+      clientTemplate: clientTemplatePreview,
+      maxExternalClients: clientTemplate ? (maxExternalClients ?? 'unbounded') : undefined,
       unrealLag: unrealLagPreview,
     };
   }
@@ -1119,16 +1341,16 @@ export class ATO {
   private buildUnrealLagPreview(
     port: number,
     timeoutSeconds: number,
-    atcOrchestratorMode: ATCOrchestratorLaunchMode | undefined,
+    atcOrchestratorMode: OrchestratorMode | undefined,
+    unrealLagOptions: UnrealLagProxyOptions | undefined,
   ) {
-    if (!this.unrealLagOptions || (atcOrchestratorMode && !requiresNetworkServer(atcOrchestratorMode)))
-      return undefined;
+    if (!unrealLagOptions || (atcOrchestratorMode && !requiresNetworkServer(atcOrchestratorMode))) return undefined;
 
     return {
-      bindAddress: this.unrealLagOptions.bindAddress ?? '127.0.0.1',
-      bindPort: this.unrealLagOptions.bindPort ?? 0,
-      serverProfile: this.unrealLagOptions.serverProfile ?? 'Good',
-      clientProfile: this.unrealLagOptions.clientProfile ?? 'Good',
+      bindAddress: unrealLagOptions.bindAddress ?? '127.0.0.1',
+      bindPort: unrealLagOptions.bindPort ?? 0,
+      serverProfile: unrealLagOptions.serverProfile ?? 'Good',
+      clientProfile: unrealLagOptions.clientProfile ?? 'Good',
       targetServerPort: port,
       timeoutSeconds,
     };
@@ -1139,13 +1361,19 @@ export class ATO {
     return `${bindAddress}:${displayPort}`;
   }
 
-  private printDryRunPreview(preview: ResolvedPreview, atcOrchestratorMode: ATCOrchestratorLaunchMode) {
+  private printDryRunPreview(preview: ResolvedPreview, atcOrchestratorMode: OrchestratorMode) {
     const orchestratorLabel = resolveOrchestratorProcessLabel(atcOrchestratorMode);
     if (preview.unrealLag) {
       console.log('[DRYRUN] UnrealLag ->', JSON.stringify(preview.unrealLag));
     }
     console.log(`[DRYRUN] ${orchestratorLabel} -> ${preview.server.command}`);
     console.log(`[DRYRUN-ARGS] ${orchestratorLabel} ARGS:`, JSON.stringify(preview.server.args));
+    if (preview.clientTemplate) {
+      console.log(
+        `[DRYRUN] Client Template -> ${preview.clientTemplate.command} (max=${String(preview.maxExternalClients ?? 0)})`,
+      );
+      console.log('[DRYRUN-ARGS] Client Template ARGS:', JSON.stringify(preview.clientTemplate.args));
+    }
     preview.clients.forEach((client, index) => {
       console.log(`[DRYRUN] Client ${index + 1} -> ${client.command}`);
       console.log(`[DRYRUN-ARGS] Client ${index + 1} ARGS:`, JSON.stringify(client.args));
@@ -1158,11 +1386,9 @@ export class ATO {
       return false;
     }
 
-    for (const client of plan.clients) {
-      if (!checkExistsSync(client.exe)) {
-        console.error(`Client executable not found: ${client.exe}`);
-        return false;
-      }
+    if (plan.clientTemplate && !checkExistsSync(plan.clientTemplate.exe)) {
+      console.error(`Client executable not found: ${plan.clientTemplate.exe}`);
+      return false;
     }
 
     return true;
@@ -1176,9 +1402,19 @@ export class ATO {
     expectAutomation: boolean,
   ) {
     const automation = createAutomationObservationState(expectAutomation);
+    const atc: ATCObservationState = {
+      requestedRemoteClients: 0,
+    };
+    const observeLine = (line: string) => {
+      observeAutomationLogLine(automation, line);
+      const metadata = parseATCClientRequestMetadataLine(line);
+      if (metadata) {
+        atc.requestedRemoteClients = Math.max(atc.requestedRemoteClients, metadata.requiredClients);
+      }
+    };
     const process = spawnProcess(exe, args, label, {
-      onStdoutLine: (line) => observeAutomationLogLine(automation, line),
-      onStderrLine: (line) => observeAutomationLogLine(automation, line),
+      onStdoutLine: observeLine,
+      onStderrLine: observeLine,
     });
     const exitPromise = promiseProcessExitOrTimeout(process, timeoutSeconds, () => {
       console.error(`${label} exceeded maxLifetime (${timeoutSeconds}s); killing process`);
@@ -1191,6 +1427,7 @@ export class ATO {
       label,
       process,
       automation,
+      atc,
       exitPromise,
     } satisfies MonitoredProcess;
   }
@@ -1202,27 +1439,15 @@ export class ATO {
     const orchestratorLabel = resolveOrchestratorProcessLabel(plan.atcOrchestratorMode);
 
     try {
+      const bootstrapOrchestration = isATCBootstrapOrchestration(
+        plan.server,
+        plan.clientTemplate,
+        plan.atcOrchestratorMode,
+      );
       const serverMaxLifetime = plan.server.maxLifetime ?? 600;
       const proxyClientHost = requiresNetworkServer(plan.atcOrchestratorMode)
-        ? await this.startUnrealLag(plan.effectivePort)
+        ? await this.startUnrealLag(plan.effectivePort, plan.unrealLagOptions)
         : undefined;
-
-      if (isATCBootstrapOrchestration(plan.server, plan.clients)) {
-        this.spawnClients(plan.clients, proxyClientHost, clientMonitors);
-        const readyClients = await this.waitForClientsAutomationReady(
-          clientMonitors,
-          Math.max(plan.effectiveTimeout, 120),
-        );
-        if (!readyClients) {
-          for (const monitor of clientMonitors) {
-            try {
-              if (!monitor.process.killed) monitor.process.kill();
-            } catch {}
-          }
-          outcomes.push(...(await this.waitForClientMonitors(clientMonitors)));
-          return FAILURE_EXIT_CODE;
-        }
-      }
 
       const serverArgs = buildServerArgs(
         plan.server,
@@ -1272,14 +1497,62 @@ export class ATO {
         }
       }
 
-      if (clientMonitors.length === 0) {
-        if (plan.clients.length > 0) {
-          this.spawnClients(plan.clients, proxyClientHost, clientMonitors);
-        } else {
-          const finalServerExit = await serverMonitor.exitPromise;
-          outcomes.unshift(summarizeProcessOutcome(orchestratorLabel, finalServerExit, serverMonitor.automation));
-          return outcomes.some((outcome) => outcome.effectiveExitCode !== 0) ? FAILURE_EXIT_CODE : 0;
+      if (bootstrapOrchestration) {
+        const bootstrapRequestResult = await this.monitorATCClientRequestsUntilAutomationTerminal(
+          plan.clientTemplate,
+          plan.maxExternalClients,
+          plan.atcOrchestratorMode,
+          proxyClientHost,
+          clientMonitors,
+          serverMonitor,
+          serverMaxLifetime,
+        );
+
+        await this.waitForClientAutomationTerminalState(clientMonitors, 15);
+
+        try {
+          if (this.serverProc && !this.serverProc.killed) {
+            this.serverProc.kill();
+          }
+        } catch {}
+
+        for (const monitor of clientMonitors) {
+          try {
+            if (!monitor.process.killed) {
+              monitor.process.kill();
+            }
+          } catch {}
         }
+
+        const finalServerExit = await serverMonitor.exitPromise;
+        outcomes.unshift(summarizeProcessOutcome(orchestratorLabel, finalServerExit, serverMonitor.automation));
+
+        const clientOutcomes = await this.waitForClientMonitors(clientMonitors);
+        outcomes.push(...clientOutcomes);
+
+        if (!bootstrapRequestResult) {
+          return FAILURE_EXIT_CODE;
+        }
+
+        return outcomes.some((outcome) => outcome.effectiveExitCode !== 0) ? FAILURE_EXIT_CODE : 0;
+      }
+
+      if (!plan.clientTemplate) {
+        const finalServerExit = await serverMonitor.exitPromise;
+        outcomes.unshift(summarizeProcessOutcome(orchestratorLabel, finalServerExit, serverMonitor.automation));
+        return outcomes.some((outcome) => outcome.effectiveExitCode !== 0) ? FAILURE_EXIT_CODE : 0;
+      }
+
+      const eagerClientCount = plan.maxExternalClients ?? 0;
+      if (clientMonitors.length < eagerClientCount) {
+        this.spawnClients(
+          plan.clientTemplate,
+          clientMonitors.length,
+          eagerClientCount,
+          plan.atcOrchestratorMode,
+          proxyClientHost,
+          clientMonitors,
+        );
       }
 
       const clientOutcomes = await this.waitForClientMonitors(clientMonitors, serverMonitor);
@@ -1301,17 +1574,17 @@ export class ATO {
     }
   }
 
-  private async startUnrealLag(effectivePort: number) {
-    if (!this.unrealLagOptions) {
+  private async startUnrealLag(effectivePort: number, unrealLagOptions: UnrealLagProxyOptions | undefined) {
+    if (!unrealLagOptions) {
       return undefined;
     }
 
-    const serverProfileName = this.unrealLagOptions.serverProfile ?? 'NoLag';
-    const clientProfileName = this.unrealLagOptions.clientProfile ?? 'NoLag';
+    const serverProfileName = unrealLagOptions.serverProfile ?? 'NoLag';
+    const clientProfileName = unrealLagOptions.clientProfile ?? 'NoLag';
 
     this.unrealLag = new UnrealLag({
-      bindAddress: this.unrealLagOptions.bindAddress ?? '127.0.0.1',
-      bindPort: this.unrealLagOptions.bindPort ?? 0,
+      bindAddress: unrealLagOptions.bindAddress ?? '127.0.0.1',
+      bindPort: unrealLagOptions.bindPort ?? 0,
       server: {
         address: '127.0.0.1',
         port: effectivePort,
@@ -1323,7 +1596,7 @@ export class ATO {
     this.unrealLagBindInfo = await this.unrealLag.start();
 
     // Warn if chosen profiles may cause ATC coordination issues
-    const allProfiles = { ...UnrealLagProfiles, ...this.unrealLagOptions } as Record<string, unknown>;
+    const allProfiles = { ...UnrealLagProfiles, ...unrealLagOptions } as Record<string, unknown>;
     for (const name of [serverProfileName, clientProfileName]) {
       const profile =
         (allProfiles as Record<string, unknown>)[name] ?? (UnrealLagProfiles as Record<string, unknown>)[name];
@@ -1377,14 +1650,17 @@ export class ATO {
   }
 
   private spawnClients(
-    clients: ResolvedClientOptions[],
+    clientTemplate: ResolvedClientTemplate,
+    fromIndex: number,
+    toExclusiveIndex: number,
+    atcOrchestratorMode: OrchestratorMode,
     proxyClientHost: string | undefined,
     clientMonitors: MonitoredProcess[],
   ) {
-    for (let index = 0; index < clients.length; index++) {
-      const client = clients[index];
+    for (let clientIndex = fromIndex; clientIndex < toExclusiveIndex; clientIndex += 1) {
+      const client = resolveClientLaunchOptions(clientTemplate, clientIndex, atcOrchestratorMode);
       const args = buildClientArgs(client, proxyClientHost);
-      const prefix = `CLIENT ${index}`;
+      const prefix = `CLIENT ${client.clientIndex}`;
       console.log(`[SPAWN] ${prefix} -> ${formatCommand(client.exe, args)}`);
       console.log(`[SPAWN-ARGS] ${prefix} ARGS:`, JSON.stringify(args));
       clientMonitors.push(
@@ -1399,27 +1675,92 @@ export class ATO {
     }
   }
 
-  private async waitForClientsAutomationReady(clientMonitors: MonitoredProcess[], timeoutSeconds: number) {
+  private async monitorATCClientRequestsUntilAutomationTerminal(
+    clientTemplate: ResolvedClientTemplate | undefined,
+    maxExternalClients: number | undefined,
+    atcOrchestratorMode: OrchestratorMode,
+    proxyClientHost: string | undefined,
+    clientMonitors: MonitoredProcess[],
+    serverMonitor: MonitoredProcess,
+    timeoutSeconds: number,
+  ) {
     const deadline = Date.now() + timeoutSeconds * 1000;
 
     while (Date.now() < deadline) {
-      if (clientMonitors.every((monitor) => monitor.automation.sawReadyToStartAutomation)) {
+      const requestedRemoteClients = serverMonitor.atc.requestedRemoteClients;
+      if (requestedRemoteClients > 0 && !clientTemplate) {
+        console.error(
+          `[ATO] ATC requested ${requestedRemoteClients} remote client(s), but this orchestrator mode does not provide external clients`,
+        );
+        try {
+          if (!serverMonitor.process.killed) {
+            serverMonitor.process.kill();
+          }
+        } catch {}
+        await serverMonitor.exitPromise;
+        return false;
+      }
+
+      if (maxExternalClients !== undefined && requestedRemoteClients > maxExternalClients) {
+        console.error(
+          `[ATO] ATC requested ${requestedRemoteClients} remote client(s), but the configured maximum is ${maxExternalClients}`,
+        );
+        try {
+          if (!serverMonitor.process.killed) {
+            serverMonitor.process.kill();
+          }
+        } catch {}
+        await serverMonitor.exitPromise;
+        return false;
+      }
+
+      if (clientTemplate && clientMonitors.length < requestedRemoteClients) {
+        this.spawnClients(
+          clientTemplate,
+          clientMonitors.length,
+          requestedRemoteClients,
+          atcOrchestratorMode,
+          proxyClientHost,
+          clientMonitors,
+        );
+      }
+
+      if (hasTerminalAutomationResult(serverMonitor.automation)) {
         return true;
       }
 
-      const anyExited = await Promise.race([
-        Promise.all(clientMonitors.map((monitor) => monitor.exitPromise.then((exit) => exit !== 0))).then((results) =>
-          results.some(Boolean),
-        ),
+      const serverFinished = await Promise.race([
+        serverMonitor.exitPromise.then(() => true),
         new Promise<false>((resolve) => setTimeout(() => resolve(false), 250)),
       ]);
-      if (anyExited) {
-        return false;
+      if (serverFinished) {
+        return true;
       }
     }
 
-    console.error(`Timed out waiting for ${clientMonitors.length} client(s) to reach automation-ready state`);
+    console.error(`[ATO] Timed out waiting for ${serverMonitor.label} automation to reach a terminal state`);
+    try {
+      if (!serverMonitor.process.killed) {
+        serverMonitor.process.kill();
+      }
+    } catch {}
+    await serverMonitor.exitPromise;
     return false;
+  }
+
+  private async waitForClientAutomationTerminalState(clientMonitors: MonitoredProcess[], timeoutSeconds: number) {
+    if (clientMonitors.length === 0) {
+      return;
+    }
+
+    const deadline = Date.now() + timeoutSeconds * 1000;
+    while (Date.now() < deadline) {
+      if (clientMonitors.every((monitor) => hasTerminalAutomationResult(monitor.automation))) {
+        return;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
   }
 
   private async waitForClientMonitors(clientMonitors: MonitoredProcess[], serverMonitor?: MonitoredProcess) {
