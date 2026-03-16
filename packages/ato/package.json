@@ -1,5 +1,5 @@
 {
-  "name": "@UMaestro/ATO",
+  "name": "@ATO/ATO",
   "version": "0.1.0",
   "type": "module",
   "sideEffects": false,
@@ -15,7 +15,7 @@
   },
   "types": "./src/index.ts",
   "dependencies": {
-    "@UMaestro/UnrealLag": "file:../unreal-lag",
+    "@ATO/UnrealLag": "file:../unreal-lag",
     "@types/yargs": "17.0.35",
     "yargs": "18.0.0"
   },

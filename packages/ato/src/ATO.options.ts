@@ -1,4 +1,4 @@
-import type { UnrealLagProfileName } from '@UMaestro/UnrealLag';
+import type { UnrealLagProfileName } from '@ATO/UnrealLag';
 
 // See https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-command-line-arguments-reference for list of some arguments.
 export type ProcessArgs = string[];

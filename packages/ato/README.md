@@ -1,6 +1,6 @@
 # ATO
 
-`@UMaestro/ATO` provides TypeScript helpers for orchestrating ATC processes.
+`@ATO/ATO` provides TypeScript helpers for orchestrating ATC processes.
 
 ## Highlights
 
@@ -11,13 +11,13 @@
 ## Install
 
 ```bash
-pnpm add @UMaestro/ATO
+pnpm add @ATO/ATO
 ```
 
 ## Usage
 
 ```ts
-import {ATO, Orchestrator, OrchestratorMode} from '@UMaestro/ATO';
+import {ATO, Orchestrator, OrchestratorMode} from '@ATO/ATO';
 
 const e2e = ATO.fromCommandLine();
 

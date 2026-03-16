@@ -13,8 +13,8 @@
     "verbatimModuleSyntax": true,
     "types": ["node"],
     "paths": {
-      "@UMaestro/UnrealLag": ["./packages/unreal-lag/src/index.ts"],
-      "@UMaestro/ATO": ["./packages/ato/src/index.ts"]
+      "@ATO/UnrealLag": ["./packages/unreal-lag/src/index.ts"],
+      "@ATO/ATO": ["./packages/ato/src/index.ts"]
     }
   }
 }
