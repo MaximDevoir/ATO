@@ -542,6 +542,59 @@ describe('ATO', () => {
     expect(resolveProcessExitCode(0, automation)).toBe(1);
     expect(resolveProcessExitReason(0, automation)).toBe('no matching automation tests were found');
   });
+  it('treats ATC-only completion markers as authoritative automation success', () => {
+    const automation = createAutomationObservationState(true);
+    observeAutomationLogLine(
+      automation,
+      '[7:04:33 AM] LogTemp: Display: [ATC] Queue AwesomeInventoryStandalone.BasicStandaloneTest',
+    );
+    observeAutomationLogLine(
+      automation,
+      '[7:04:33 AM] LogTemp: Display: [ATC] Enabling 1 tests via AutomationController',
+    );
+    observeAutomationLogLine(
+      automation,
+      '[7:04:34 AM] LogAutomationController: Display: Test Completed. Result={Success} Name={BasicStandaloneTest} Path={AwesomeInventoryStandalone.BasicStandaloneTest}',
+    );
+    observeAutomationLogLine(automation, '[7:04:35 AM] LogTemp: Display: [ATC] **** TEST COMPLETE. EXIT CODE: 0 ****');
+
+    expect(getAutomationTotals(automation)).toEqual({ passed: 1, total: 1 });
+    expect(formatAutomationSummaryLine('STANDALONE', automation)).toBe('Standalone | Passed 1/1');
+    expect(resolveProcessExitCode(1, automation)).toBe(0);
+    expect(resolveProcessExitReason(1, automation)).toBe('automation passed (1 test performed)');
+  });
+  it('treats ATC-only zero-enabled completion as no matching tests', () => {
+    const automation = createAutomationObservationState(true);
+    observeAutomationLogLine(
+      automation,
+      '[7:04:33 AM] LogTemp: Display: [ATC] Enabling 0 tests via AutomationController',
+    );
+    observeAutomationLogLine(automation, '[7:04:34 AM] LogTemp: Display: [ATC] **** TEST COMPLETE. EXIT CODE: 1 ****');
+
+    expect(getAutomationTotals(automation)).toEqual({ passed: 0, total: 0 });
+    expect(resolveProcessExitCode(0, automation)).toBe(1);
+    expect(resolveProcessExitReason(0, automation)).toBe('no matching automation tests were found');
+  });
+  it('preserves failed automation results when ATC exits without queue-empty logs', () => {
+    const automation = createAutomationObservationState(true);
+    observeAutomationLogLine(
+      automation,
+      '[7:04:33 AM] LogTemp: Display: [ATC] Queue AwesomeInventory.ATCMacro.PARALLEL_TEST',
+    );
+    observeAutomationLogLine(
+      automation,
+      '[7:04:33 AM] LogTemp: Display: [ATC] Enabling 1 tests via AutomationController',
+    );
+    observeAutomationLogLine(
+      automation,
+      '[7:04:34 AM] LogAutomationController: Error: Test Completed. Result={Fail} Name={PARALLEL_TEST} Path={AwesomeInventory.ATCMacro.PARALLEL_TEST}',
+    );
+    observeAutomationLogLine(automation, '[7:04:35 AM] LogTemp: Display: [ATC] **** TEST COMPLETE. EXIT CODE: 1 ****');
+
+    expect(getAutomationTotals(automation)).toEqual({ passed: 0, total: 1 });
+    expect(resolveProcessExitCode(0, automation)).toBe(1);
+    expect(resolveProcessExitReason(0, automation)).toBe('automation completed with result Fail');
+  });
   it('keeps raw exit behavior for non-automation processes', () => {
     const automation = createAutomationObservationState(false);
     expect(formatAutomationSummaryLine('SERVER', automation)).toBeUndefined();

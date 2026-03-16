@@ -117,6 +117,9 @@ export interface AutomationObservationState {
   foundTests: number | null;
   testsPerformed: number | null;
   sawQueueEmpty: boolean;
+  queuedTests: number;
+  enabledTests: number | null;
+  atcCompletionExitCode: number | null;
   successfulTests: number;
   unsuccessfulTests: AutomationCompletedTest[];
 }
@@ -173,6 +176,9 @@ export function createAutomationObservationState(expectAutomation: boolean): Aut
     foundTests: null,
     testsPerformed: null,
     sawQueueEmpty: false,
+    queuedTests: 0,
+    enabledTests: null,
+    atcCompletionExitCode: null,
     successfulTests: 0,
     unsuccessfulTests: [],
   };
@@ -189,6 +195,9 @@ const automationQueueEmptyPattern =
   /LogAutomationCommandLine:\s+Display:\s+\.\.\.Automation Test Queue Empty\s+(\d+)\s+tests performed\./i;
 const automationCompletedPattern =
   /LogAutomationController:\s+(?:Display|Error):\s+Test Completed\. Result=\{([^}]*)}\s+Name=\{([^}]*)}\s+Path=\{([^}]*)}/i;
+const atcQueuedTestPattern = /\[ATC]\s+Queue\s+(.+)$/i;
+const atcEnabledTestsPattern = /\[ATC]\s+Enabling\s+(\d+)\s+tests via AutomationController/i;
+const atcCompletionExitCodePattern = /\[ATC]\s+\*{4}\s+TEST COMPLETE\. EXIT CODE:\s+(-?\d+)\s+\*{4}/i;
 const clientLabelPattern = /^CLIENT\s+(\d+)$/i;
 
 function toAutomationTerminalResult(rawResult: string): AutomationTerminalResult {
@@ -248,6 +257,96 @@ function applyCompletedTestLogLine(state: AutomationObservationState, normalized
   });
 }
 
+function applyATCQueuedTestLogLine(state: AutomationObservationState, normalized: string) {
+  if (!atcQueuedTestPattern.test(normalized)) {
+    return;
+  }
+
+  state.queuedTests += 1;
+  if (state.foundTests === null || state.foundTests < state.queuedTests) {
+    state.foundTests = state.queuedTests;
+  }
+}
+
+function applyATCEnabledTestsLogLine(state: AutomationObservationState, normalized: string) {
+  const match = atcEnabledTestsPattern.exec(normalized);
+  if (!match) {
+    return;
+  }
+
+  const enabledTests = Number.parseInt(match[1] ?? '', 10);
+  if (!Number.isFinite(enabledTests)) {
+    return;
+  }
+
+  state.enabledTests = enabledTests;
+  if (state.foundTests === null) {
+    state.foundTests = enabledTests;
+  }
+}
+
+function applyATCCompletionLogLine(state: AutomationObservationState, normalized: string) {
+  const match = atcCompletionExitCodePattern.exec(normalized);
+  if (!match) {
+    return;
+  }
+
+  const exitCode = Number.parseInt(match[1] ?? '', 10);
+  if (!Number.isFinite(exitCode)) {
+    return;
+  }
+
+  state.atcCompletionExitCode = exitCode;
+}
+
+function getCompletedAutomationCount(state: AutomationObservationState) {
+  return state.successfulTests + state.unsuccessfulTests.length;
+}
+
+function getObservedAutomationTotal(state: AutomationObservationState) {
+  const completedCount = getCompletedAutomationCount(state);
+  if (state.testsPerformed !== null) {
+    return state.testsPerformed;
+  }
+  if (completedCount > 0) {
+    return completedCount;
+  }
+  if (state.enabledTests !== null) {
+    return state.enabledTests;
+  }
+  if (state.foundTests !== null) {
+    return state.foundTests;
+  }
+  return state.queuedTests > 0 ? state.queuedTests : null;
+}
+
+function inferAutomationFailureReason(state: AutomationObservationState) {
+  const failedResult = state.unsuccessfulTests[0]?.result;
+  if (failedResult) {
+    return {
+      effectiveExitCode: FAILURE_EXIT_CODE,
+      reason: `automation completed with result ${failedResult}`,
+    };
+  }
+
+  const observedTotal = getObservedAutomationTotal(state);
+  if ((state.foundTests !== null && state.foundTests <= 0) || (observedTotal !== null && observedTotal <= 0)) {
+    return {
+      effectiveExitCode: FAILURE_EXIT_CODE,
+      reason: 'no matching automation tests were found',
+    };
+  }
+
+  if (state.atcCompletionExitCode !== null && state.atcCompletionExitCode !== 0) {
+    return {
+      effectiveExitCode: FAILURE_EXIT_CODE,
+      reason: `automation reported exit code ${state.atcCompletionExitCode}`,
+    };
+  }
+
+  return undefined;
+}
+
 export function observeAutomationLogLine(state: AutomationObservationState, line: string) {
   if (!state.expectAutomation) {
     return;
@@ -258,6 +357,9 @@ export function observeAutomationLogLine(state: AutomationObservationState, line
   applyFoundTestsLogLine(state, normalized);
   applyQueueEmptyLogLine(state, normalized);
   applyCompletedTestLogLine(state, normalized);
+  applyATCQueuedTestLogLine(state, normalized);
+  applyATCEnabledTestsLogLine(state, normalized);
+  applyATCCompletionLogLine(state, normalized);
 }
 
 export function parseATCClientRequestMetadataLine(line: string): ATCClientRequestMetadata | undefined {
@@ -295,8 +397,8 @@ export function parseATCClientRequestMetadataLine(line: string): ATCClientReques
 }
 
 export function getAutomationTotals(state: AutomationObservationState) {
-  const completedCount = state.successfulTests + state.unsuccessfulTests.length;
-  const total = state.testsPerformed ?? completedCount;
+  const completedCount = getCompletedAutomationCount(state);
+  const total = getObservedAutomationTotal(state) ?? completedCount;
   const passed = Math.min(state.successfulTests, total);
   return {
     passed,
@@ -313,31 +415,29 @@ function formatAutomationSuccessReason(testsPerformed: number | null) {
 }
 
 function hasTerminalAutomationResult(automation: AutomationObservationState) {
-  return automation.unsuccessfulTests.length > 0 || automation.sawQueueEmpty;
+  return (
+    automation.unsuccessfulTests.length > 0 || automation.sawQueueEmpty || automation.atcCompletionExitCode !== null
+  );
 }
 
 function resolveProcessOutcome(rawExitResult: ProcessExitResult, automation: AutomationObservationState) {
   if (automation.expectAutomation && hasTerminalAutomationResult(automation)) {
-    const failedResult = automation.unsuccessfulTests[0]?.result;
-    if (failedResult) {
+    const inferredFailure = inferAutomationFailureReason(automation);
+    if (inferredFailure) {
+      return inferredFailure;
+    }
+
+    const observedTotal = getObservedAutomationTotal(automation);
+    if (observedTotal === null) {
       return {
         effectiveExitCode: FAILURE_EXIT_CODE,
-        reason: `automation completed with result ${failedResult}`,
+        reason:
+          automation.atcCompletionExitCode !== null
+            ? 'automation completion did not report how many tests ran'
+            : 'automation queue did not report tests performed',
       };
     }
-    if (automation.foundTests !== null && automation.foundTests <= 0) {
-      return {
-        effectiveExitCode: FAILURE_EXIT_CODE,
-        reason: 'no matching automation tests were found',
-      };
-    }
-    if (automation.testsPerformed === null) {
-      return {
-        effectiveExitCode: FAILURE_EXIT_CODE,
-        reason: 'automation queue did not report tests performed',
-      };
-    }
-    if (automation.testsPerformed <= 0) {
+    if (observedTotal <= 0) {
       return {
         effectiveExitCode: FAILURE_EXIT_CODE,
         reason: 'automation queue completed with 0 tests performed',
@@ -346,7 +446,7 @@ function resolveProcessOutcome(rawExitResult: ProcessExitResult, automation: Aut
 
     return {
       effectiveExitCode: 0,
-      reason: formatAutomationSuccessReason(automation.testsPerformed),
+      reason: formatAutomationSuccessReason(observedTotal),
     };
   }
 
@@ -369,12 +469,9 @@ function resolveProcessOutcome(rawExitResult: ProcessExitResult, automation: Aut
     };
   }
 
-  const failedResult = automation.unsuccessfulTests[0]?.result;
-  if (failedResult) {
-    return {
-      effectiveExitCode: FAILURE_EXIT_CODE,
-      reason: `automation completed with result ${failedResult}`,
-    };
+  const inferredFailure = inferAutomationFailureReason(automation);
+  if (inferredFailure) {
+    return inferredFailure;
   }
   if (!automation.sawQueueEmpty) {
     return {
@@ -382,19 +479,14 @@ function resolveProcessOutcome(rawExitResult: ProcessExitResult, automation: Aut
       reason: 'automation queue did not finish',
     };
   }
-  if (automation.foundTests !== null && automation.foundTests <= 0) {
-    return {
-      effectiveExitCode: FAILURE_EXIT_CODE,
-      reason: 'no matching automation tests were found',
-    };
-  }
-  if (automation.testsPerformed === null) {
+  const observedTotal = getObservedAutomationTotal(automation);
+  if (observedTotal === null) {
     return {
       effectiveExitCode: FAILURE_EXIT_CODE,
       reason: 'automation queue did not report tests performed',
     };
   }
-  if (automation.testsPerformed <= 0) {
+  if (observedTotal <= 0) {
     return {
       effectiveExitCode: FAILURE_EXIT_CODE,
       reason: 'automation queue completed with 0 tests performed',
@@ -403,7 +495,7 @@ function resolveProcessOutcome(rawExitResult: ProcessExitResult, automation: Aut
 
   return {
     effectiveExitCode: 0,
-    reason: formatAutomationSuccessReason(automation.testsPerformed),
+    reason: formatAutomationSuccessReason(observedTotal),
   };
 }
 
@@ -1493,6 +1585,22 @@ export class ATO {
       }
 
       if (bootstrapOrchestration) {
+        if (
+          plan.atcOrchestratorMode === OrchestratorMode.DedicatedServer &&
+          plan.clientTemplate &&
+          plan.maxExternalClients !== undefined &&
+          clientMonitors.length < plan.maxExternalClients
+        ) {
+          this.spawnClients(
+            plan.clientTemplate,
+            clientMonitors.length,
+            plan.maxExternalClients,
+            plan.atcOrchestratorMode,
+            proxyClientHost,
+            clientMonitors,
+          );
+        }
+
         const bootstrapRequestResult = await this.monitorATCClientRequestsUntilAutomationTerminal(
           plan.clientTemplate,
           plan.maxExternalClients,
