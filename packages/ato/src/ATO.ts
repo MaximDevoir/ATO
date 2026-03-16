@@ -5,15 +5,7 @@ import type { ChildProcess } from 'node:child_process';
 import * as path from 'node:path';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import {
-  ATC_CLIENT_BOOTSTRAP_FINISH_TEST,
-  ATC_CLIENT_BOOTSTRAP_TEST,
-  ATC_CLIENT_REQUEST_LOG_PREFIX,
-  ATC_ORCHESTRATOR_TESTS,
-  getATCIndexedClientBootstrapTest,
-  isATCClientBootstrapTestName,
-  MAX_EXPLICIT_ATC_CLIENT_BOOTSTRAP_CLIENTS,
-} from './ATCAutomationNames';
+import { ATC_CLIENT_REQUEST_LOG_PREFIX, ATC_RUN_TESTS_COMMAND } from './ATCAutomationNames';
 import { checkExistsSync } from './ATO._helpers';
 import { spawnProcess, waitForUdpPort } from './ATO.helpers';
 import type {
@@ -28,6 +20,7 @@ import type {
 import { OrchestratorMode, RuntimePresets } from './ATO.options';
 
 export * from './ATCAutomationNames';
+export { ATC_RUN_TESTS_COMMAND } from './ATCAutomationNames';
 export { OrchestratorMode, RuntimePresets } from './ATO.options';
 
 interface ATOInit {
@@ -108,6 +101,7 @@ interface ATCObservationState {
 const FAILURE_EXIT_CODE = 1;
 
 type ProcessExitResult = number | 'timeout';
+type ATCRunTestsMode = OrchestratorMode | 'Client';
 
 type AutomationTerminalResult = 'Success' | 'Fail' | 'Error' | 'NotRun' | 'Unknown';
 
@@ -540,25 +534,51 @@ function hasAutomationCommands(launchOptions: Pick<ProcessLaunchOptions, 'execTe
     return true;
   }
 
-  return (launchOptions.execCmds ?? []).some((command) => /\bAutomation\s+RunTests?\b/i.test(command));
+  return (launchOptions.execCmds ?? []).some((command) =>
+    /\b(?:Automation\s+RunTests?|ATC\.RunTests)\b/i.test(command),
+  );
 }
 
-function buildExecTestsCommand(execTests?: string[]) {
-  const formattedTests = (execTests ?? [])
-    .map((testName) => testName.trim())
-    .filter((testName) => testName.length > 0)
-    .map((testName) => `${testName.endsWith('$') ? testName.slice(0, -1) : testName}$`);
-
-  if (formattedTests.length === 0) {
+function normalizeATCRunTestsPattern(testName: string) {
+  const trimmed = testName.trim();
+  if (!trimmed) {
     return undefined;
   }
 
-  return `Automation RunTests ${formattedTests.join('+')}`;
+  const withoutExactSuffix = trimmed.endsWith('$') ? trimmed.slice(0, -1) : trimmed;
+  return withoutExactSuffix.includes('*') ? withoutExactSuffix : `${withoutExactSuffix}*`;
 }
 
-function buildExecCmdsArg(execCmds?: string[], execTests?: string[]): string | undefined {
+function buildExecTestsCommand(execTests?: string[], mode?: ATCRunTestsMode, clientIndex?: number) {
+  const formattedTests = (execTests ?? [])
+    .map((testName) => testName.trim())
+    .filter((testName) => testName.length > 0)
+    .map(normalizeATCRunTestsPattern)
+    .filter((testName): testName is string => !!testName);
+
+  if (formattedTests.length === 0 && !mode) {
+    return undefined;
+  }
+
+  const args = [ATC_RUN_TESTS_COMMAND];
+  if (mode) {
+    args.push(`--mode=${mode}`);
+    if (mode === 'Client' && clientIndex !== undefined && clientIndex >= 0) {
+      args.push(`--clientIndex=${clientIndex}`);
+    }
+  }
+  args.push(...formattedTests);
+  return args.join(' ');
+}
+
+function buildExecCmdsArg(
+  execCmds?: string[],
+  execTests?: string[],
+  mode?: ATCRunTestsMode,
+  clientIndex?: number,
+): string | undefined {
   const commands = (execCmds ?? []).filter((command) => command.trim().length > 0);
-  const runTestsCommand = buildExecTestsCommand(execTests);
+  const runTestsCommand = buildExecTestsCommand(execTests, mode, clientIndex);
   if (runTestsCommand) {
     commands.push(runTestsCommand);
   }
@@ -694,18 +714,6 @@ function dedupeFinalNamedArgs(positionals: string[], args: string[]) {
   return positionals.concat(flattenArgEntries(dedupedEntries));
 }
 
-function buildProcessArgs(positionals: string[], launchOptions: ProcessLaunchOptions) {
-  const args = positionals.concat(resolveLaunchExtraArgs(launchOptions));
-  const execCmds = buildExecCmdsArg(launchOptions.execCmds, launchOptions.execTests);
-  if (execCmds) {
-    args.push(`-ExecCmds=${execCmds}`);
-  }
-  if (launchOptions.testExit) {
-    args.push(`-testexit=${launchOptions.testExit}`);
-  }
-  return dedupeFinalNamedArgs(positionals, args.slice(positionals.length));
-}
-
 function resolveListenStartupUrl(startupMap: string | undefined) {
   if (!startupMap) {
     return undefined;
@@ -737,14 +745,48 @@ function buildServerArgs(
     extraArgs.push(`-port=${port}`);
   }
 
-  return buildProcessArgs(positionals, {
-    ...serverOptions,
-    extraArgs,
-  });
+  return buildProcessArgsWithATCRunTestsMode(
+    positionals,
+    {
+      ...serverOptions,
+      extraArgs,
+    },
+    shouldAutomaticallyApplyBootstrapTests(serverOptions) ? atcOrchestratorMode : undefined,
+  );
 }
 
-function buildClientArgs(clientOptions: ClientOptions, hostOverride?: string) {
-  return buildProcessArgs([clientOptions.project, hostOverride ?? clientOptions.host ?? '127.0.0.1'], clientOptions);
+function buildProcessArgsWithATCRunTestsMode(
+  positionals: string[],
+  launchOptions: ProcessLaunchOptions,
+  mode?: ATCRunTestsMode,
+  clientIndex?: number,
+) {
+  const args = positionals.concat(resolveLaunchExtraArgs(launchOptions));
+  const execCmds = buildExecCmdsArg(launchOptions.execCmds, launchOptions.execTests, mode, clientIndex);
+  if (execCmds) {
+    args.push(`-ExecCmds=${execCmds}`);
+  }
+  if (launchOptions.testExit) {
+    args.push(`-testexit=${launchOptions.testExit}`);
+  }
+  return dedupeFinalNamedArgs(positionals, args.slice(positionals.length));
+}
+
+function buildClientArgs(
+  clientOptions: ResolvedClientOptions,
+  hostOverride: string | undefined,
+  atcOrchestratorMode: OrchestratorMode,
+) {
+  const runTestsMode: ATCRunTestsMode | undefined =
+    shouldAutomaticallyApplyBootstrapTests(clientOptions) && shouldApplyRemoteClientBootstrap(atcOrchestratorMode)
+      ? 'Client'
+      : undefined;
+  return buildProcessArgsWithATCRunTestsMode(
+    [clientOptions.project, hostOverride ?? clientOptions.host ?? '127.0.0.1'],
+    clientOptions,
+    runTestsMode,
+    runTestsMode === 'Client' ? clientOptions.clientIndex : undefined,
+  );
 }
 
 function cloneProcessLaunchOptions<T extends ProcessLaunchOptions>(launchOptions: T): T {
@@ -827,14 +869,6 @@ function shouldAutomaticallyApplyBootstrapTests(launchOptions: ProcessLaunchOpti
   return launchOptions.automaticallyApplyBootstrapTestsCmds !== false;
 }
 
-function isATCClientBootstrapTest(execTest: string) {
-  return isATCClientBootstrapTestName(execTest);
-}
-
-function appendUniqueExecTest(execTests: string[], execTest: string) {
-  return execTests.includes(execTest) ? execTests : execTests.concat(execTest);
-}
-
 function shouldApplyRemoteClientBootstrap(mode: OrchestratorMode) {
   return mode === 'DedicatedServer' || mode === 'ListenServer';
 }
@@ -882,55 +916,14 @@ function resolveMaxExternalClientCount(mode: OrchestratorMode, runtimeClientCoun
   return Math.max(runtimeClientCount, 0);
 }
 
-function resolveFirstRemoteBootstrapIndex() {
-  return 0;
-}
-
-function resolveATCServerBootstrapTests(serverOptions: ServerOptions, orchestratorMode: OrchestratorMode) {
-  const execTests = [...(serverOptions.execTests ?? [])];
-  if (!shouldAutomaticallyApplyBootstrapTests(serverOptions)) {
-    return execTests;
-  }
-
-  const withOrchestratorIdentity = appendUniqueExecTest(execTests, ATC_ORCHESTRATOR_TESTS[orchestratorMode]);
-  return shouldApplyRemoteClientBootstrap(orchestratorMode)
-    ? appendUniqueExecTest(withOrchestratorIdentity, ATC_CLIENT_BOOTSTRAP_FINISH_TEST)
-    : withOrchestratorIdentity;
-}
-
-function resolveATCClientBootstrapTests(execTests: string[] | undefined, bootstrapClientIndex: number) {
-  const resolvedExecTests = [...(execTests ?? [])];
-  const hasExplicitBootstrapTest = resolvedExecTests.some(isATCClientBootstrapTest);
-
-  if (!hasExplicitBootstrapTest) {
-    resolvedExecTests.push(ATC_CLIENT_BOOTSTRAP_TEST);
-  }
-
-  const explicitBootstrapTest =
-    bootstrapClientIndex < MAX_EXPLICIT_ATC_CLIENT_BOOTSTRAP_CLIENTS
-      ? getATCIndexedClientBootstrapTest(bootstrapClientIndex)
-      : ATC_CLIENT_BOOTSTRAP_TEST;
-
-  return resolvedExecTests.map((execTest) =>
-    execTest === ATC_CLIENT_BOOTSTRAP_TEST ? explicitBootstrapTest : execTest,
-  );
-}
-
 function resolveClientLaunchOptions(
   clientTemplate: ResolvedClientTemplate,
   bootstrapClientIndex: number,
-  atcOrchestratorMode: OrchestratorMode,
 ): ResolvedClientOptions {
   return {
     ...clientTemplate,
     clientIndex: bootstrapClientIndex,
-    execTests:
-      shouldAutomaticallyApplyBootstrapTests(clientTemplate) && shouldApplyRemoteClientBootstrap(atcOrchestratorMode)
-        ? resolveATCClientBootstrapTests(
-            clientTemplate.execTests,
-            resolveFirstRemoteBootstrapIndex() + bootstrapClientIndex,
-          )
-        : [...(clientTemplate.execTests ?? [])],
+    execTests: [...(clientTemplate.execTests ?? [])],
   };
 }
 
@@ -942,8 +935,8 @@ function isATCBootstrapOrchestration(
   return (
     !!clientTemplate &&
     shouldApplyRemoteClientBootstrap(atcOrchestratorMode) &&
-    server.execTests.includes(ATC_ORCHESTRATOR_TESTS[atcOrchestratorMode]) &&
-    server.execTests.includes(ATC_CLIENT_BOOTSTRAP_FINISH_TEST)
+    shouldAutomaticallyApplyBootstrapTests(server) &&
+    shouldAutomaticallyApplyBootstrapTests(clientTemplate)
   );
 }
 
@@ -1213,7 +1206,7 @@ export class ATO {
 
     return {
       ...serverOptions,
-      execTests: resolveATCServerBootstrapTests(serverOptions, atcOrchestratorMode),
+      execTests: [...(serverOptions.execTests ?? [])],
       exe: findFirstExisting(this.getPrimaryCandidates(serverOptions, atcOrchestratorMode, runtimeOptions)),
     };
   }
@@ -1308,8 +1301,8 @@ export class ATO {
 
     const clientTemplatePreview = clientTemplate
       ? (() => {
-          const client = resolveClientLaunchOptions(clientTemplate, 0, atcOrchestratorMode);
-          const args = buildClientArgs(client, proxyHost);
+          const client = resolveClientLaunchOptions(clientTemplate, 0);
+          const args = buildClientArgs(client, proxyHost, atcOrchestratorMode);
           return {
             exe: client.exe,
             args,
@@ -1321,8 +1314,8 @@ export class ATO {
     const clientPreviews =
       clientTemplate && maxExternalClients !== undefined
         ? Array.from({ length: maxExternalClients }, (_, clientIndex) => {
-            const client = resolveClientLaunchOptions(clientTemplate, clientIndex, atcOrchestratorMode);
-            const args = buildClientArgs(client, proxyHost);
+            const client = resolveClientLaunchOptions(clientTemplate, clientIndex);
+            const args = buildClientArgs(client, proxyHost, atcOrchestratorMode);
             return {
               exe: client.exe,
               args,
@@ -1660,8 +1653,8 @@ export class ATO {
     clientMonitors: MonitoredProcess[],
   ) {
     for (let clientIndex = fromIndex; clientIndex < toExclusiveIndex; clientIndex += 1) {
-      const client = resolveClientLaunchOptions(clientTemplate, clientIndex, atcOrchestratorMode);
-      const args = buildClientArgs(client, proxyClientHost);
+      const client = resolveClientLaunchOptions(clientTemplate, clientIndex);
+      const args = buildClientArgs(client, proxyClientHost, atcOrchestratorMode);
       const prefix = `CLIENT ${client.clientIndex}`;
       console.log(`[SPAWN] ${prefix} -> ${formatCommand(client.exe, args)}`);
       console.log(`[SPAWN-ARGS] ${prefix} ARGS:`, JSON.stringify(args));

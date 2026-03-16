@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
-  ATC_CLIENT_BOOTSTRAP_FINISH_TEST,
   ATC_CLIENT_BOOTSTRAP_TEST,
   ATC_CLIENT_REQUEST_LOG_PREFIX,
-  ATC_ORCHESTRATOR_TESTS,
+  ATC_RUN_TESTS_COMMAND,
   ATO,
   createAutomationObservationState,
   formatAutomationSummaryLine,
@@ -140,7 +139,7 @@ describe('ATO', () => {
       '-nosound',
       '-nullrhi',
       '-NoSplash',
-      '-ExecCmds=Automation List; quit; Automation RunTests AwesomeInventory$+Smoke$',
+      `-ExecCmds=Automation List; quit; ${ATC_RUN_TESTS_COMMAND} AwesomeInventory* Smoke*`,
       '-testexit=Automation Test Queue Empty',
     ]);
   });
@@ -162,9 +161,9 @@ describe('ATO', () => {
     const preview = getPreview(session);
 
     expect(preview.server.args).toContain(
-      `-ExecCmds=Automation RunTests AwesomeInventory.ATCMacro.Test$+${ATC_ORCHESTRATOR_TESTS.DedicatedServer}$+${ATC_CLIENT_BOOTSTRAP_FINISH_TEST}$`,
+      `-ExecCmds=${ATC_RUN_TESTS_COMMAND} --mode=DedicatedServer AwesomeInventory.ATCMacro.Test*`,
     );
-    expect(preview.clients[0].args).toContain(`-ExecCmds=Automation RunTests ${getATCIndexedClientBootstrapTest(0)}$`);
+    expect(preview.clients[0].args).toContain(`-ExecCmds=${ATC_RUN_TESTS_COMMAND} --mode=Client --clientIndex=0`);
   });
   it('does not auto-append ATC bootstrap tests when disabled', () => {
     const session = new ATO({
@@ -189,12 +188,12 @@ describe('ATO', () => {
 
     const preview = getPreview(session);
 
-    expect(preview.server.args).toContain('-ExecCmds=Automation RunTests AwesomeInventory.ATCMacro.Test$');
+    expect(preview.server.args).toContain(`-ExecCmds=${ATC_RUN_TESTS_COMMAND} AwesomeInventory.ATCMacro.Test*`);
     expectArgMissing(
       preview.server.args,
-      `-ExecCmds=Automation RunTests AwesomeInventory.ATCMacro.Test$+${ATC_ORCHESTRATOR_TESTS.DedicatedServer}$+${ATC_CLIENT_BOOTSTRAP_FINISH_TEST}$`,
+      `-ExecCmds=${ATC_RUN_TESTS_COMMAND} --mode=DedicatedServer AwesomeInventory.ATCMacro.Test*`,
     );
-    expectArgMissingByPrefix(preview.clients[0].args, `-ExecCmds=Automation RunTests ${ATC_CLIENT_BOOTSTRAP_TEST}`);
+    expectArgMissingByPrefix(preview.clients[0].args, `-ExecCmds=${ATC_RUN_TESTS_COMMAND}`);
   });
   it('avoids duplicating explicit ATC bootstrap tests that are already present', () => {
     const session = new ATO({
@@ -209,8 +208,8 @@ describe('ATO', () => {
         exe: 'D:/fake/invServer.exe',
         execTests: [
           'AwesomeInventory.ATCMacro.Test',
-          ATC_ORCHESTRATOR_TESTS.DedicatedServer,
-          ATC_CLIENT_BOOTSTRAP_FINISH_TEST,
+          'ZZZ.ATC.Orchestrator.DedicatedServer',
+          'ZZZ.ATC.ClientBootstrap.Finish',
         ],
       })
       .configureClient({ exe: 'D:/fake/UnrealEditor-Cmd.exe', execTests: [ATC_CLIENT_BOOTSTRAP_TEST] })
@@ -221,9 +220,12 @@ describe('ATO', () => {
     const serverExecCmds = preview.server.args.find((arg) => arg.startsWith('-ExecCmds='));
     const clientExecCmds = preview.clients[0].args.find((arg) => arg.startsWith('-ExecCmds='));
 
-    expect(serverExecCmds).toContain(`${ATC_ORCHESTRATOR_TESTS.DedicatedServer}$`);
-    expect(serverExecCmds).toContain(`${ATC_CLIENT_BOOTSTRAP_FINISH_TEST}$`);
-    expect(clientExecCmds).toContain(`${getATCIndexedClientBootstrapTest(0)}$`);
+    expect(serverExecCmds).toContain(`${ATC_RUN_TESTS_COMMAND} --mode=DedicatedServer`);
+    expect(serverExecCmds).toContain('AwesomeInventory.ATCMacro.Test*');
+    expect(serverExecCmds).toContain('ZZZ.ATC.Orchestrator.DedicatedServer*');
+    expect(serverExecCmds).toContain('ZZZ.ATC.ClientBootstrap.Finish*');
+    expect(clientExecCmds).toContain(`${ATC_RUN_TESTS_COMMAND} --mode=Client --clientIndex=0`);
+    expect(clientExecCmds).toContain(`${ATC_CLIENT_BOOTSTRAP_TEST}*`);
   });
   it('rewrites ATC bootstrap tests to the matching client slot for the first 32 clients', () => {
     const { session, orchestrator } = createPreview();
@@ -234,11 +236,15 @@ describe('ATO', () => {
     orchestrator.configureRuntime({ clientCount: 33 });
     const preview = getPreview(session);
 
-    expect(preview.clients[0].args).toContain(`-ExecCmds=Automation RunTests ${getATCIndexedClientBootstrapTest(0)}$`);
-    expect(preview.clients[31].args).toContain(
-      `-ExecCmds=Automation RunTests ${getATCIndexedClientBootstrapTest(31)}$`,
+    expect(preview.clients[0].args).toContain(
+      `-ExecCmds=${ATC_RUN_TESTS_COMMAND} --mode=Client --clientIndex=0 ${ATC_CLIENT_BOOTSTRAP_TEST}*`,
     );
-    expect(preview.clients[32].args).toContain(`-ExecCmds=Automation RunTests ${ATC_CLIENT_BOOTSTRAP_TEST}$`);
+    expect(preview.clients[31].args).toContain(
+      `-ExecCmds=${ATC_RUN_TESTS_COMMAND} --mode=Client --clientIndex=31 ${ATC_CLIENT_BOOTSTRAP_TEST}*`,
+    );
+    expect(preview.clients[32].args).toContain(
+      `-ExecCmds=${ATC_RUN_TESTS_COMMAND} --mode=Client --clientIndex=32 ${ATC_CLIENT_BOOTSTRAP_TEST}*`,
+    );
   });
   it('preserves already-explicit ATC bootstrap test names', () => {
     const { session, orchestrator } = createPreview();
@@ -246,9 +252,7 @@ describe('ATO', () => {
 
     const preview = getPreview(session);
 
-    expect(preview.clientTemplate?.args).toContain(
-      `-ExecCmds=Automation RunTests ${getATCIndexedClientBootstrapTest(7)}$`,
-    );
+    expect(preview.clientTemplate?.args).toContain(`-ExecCmds=${ATC_RUN_TESTS_COMMAND} ATC.ClientBootstrap.7*`);
   });
   it('uses standalone ATC orchestrator identity when configured without dedicated clients', () => {
     const session = new ATO({
@@ -266,7 +270,7 @@ describe('ATO', () => {
     const preview = getPreview(session);
 
     expect(preview.server.args).toContain(
-      `-ExecCmds=Automation RunTests AwesomeInventory.ATCMacro.Test$+${ATC_ORCHESTRATOR_TESTS.Standalone}$`,
+      `-ExecCmds=${ATC_RUN_TESTS_COMMAND} --mode=Standalone AwesomeInventory.ATCMacro.Test*`,
     );
     expect(preview.server.args).toContain('-game');
     expectArgMissing(preview.server.args, '-port=7777');
@@ -323,10 +327,10 @@ describe('ATO', () => {
     expect(preview.server.args).toContain('-game');
     expect(preview.server.args).toContain('-port=7777');
     expect(preview.server.args).toContain(
-      `-ExecCmds=Automation RunTests AwesomeInventory.ATCMacro.PARALLEL_TEST$+${ATC_ORCHESTRATOR_TESTS.ListenServer}$+${ATC_CLIENT_BOOTSTRAP_FINISH_TEST}$`,
+      `-ExecCmds=${ATC_RUN_TESTS_COMMAND} --mode=ListenServer AwesomeInventory.ATCMacro.PARALLEL_TEST*`,
     );
     expect(preview.clients).toHaveLength(1);
-    expect(preview.clients[0].args).toContain(`-ExecCmds=Automation RunTests ${getATCIndexedClientBootstrapTest(0)}$`);
+    expect(preview.clients[0].args).toContain(`-ExecCmds=${ATC_RUN_TESTS_COMMAND} --mode=Client --clientIndex=0`);
     expect(preview.unrealLag).toBeTruthy();
   });
   it('still appends ?listen when an explicit listen startup map is provided', () => {
@@ -364,7 +368,7 @@ describe('ATO', () => {
     expect(preview.server.args).toEqual([
       'D:/ue-projects/inv/inv.uproject',
       '-port=7777',
-      '-ExecCmds=Automation List; Automation RunTests AwesomeInventory$',
+      `-ExecCmds=Automation List; ${ATC_RUN_TESTS_COMMAND} AwesomeInventory*`,
       '-testexit=Automation Test Queue Empty',
     ]);
   });
@@ -429,9 +433,7 @@ describe('ATO', () => {
     const preview = getPreview(session);
 
     expect(preview.maxExternalClients).toBe('unbounded');
-    expect(preview.clientTemplate?.args).toContain(
-      `-ExecCmds=Automation RunTests ${getATCIndexedClientBootstrapTest(0)}$`,
-    );
+    expect(preview.clientTemplate?.args).toContain(`-ExecCmds=${ATC_RUN_TESTS_COMMAND} --mode=Client --clientIndex=0`);
     expect(preview.clients).toHaveLength(0);
   });
   it('supports multiple orchestrators in a single ATO session', () => {
@@ -461,10 +463,10 @@ describe('ATO', () => {
 
     expect(previews).toHaveLength(2);
     expect(previews[0]?.server.args).toContain(
-      `-ExecCmds=Automation RunTests AwesomeInventory.ATCMacro.Test$+${ATC_ORCHESTRATOR_TESTS.DedicatedServer}$+${ATC_CLIENT_BOOTSTRAP_FINISH_TEST}$`,
+      `-ExecCmds=${ATC_RUN_TESTS_COMMAND} --mode=DedicatedServer AwesomeInventory.ATCMacro.Test*`,
     );
     expect(previews[1]?.server.args).toContain(
-      `-ExecCmds=Automation RunTests AwesomeInventoryStandalone.BasicStandaloneTest$+${ATC_ORCHESTRATOR_TESTS.Standalone}$`,
+      `-ExecCmds=${ATC_RUN_TESTS_COMMAND} --mode=Standalone AwesomeInventoryStandalone.BasicStandaloneTest*`,
     );
   });
   it('omits the generated testexit arg when disabled', () => {
