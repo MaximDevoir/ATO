@@ -42,7 +42,7 @@ importers:
   packages/ato:
     dependencies:
       '@ATO/UnrealLag':
-        specifier: file:../unreal-lag
+        specifier: workspace:^
         version: link:../unreal-lag
       '@types/yargs':
         specifier: 17.0.35
