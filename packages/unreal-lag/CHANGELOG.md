@@ -1,5 +1,11 @@
 # @maximdevoir/unreal-lag
 
+## 1.0.3
+
+### Patch Changes
+
+- [`228aafa`](https://github.com/MaximDevoir/ATO/commit/228aafa0098459c6ddf0b48916735692237d8949) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - Switch to OIDC
+
 ## 1.0.2
 
 ### Patch Changes
