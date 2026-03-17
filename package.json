@@ -15,6 +15,7 @@
     "@changesets/changelog-github": "0.6.0",
     "@changesets/cli": "2.30.0",
     "@types/node": "25.4.0",
+    "dotenv": "17.3.1",
     "husky": "9.1.7",
     "nx": "22.5.4",
     "tsx": "4.21.0",
