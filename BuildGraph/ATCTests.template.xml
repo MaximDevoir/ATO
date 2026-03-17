@@ -18,7 +18,7 @@
 
   <!-- ================= STANDALONE ================= -->
 
-  <Agent Name="StandaloneTests">
+  <Agent Name="StandaloneTests" Type="$(CompilePlatform)">
 
     <Node Name="Standalone_CompileEditor">
       <Compile Target="$(ProjectName)Editor" Platform="$(CompilePlatform)" Configuration="Development" Project="$(ProjectFile)"/>
@@ -54,7 +54,7 @@
 
   <!-- ================= DEDICATED ================= -->
 
-  <Agent Name="DedicatedTests">
+  <Agent Name="DedicatedTests" Type="$(CompilePlatform)">
 
     <Node Name="Dedicated_CompileEditor">
       <Compile Target="$(ProjectName)Editor" Platform="$(CompilePlatform)" Configuration="Development" Project="$(ProjectFile)"/>
@@ -90,7 +90,7 @@
 
   <!-- ================= LISTEN SERVER ================= -->
 
-  <Agent Name="ListenTests">
+  <Agent Name="ListenTests" Type="$(CompilePlatform)">
 
     <Node Name="Listen_CompileEditor">
       <Compile Target="$(ProjectName)Editor" Platform="$(CompilePlatform)" Configuration="Development" Project="$(ProjectFile)"/>
@@ -124,7 +124,7 @@
   <Aggregate Name="Listen" Requires="RunListenTests"/>
 
   <!-- ================= PIE SERVER ================= -->
-  <Agent Name="PIETests">
+  <Agent Name="PIETests" Type="$(CompilePlatform)">
 
     <Node Name="PIE_CompileEditor">
       <Compile Target="$(ProjectName)Editor" Platform="$(CompilePlatform)" Configuration="Development" Project="$(ProjectFile)"/>
