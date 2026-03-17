@@ -1,5 +1,11 @@
 # @ATO/UnrealLag
 
+## 1.0.1
+
+### Patch Changes
+
+- [`f3a01bd`](https://github.com/MaximDevoir/ATO/commit/f3a01bdf9c5a7016695f512f65081ff50f448f56) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - fix: add release script
+
 ## 1.0.0
 
 ### Major Changes
