@@ -2,20 +2,17 @@
   "scripts": {
     "change": "changeset",
     "prepare": "husky",
-    "format": "biome check packages README.md package.json pnpm-workspace.yaml nx.json tsconfig.base.json biome.json vitest.workspace.ts commitlint.config.cjs --write",
-    "format:check": "biome check packages README.md package.json pnpm-workspace.yaml nx.json tsconfig.base.json biome.json vitest.workspace.ts commitlint.config.cjs",
+    "format": "biome check packages README.md package.json pnpm-workspace.yaml nx.json tsconfig.base.json biome.json vitest.workspace.ts --write",
+    "format:check": "biome check packages README.md package.json pnpm-workspace.yaml nx.json tsconfig.base.json biome.json vitest.workspace.ts",
     "lint": "nx run-many -t lint --all",
     "typecheck": "nx run-many -t typecheck --all",
     "test": "nx run-many -t test --all",
-    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
-    "commitlint": "commitlint"
+    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.6",
     "@changesets/changelog-github": "0.6.0",
     "@changesets/cli": "2.30.0",
-    "@commitlint/cli": "20.4.3",
-    "@commitlint/config-conventional": "20.4.3",
     "@types/node": "25.4.0",
     "husky": "9.1.7",
     "nx": "22.5.4",
