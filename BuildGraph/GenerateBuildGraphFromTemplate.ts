@@ -376,6 +376,7 @@ async function main() {
   console.log(`  ProjectDir: ${ProjectDir}`);
   console.log(`  ProjectName: ${ProjectName}`);
   console.log(`  EngineDir: ${EngineDir}`);
+  console.log(`  SchemaXSD: ${SchemaLocation}`);
   console.log(`  CompilePlatform: ${platforms.CompilePlatform}`);
   console.log(`  CookPlatform: ${platforms.CookPlatform}`);
   console.log(`  ShellExecutable: ${ShellExecutable}`);
