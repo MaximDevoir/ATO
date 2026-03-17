@@ -1,0 +1,39 @@
+name: Release
+
+env:
+  NODE_VERSION: 24
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  verify:
+    uses: ./.github/workflows/_verify.yml
+    with:
+      node-versions: '["${{ env.NODE_VERSION }}"]'
+
+  release:
+    needs: verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+
+      - name: Create Release Pull Request or Release
+        uses: changesets/action@v1
+        with:
+          publish: pnpm release
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
