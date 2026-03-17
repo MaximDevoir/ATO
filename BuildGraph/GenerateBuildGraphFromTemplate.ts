@@ -132,6 +132,77 @@ async function main() {
     .replace(/\.uproject$/i, "");
 
   /* =========================
+   * PLATFORM DETECTION
+   * Compute the BuildGraph platform aliases used in the template. Users may override
+   * via the PLATFORM env variable (examples: Win64, Linux, LinuxArm64, Mac).
+   * Defaults are inferred from process.platform and process.arch.
+   * ========================= */
+
+  // Update: resolve platforms should use COMPILE_PLATFORM env and return CompilePlatform + CookPlatform only
+  function resolvePlatforms(): {
+    CompilePlatform: string;
+    CookPlatform: string;
+  } {
+    // prefer explicit COMPILE_PLATFORM env; fall back to existing detection if not provided
+    const envCompilePlatform = process.env.COMPILE_PLATFORM?.trim();
+    if (envCompilePlatform) {
+      switch (envCompilePlatform) {
+        case 'Win64':
+          return {CompilePlatform: 'Win64', CookPlatform: 'Windows'};
+        case 'Linux':
+          return {CompilePlatform: 'Linux', CookPlatform: 'Linux'};
+        case 'LinuxArm64':
+          return {CompilePlatform: 'LinuxArm64', CookPlatform: 'Linux'};
+        default:
+          // if unknown, continue to automatic detection below
+          break;
+      }
+    }
+
+    // Auto-detect from runtime platform
+    if (process.platform === 'win32') {
+      return {CompilePlatform: 'Win64', CookPlatform: 'Windows'};
+    }
+
+    if (process.platform === 'darwin') {
+      return {CompilePlatform: 'Mac', CookPlatform: 'Mac'};
+    }
+
+    // Linux / other unix-like
+    if (process.platform === 'linux') {
+      if (process.arch === 'arm64') {
+        return {CompilePlatform: 'LinuxArm64', CookPlatform: 'Linux'};
+      }
+
+      return {CompilePlatform: 'Linux', CookPlatform: 'Linux'};
+    }
+
+    // Fallback to Linux-style
+    return {CompilePlatform: 'Linux', CookPlatform: 'Linux'};
+  }
+
+  let platforms = resolvePlatforms();
+
+  // If COOK_PLATFORM is explicitly provided, normalize/override cook platform only
+  if (process.env.COOK_PLATFORM) {
+    const cook = process.env.COOK_PLATFORM.trim();
+    switch (cook.toLowerCase()) {
+      case 'windows':
+        platforms.CookPlatform = 'Windows';
+        break;
+      case 'linux':
+        platforms.CookPlatform = 'Linux';
+        break;
+      case 'mac':
+      case 'macos':
+        platforms.CookPlatform = 'Mac';
+        break;
+      default:
+        console.warn(`[BuildGraph] Unrecognized COOK_PLATFORM value: ${cook}. Ignoring.`);
+    }
+  }
+
+  /* =========================
    * SHELL DETECTION (platform-agnostic)
    * Returns the executable to run and the arguments to use to execute a command.
    * On Windows we prefer PowerShell (pwsh/powershell) with '-NoProfile -Command'.
@@ -250,6 +321,8 @@ async function main() {
     EngineDir,
     ShellExecutable,
     ShellArguments,
+    CompilePlatform: platforms.CompilePlatform,
+    CookPlatform: platforms.CookPlatform,
     SchemaLocation,
   };
 
@@ -303,6 +376,8 @@ async function main() {
   console.log(`  ProjectDir: ${ProjectDir}`);
   console.log(`  ProjectName: ${ProjectName}`);
   console.log(`  EngineDir: ${EngineDir}`);
+  console.log(`  CompilePlatform: ${platforms.CompilePlatform}`);
+  console.log(`  CookPlatform: ${platforms.CookPlatform}`);
   console.log(`  ShellExecutable: ${ShellExecutable}`);
   console.log(`  ShellArguments: ${ShellArguments}`);
 }
