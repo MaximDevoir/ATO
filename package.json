@@ -1,6 +1,7 @@
 {
   "scripts": {
     "change": "changeset",
+    "release": "changeset publish",
     "prepare": "husky",
     "format": "biome check packages README.md package.json pnpm-workspace.yaml nx.json tsconfig.base.json biome.json vitest.workspace.ts --write",
     "format:check": "biome check packages README.md package.json pnpm-workspace.yaml nx.json tsconfig.base.json biome.json vitest.workspace.ts",
