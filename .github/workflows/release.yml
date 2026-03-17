@@ -1,8 +1,5 @@
 name: Release
 
-env:
-  NODE_VERSION: 24
-
 on:
   push:
     branches:
@@ -12,7 +9,7 @@ jobs:
   verify:
     uses: ./.github/workflows/_verify.yml
     with:
-      node-versions: '["${{ env.NODE_VERSION }}"]'
+      node-versions: '["24"]'
 
   release:
     needs: verify
@@ -25,7 +22,7 @@ jobs:
           version: 10
       - uses: actions/setup-node@v6
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 24
           cache: pnpm
 
       - run: corepack enable
