@@ -1,5 +1,4 @@
 {
-  "private": true,
   "scripts": {
     "prepare": "husky",
     "format": "biome check packages README.md package.json pnpm-workspace.yaml nx.json tsconfig.base.json biome.json vitest.workspace.ts commitlint.config.cjs --write",
