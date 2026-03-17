@@ -1,5 +1,5 @@
 {
-  "name": "@ATO/UnrealLag",
+  "name": "@maximdevoir/unreal-lag",
   "version": "1.0.1",
   "type": "module",
   "sideEffects": false,

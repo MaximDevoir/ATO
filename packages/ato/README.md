@@ -1,6 +1,6 @@
 # ATO
 
-`@ATO/ATO` provides TypeScript helpers for orchestrating ATC processes.
+`@maximdevoir/ato` provides TypeScript helpers for orchestrating ATC processes.
 
 ## Highlights
 
@@ -11,13 +11,13 @@
 ## Install
 
 ```bash
-pnpm add @ATO/ATO
+pnpm add @maximdevoir/ato
 ```
 
 ## Usage
 
 ```ts
-import {ATO, Orchestrator, OrchestratorMode} from '@ATO/ATO';
+import {ATO, Orchestrator, OrchestratorMode} from '@maximdevoir/ato';
 
 const e2e = ATO.fromCommandLine();
 

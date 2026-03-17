@@ -1,8 +1,8 @@
-import { logWarningIfNetworkProfileUnstable, UnrealLagProfiles } from '@ATO/UnrealLag/profiles';
-import type { BindInfo } from '@ATO/UnrealLag/types';
-import { UnrealLag } from '@ATO/UnrealLag/UnrealLag';
 import type { ChildProcess } from 'node:child_process';
 import * as path from 'node:path';
+import { logWarningIfNetworkProfileUnstable, UnrealLagProfiles } from '@maximdevoir/unreal-lag/profiles';
+import type { BindInfo } from '@maximdevoir/unreal-lag/types';
+import { UnrealLag } from '@maximdevoir/unreal-lag/UnrealLag';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { ATC_CLIENT_REQUEST_LOG_PREFIX, ATC_RUN_TESTS_COMMAND } from './ATCAutomationNames';

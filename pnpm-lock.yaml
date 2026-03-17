@@ -38,7 +38,7 @@ importers:
 
   packages/ato:
     dependencies:
-      '@ATO/UnrealLag':
+      '@maximdevoir/unreal-lag':
         specifier: workspace:^
         version: link:../unreal-lag
       '@types/yargs':

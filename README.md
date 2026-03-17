@@ -14,5 +14,5 @@ pnpm install
 
 ## Packages
 
-- `@ATO/UnrealLag` — UDP lag/loss proxy for multiplayer testing.
-- `@ATO/ATO` — Unreal multiplayer process orchestration helpers.
+- `@maximdevoir/unreal-lag` — UDP lag/loss proxy for multiplayer testing.
+- `@maximdevoir/ato` — Unreal multiplayer process orchestration helpers.

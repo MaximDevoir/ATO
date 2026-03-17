@@ -1,4 +1,4 @@
-# @ATO/UnrealLag
+# @maximdevoir/unreal-lag
 
 ## 1.0.1
 
