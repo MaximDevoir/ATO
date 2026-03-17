@@ -1,5 +1,11 @@
 # @maximdevoir/unreal-lag
 
+## 1.0.2
+
+### Patch Changes
+
+- [`5343d89`](https://github.com/MaximDevoir/ATO/commit/5343d892cbdee4f69e52cbdeb4a5943b0cf111a4) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - fix: lowercase names and scope to maximdevoir
+
 ## 1.0.1
 
 ### Patch Changes
