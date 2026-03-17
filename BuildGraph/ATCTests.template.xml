@@ -1,0 +1,145 @@
+<?xml version="1.0"?>
+<BuildGraph xmlns="http://www.epicgames.com/BuildGraph"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="{{SchemaLocation}}">
+
+  <!-- ================= OPTIONS ================= -->
+
+  <Option Name="ProjectFile" DefaultValue="{{ProjectFile}}" Description="Path to the Unreal Engine project file"/>
+  <Option Name="ProjectDir" DefaultValue="{{ProjectDir}}" Description="Directory containing the Unreal Engine project"/>
+  <Option Name="ProjectName" DefaultValue="{{ProjectName}}" Description="Name of the Unreal Engine project"/>
+  <Option Name="EngineDir" DefaultValue="{{EngineDir}}" Description="Directory containing the Unreal Engine installation"/>
+  <Option Name="ShellExecutable" DefaultValue="{{ShellExecutable}}" Description="Path to the shell executable to run commands (e.g. PowerShell on Windows or /bin/sh on Unix)"/>
+  <Option Name="ShellArguments" DefaultValue="{{ShellArguments}}" Description="Arguments to pass to the shell to execute a command. Example: '-NoProfile -Command' for PowerShell or '-c' for /bin/sh"/>
+  
+  <Option Name="ScriptsDir" DefaultValue="$(ProjectDir)/BuildGraph/Scripts" Description="Directory containing custom scripts for the build graph"/>
+
+  <!-- ================= STANDALONE ================= -->
+
+  <Agent Name="StandaloneTests" Type="Win64">
+
+    <Node Name="Standalone_CompileEditor">
+      <Compile Target="$(ProjectName)Editor" Platform="Win64" Configuration="Development" Project="$(ProjectFile)"/>
+    </Node>
+
+    <Node Name="Standalone_CompileServer" Requires="Standalone_CompileEditor">
+      <Compile Target="$(ProjectName)Server" Platform="Win64" Configuration="Development" Project="$(ProjectFile)"/>
+    </Node>
+
+    <Node Name="Standalone_CompileClient" Requires="Standalone_CompileServer">
+      <Compile Target="$(ProjectName)" Platform="Win64" Configuration="Development" Project="$(ProjectFile)"/>
+    </Node>
+
+    <Node Name="Standalone_Cook" Requires="Standalone_CompileClient">
+      <Cook Project="$(ProjectFile)"
+            Platform="Windows"
+            Maps="/Game/ThirdPerson/Lvl_ThirdPerson"
+            Arguments="-iterate -unversioned"/>
+    </Node>
+
+    <Node Name="RunStandaloneTest" Requires="Standalone_Cook">
+      <Spawn
+        Exe="$(ShellExecutable)"
+        Arguments="$(ShellArguments) &quot;npx tsx --nocache '$(ProjectDir)/BuildGraph/Scripts/RunStandaloneTest.ts' --UERoot '$(EngineDir)' --Project '$(ProjectFile)'&quot;"
+        LogOutput="true"
+        ErrorLevel="1"/>
+    </Node>
+
+  </Agent>
+
+  <Aggregate Name="Standalone" Requires="RunStandaloneTest"/>
+
+
+  <!-- ================= DEDICATED ================= -->
+
+  <Agent Name="DedicatedTests" Type="Win64">
+
+    <Node Name="Dedicated_CompileEditor">
+      <Compile Target="$(ProjectName)Editor" Platform="Win64" Configuration="Development" Project="$(ProjectFile)"/>
+    </Node>
+
+    <Node Name="Dedicated_CompileServer" Requires="Dedicated_CompileEditor">
+      <Compile Target="$(ProjectName)Server" Platform="Win64" Configuration="Development" Project="$(ProjectFile)"/>
+    </Node>
+
+    <Node Name="Dedicated_CompileClient" Requires="Dedicated_CompileServer">
+      <Compile Target="$(ProjectName)" Platform="Win64" Configuration="Development" Project="$(ProjectFile)"/>
+    </Node>
+
+    <Node Name="Dedicated_Cook" Requires="Dedicated_CompileClient">
+      <Cook Project="$(ProjectFile)"
+            Platform="WindowsServer"
+            Maps="/Game/ThirdPerson/Lvl_ThirdPerson"
+            Arguments="-iterate -unversioned"/>
+    </Node>
+
+    <Node Name="RunDedicatedTests" Requires="Dedicated_Cook">
+      <Spawn
+        Exe="$(ShellExecutable)"
+        Arguments="$(ShellArguments) &quot;npx tsx --nocache '$(ProjectDir)/BuildGraph/Scripts/RunDedicatedTest.ts' --UERoot '$(EngineDir)' --Project '$(ProjectFile)'&quot;"
+        LogOutput="true"
+        ErrorLevel="1"/>
+    </Node>
+
+  </Agent>
+
+  <Aggregate Name="Dedicated" Requires="RunDedicatedTests"/>
+
+
+  <!-- ================= LISTEN SERVER ================= -->
+
+  <Agent Name="ListenTests" Type="Win64">
+
+    <Node Name="Listen_CompileEditor">
+      <Compile Target="$(ProjectName)Editor" Platform="Win64" Configuration="Development" Project="$(ProjectFile)"/>
+    </Node>
+
+    <Node Name="Listen_CompileServer" Requires="Listen_CompileEditor">
+      <Compile Target="$(ProjectName)Server" Platform="Win64" Configuration="Development" Project="$(ProjectFile)"/>
+    </Node>
+
+    <Node Name="Listen_CompileClient" Requires="Listen_CompileServer">
+      <Compile Target="$(ProjectName)" Platform="Win64" Configuration="Development" Project="$(ProjectFile)"/>
+    </Node>
+
+    <Node Name="Listen_Cook" Requires="Listen_CompileClient">
+      <Cook Project="$(ProjectFile)"
+            Platform="Windows"
+            Maps="/Game/ThirdPerson/Lvl_ThirdPerson"
+            Arguments="-iterate -unversioned"/>
+    </Node>
+
+    <Node Name="RunListenTests" Requires="Listen_Cook">
+      <Spawn
+        Exe="$(ShellExecutable)"
+        Arguments="$(ShellArguments) &quot;npx tsx --nocache '$(ProjectDir)/BuildGraph/Scripts/RunListenServerTest.ts' --UERoot '$(EngineDir)' --Project '$(ProjectFile)'&quot;"
+        LogOutput="true"
+        ErrorLevel="1"/>
+    </Node>
+
+  </Agent>
+
+  <Aggregate Name="Listen" Requires="RunListenTests"/>
+
+  <!-- ================= PIE SERVER ================= -->
+  <Agent Name="PIETests" Type="Win64">
+
+    <Node Name="PIE_CompileEditor">
+      <Compile Target="$(ProjectName)Editor" Platform="Win64" Configuration="Development" Project="$(ProjectFile)"/>
+    </Node>
+
+    <Node Name="RunPIETests" Requires="PIE_CompileEditor">
+      <Spawn
+        Exe="$(ShellExecutable)"
+        Arguments="$(ShellArguments) &quot;npx tsx --nocache '$(ProjectDir)/BuildGraph/Scripts/RunPIETest.ts' --UERoot '$(EngineDir)' --Project '$(ProjectFile)'&quot;"
+        LogOutput="true"
+        ErrorLevel="1"/>
+    </Node>
+
+  </Agent>
+
+  <Aggregate Name="PIE" Requires="RunPIETests"/>
+
+  <Aggregate Name="ATCTests" Requires="RunStandaloneTest;RunDedicatedTests;RunListenTests;RunPIETests"/>
+
+</BuildGraph>
