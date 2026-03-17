@@ -34,6 +34,7 @@
     </Node>
     <Node Name="RunStandaloneTest" Requires="Standalone_Cook">
       <Spawn Exe="$(ShellExecutable)"
+             WorkingDir="$(ProjectDir)"
              Arguments="$(ShellArguments) &quot;npx tsx --nocache '$(ProjectDir)/BuildGraph/Scripts/RunStandaloneTest.ts' --UERoot '$(EngineDir)' --Project '$(ProjectFile)'&quot;"
              LogOutput="true"
              ErrorLevel="1"/>
@@ -59,6 +60,7 @@
     </Node>
     <Node Name="RunDedicatedTests" Requires="Dedicated_Cook">
       <Spawn Exe="$(ShellExecutable)"
+             WorkingDir="$(ProjectDir)"
              Arguments="$(ShellArguments) &quot;npx tsx --nocache '$(ProjectDir)/BuildGraph/Scripts/RunDedicatedTest.ts' --UERoot '$(EngineDir)' --Project '$(ProjectFile)'&quot;"
              LogOutput="true" ErrorLevel="1"/>
     </Node>
@@ -79,6 +81,7 @@
     </Node>
     <Node Name="RunListenTests" Requires="Listen_Cook">
       <Spawn Exe="$(ShellExecutable)"
+             WorkingDir="$(ProjectDir)"
              Arguments="$(ShellArguments) &quot;npx tsx --nocache '$(ProjectDir)/BuildGraph/Scripts/RunListenServerTest.ts' --UERoot '$(EngineDir)' --Project '$(ProjectFile)'&quot;"
              LogOutput="true" ErrorLevel="1"/>
     </Node>
@@ -93,6 +96,7 @@
     </Node>
     <Node Name="RunPIETests" Requires="PIE_CompileEditor">
       <Spawn Exe="$(ShellExecutable)"
+             WorkingDir="$(ProjectDir)"
              Arguments="$(ShellArguments) &quot;npx tsx --nocache '$(ProjectDir)/BuildGraph/Scripts/RunPIETest.ts' --UERoot '$(EngineDir)' --Project '$(ProjectFile)'&quot;"
              LogOutput="true" ErrorLevel="1"/>
     </Node>

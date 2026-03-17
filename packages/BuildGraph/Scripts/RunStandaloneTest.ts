@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {ATO, Orchestrator, OrchestratorMode} from '@maximdevoir/ato';
+import { ATO, Orchestrator, OrchestratorMode } from '@maximdevoir/ato';
 
 const ATCStandaloneTest = ATO.fromCommandLine();
 
