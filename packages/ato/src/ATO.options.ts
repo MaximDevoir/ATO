@@ -77,10 +77,19 @@ export interface E2ECommandLineOptions extends E2ERuntimeOptions {
 
 export const RuntimePresets = {
   Server(projectPath: string, serverExe?: string): ServerOptions {
-    return {
+    const serverConfig = {
       exe: serverExe,
       project: projectPath,
-      extraArgs: ['-log', '-stdout', '-FullStdOutLogOutputs', '-unattended', '-nullrhi', '-NoSplash', '-Verbose'],
+      extraArgs: [
+        '-server',
+        '-log',
+        '-stdout',
+        '-FullStdOutLogOutputs',
+        '-unattended',
+        '-nullrhi',
+        '-NoSplash',
+        '-Verbose',
+      ],
       excludeArgs: [],
       port: 7777,
       timeoutSeconds: 60,
@@ -90,9 +99,12 @@ export const RuntimePresets = {
       execCmds: [],
       automaticallyApplyBootstrapTestsCmds: true,
     };
+    // LiveCoding will report exit code 1 if the process life is short enough
+    serverConfig.extraArgs.push('-LiveCoding=0');
+    return serverConfig;
   },
   Client(projectPath: string, host = '127.0.0.1', clientExe?: string): ClientOptions {
-    return {
+    const clientConfig = {
       exe: clientExe,
       project: projectPath,
       host,
@@ -104,5 +116,8 @@ export const RuntimePresets = {
       testExit: 'Automation Test Queue Empty',
       automaticallyApplyBootstrapTestsCmds: true,
     };
+    // LiveCoding will report exit code 1 if the process life is short enough
+    clientConfig.extraArgs.push('-LiveCoding=0');
+    return clientConfig;
   },
 };
