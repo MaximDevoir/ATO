@@ -141,11 +141,11 @@ async function main() {
     if (envCompilePlatform) {
       switch (envCompilePlatform) {
         case 'Win64':
-          return { CompilePlatform: 'Win64', CookPlatform: 'Windows' };
+          return { CompilePlatform: 'Win64', CookPlatform: 'WindowsServer' };
         case 'Linux':
-          return { CompilePlatform: 'Linux', CookPlatform: 'Linux' };
+          return { CompilePlatform: 'Linux', CookPlatform: 'LinuxServer' };
         case 'LinuxArm64':
-          return { CompilePlatform: 'LinuxArm64', CookPlatform: 'Linux' };
+          return { CompilePlatform: 'LinuxArm64', CookPlatform: 'LinuxServer' };
         default:
           // if unknown, continue to automatic detection below
           break;
@@ -154,7 +154,7 @@ async function main() {
 
     // Auto-detect from runtime platform
     if (process.platform === 'win32') {
-      return { CompilePlatform: 'Win64', CookPlatform: 'Windows' };
+      return { CompilePlatform: 'Win64', CookPlatform: 'WindowsServer' };
     }
 
     if (process.platform === 'darwin') {
@@ -164,14 +164,14 @@ async function main() {
     // Linux / other unix-like
     if (process.platform === 'linux') {
       if (process.arch === 'arm64') {
-        return { CompilePlatform: 'LinuxArm64', CookPlatform: 'Linux' };
+        return { CompilePlatform: 'LinuxArm64', CookPlatform: 'LinuxServer' };
       }
 
-      return { CompilePlatform: 'Linux', CookPlatform: 'Linux' };
+      return { CompilePlatform: 'Linux', CookPlatform: 'LinuxServer' };
     }
 
     // Fallback to Linux-style
-    return { CompilePlatform: 'Linux', CookPlatform: 'Linux' };
+    return { CompilePlatform: 'Linux', CookPlatform: 'LinuxServer' };
   }
 
   const platforms = resolvePlatforms();
@@ -181,10 +181,10 @@ async function main() {
     const cook = process.env.COOK_PLATFORM.trim();
     switch (cook.toLowerCase()) {
       case 'windows':
-        platforms.CookPlatform = 'Windows';
+        platforms.CookPlatform = 'WindowsServer';
         break;
       case 'linux':
-        platforms.CookPlatform = 'Linux';
+        platforms.CookPlatform = 'LinuxServer';
         break;
       case 'mac':
       case 'macos':
@@ -373,8 +373,13 @@ async function main() {
   console.log(`  SchemaXSD: ${SchemaLocation}`);
   console.log(`  CompilePlatform: ${platforms.CompilePlatform}`);
   console.log(`  CookPlatform: ${platforms.CookPlatform}`);
-  console.log(`  ShellExecutable: ${ShellExecutable}`);
-  console.log(`  ShellArguments: ${ShellArguments}`);
+  if (platforms.CookPlatform === 'Mac') {
+    console.warn(``);
+    console.warn(
+      `  Cooking has limitations on macOS. Testing outside of PIE may fail due to uncooked builds. Let me know if you have any information on this topic.`,
+    );
+    console.warn(``);
+  }
 }
 
 main().catch((err) => {
