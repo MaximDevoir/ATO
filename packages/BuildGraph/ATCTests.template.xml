@@ -11,10 +11,6 @@
     <Option Name="ProjectName" DefaultValue="{{ProjectName}}" Description="Name of the Unreal Engine project"/>
     <Option Name="EngineDir" DefaultValue="{{EngineDir}}"
             Description="Directory containing the Unreal Engine installation"/>
-    <Option Name="ShellExecutable" DefaultValue="{{ShellExecutable}}"
-            Description="Path to the shell executable to run commands (e.g. PowerShell on Windows or /bin/sh on Unix)"/>
-    <Option Name="ShellArguments" DefaultValue="{{ShellArguments}}"
-            Description="Arguments to pass to the shell to execute a command. Example: '-NoProfile -Command' for PowerShell or '-c' for /bin/sh"/>
 
     <Option Name="ScriptsDir" DefaultValue="$(ProjectDir)/BuildGraph/Scripts"
             Description="Directory containing custom scripts for the build graph"/>
