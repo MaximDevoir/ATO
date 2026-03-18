@@ -91,7 +91,7 @@ interface ParsedCommandLineArguments {
 }
 
 export interface ATCClientRequestMetadata {
-  fixturePath: string;
+  testPath: string;
   requiredClients: number;
 }
 
@@ -377,19 +377,19 @@ export function parseATCClientRequestMetadataLine(line: string): ATCClientReques
 
   try {
     const parsed = JSON.parse(payload) as Partial<ATCClientRequestMetadata>;
-    const fixturePath = typeof parsed.fixturePath === 'string' ? parsed.fixturePath.trim() : '';
+    const testPath = typeof parsed.testPath === 'string' ? parsed.testPath.trim() : '';
     const requiredClients =
       typeof parsed.requiredClients === 'number' &&
       Number.isInteger(parsed.requiredClients) &&
       parsed.requiredClients >= 0
         ? parsed.requiredClients
         : undefined;
-    if (!fixturePath || requiredClients === undefined) {
+    if (!testPath || requiredClients === undefined) {
       return undefined;
     }
 
     return {
-      fixturePath,
+      testPath,
       requiredClients,
     };
   } catch {

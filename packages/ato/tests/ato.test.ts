@@ -377,21 +377,19 @@ describe('ATO', () => {
   it('parses ATC client-request metadata lines', () => {
     expect(
       parseATCClientRequestMetadataLine(
-        `[8:37:40 AM] LogTemp: Display: ${ATC_CLIENT_REQUEST_LOG_PREFIX}{"fixturePath":"AwesomeInventory.ATCMacro.PARALLEL_TEST","requiredClients":1}`,
+        `[8:37:40 AM] LogTemp: Display: ${ATC_CLIENT_REQUEST_LOG_PREFIX}{"testPath":"AwesomeInventory.ATCMacro.PARALLEL_TEST","requiredClients":1}`,
       ),
     ).toEqual({
-      fixturePath: 'AwesomeInventory.ATCMacro.PARALLEL_TEST',
+      testPath: 'AwesomeInventory.ATCMacro.PARALLEL_TEST',
       requiredClients: 1,
     });
   });
   it('ignores malformed ATC client-request metadata lines', () => {
     expect(
-      parseATCClientRequestMetadataLine(`${ATC_CLIENT_REQUEST_LOG_PREFIX}{"fixturePath":"","requiredClients":1}`),
+      parseATCClientRequestMetadataLine(`${ATC_CLIENT_REQUEST_LOG_PREFIX}{"testPath":"","requiredClients":1}`),
     ).toBeUndefined();
     expect(
-      parseATCClientRequestMetadataLine(
-        `${ATC_CLIENT_REQUEST_LOG_PREFIX}{"fixturePath":"Fixture","requiredClients":-1}`,
-      ),
+      parseATCClientRequestMetadataLine(`${ATC_CLIENT_REQUEST_LOG_PREFIX}{"testPath":"Test","requiredClients":-1}`),
     ).toBeUndefined();
     expect(parseATCClientRequestMetadataLine(`${ATC_CLIENT_REQUEST_LOG_PREFIX}not-json`)).toBeUndefined();
   });
