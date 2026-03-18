@@ -1328,6 +1328,33 @@ export class ATO {
   ): ResolvedServerOptions {
     const serverOptions = orchestrator.buildServerOptions(this.projectPath);
 
+    // For PIE mode prefer launching the Unreal Editor (from ueRoot) when available.
+    if (atcOrchestratorMode === OrchestratorMode.PIE) {
+      // If the user provided an Engine root, always use the engine's UnrealEditor executable for PIE.
+      if (this.ueRoot) {
+        const engineEditor = path.join(this.ueRoot, 'Binaries', 'Win64', 'UnrealEditor.exe');
+        return {
+          ...serverOptions,
+          execTests: [...(serverOptions.execTests ?? [])],
+          exe: engineEditor,
+        };
+      }
+      // Otherwise fall back to probing common candidates (including project editor locations)
+      const projectRoot = path.dirname(serverOptions.project);
+      const projectEditor = path.join(projectRoot, 'Binaries', 'Win64', 'UnrealEditor.exe');
+      const primaryCandidates = [
+        serverOptions.exe ?? '',
+        runtimeOptions.serverExe ?? '',
+        projectEditor,
+        ...this.getPrimaryCandidates(serverOptions, atcOrchestratorMode, runtimeOptions),
+      ];
+      return {
+        ...serverOptions,
+        execTests: [...(serverOptions.execTests ?? [])],
+        exe: findFirstExisting(primaryCandidates),
+      };
+    }
+
     return {
       ...serverOptions,
       execTests: [...(serverOptions.execTests ?? [])],
@@ -1370,6 +1397,10 @@ export class ATO {
       return this.getStandaloneCandidates(serverOptions, runtimeOptions);
     }
 
+    if (atcOrchestratorMode === OrchestratorMode.PIE) {
+      return this.getPieCandidates(serverOptions, runtimeOptions);
+    }
+
     return this.getHostCandidates(serverOptions, runtimeOptions);
   }
 
@@ -1410,6 +1441,24 @@ export class ATO {
       path.join(projectRoot, 'Binaries', 'Win64', `${path.basename(projectRoot)}.exe`),
       // fallback to any serverExe override
       runtimeOptions.serverExe ?? '',
+    ];
+  }
+
+  /**
+   * Candidates for PIE mode — prefer launching the Unreal Editor executable
+   */
+  private getPieCandidates(serverOptions: ServerOptions, runtimeOptions: E2ERuntimeOptions) {
+    const projectRoot = path.dirname(serverOptions.project);
+    return [
+      // explicit override first
+      serverOptions.exe ?? '',
+      // runtime overrides
+      runtimeOptions.serverExe ?? '',
+      runtimeOptions.clientExe ?? '',
+      // typical editor binary in project Binaries
+      path.join(projectRoot, 'Binaries', 'Win64', 'UnrealEditor.exe'),
+      // fallback to project game exe (least preferred)
+      path.join(projectRoot, 'Binaries', 'Win64', `${path.basename(projectRoot)}.exe`),
     ];
   }
 
