@@ -1,4 +1,5 @@
 {
+  "name": "buildgraph",
   "private": "true",
   "type": "module"
 }
