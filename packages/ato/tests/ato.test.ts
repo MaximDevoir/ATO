@@ -121,6 +121,7 @@ describe('ATO', () => {
       '-nosound',
       '-nullrhi',
       '-NoSplash',
+      '-LiveCoding=0',
       '-ExecCmds=Automation List; quit',
       '-testexit=Automation Test Queue Empty',
     ]);
@@ -139,6 +140,7 @@ describe('ATO', () => {
       '-nosound',
       '-nullrhi',
       '-NoSplash',
+      '-LiveCoding=0',
       `-ExecCmds=Automation List; quit; ${ATC_RUN_TESTS_COMMAND} AwesomeInventory* Smoke*`,
       '-testexit=Automation Test Queue Empty',
     ]);

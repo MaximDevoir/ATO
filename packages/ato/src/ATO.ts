@@ -918,10 +918,10 @@ function mergeProcessLaunchOptions<T extends ProcessLaunchOptions>(base: T, over
   return {
     ...cloneProcessLaunchOptions(base),
     ...overrides,
-    extraArgs: overrides.extraArgs ? [...overrides.extraArgs] : [...(base.extraArgs ?? [])],
-    excludeArgs: overrides.excludeArgs ? [...overrides.excludeArgs] : [...(base.excludeArgs ?? [])],
-    execCmds: overrides.execCmds ? [...overrides.execCmds] : [...(base.execCmds ?? [])],
-    execTests: overrides.execTests ? [...overrides.execTests] : [...(base.execTests ?? [])],
+    extraArgs: overrides.extraArgs !== undefined ? [...overrides.extraArgs] : [...(base.extraArgs ?? [])],
+    excludeArgs: overrides.excludeArgs !== undefined ? [...overrides.excludeArgs] : [...(base.excludeArgs ?? [])],
+    execCmds: overrides.execCmds !== undefined ? [...overrides.execCmds] : [...(base.execCmds ?? [])],
+    execTests: overrides.execTests !== undefined ? [...overrides.execTests] : [...(base.execTests ?? [])],
   } as T;
 }
 
@@ -935,13 +935,25 @@ function mergePartialProcessLaunchOptions<T extends Partial<ProcessLaunchOptions
     ...clonePartialProcessLaunchOptions(overrides),
 
     // The closest we can get to a controlled deep-merge
-    extraArgs: [...(base.extraArgs ?? []), ...(overrides.extraArgs ?? [])],
+    extraArgs:
+      (base.extraArgs ?? overrides.extraArgs) !== undefined
+        ? [...(base.extraArgs ?? []), ...(overrides.extraArgs ?? [])]
+        : undefined,
 
-    excludeArgs: [...(base.excludeArgs ?? []), ...(overrides.excludeArgs ?? [])],
+    excludeArgs:
+      (base.excludeArgs ?? overrides.excludeArgs) !== undefined
+        ? [...(base.excludeArgs ?? []), ...(overrides.excludeArgs ?? [])]
+        : undefined,
 
-    execCmds: [...(base.execCmds ?? []), ...(overrides.execCmds ?? [])],
+    execCmds:
+      (base.execCmds ?? overrides.execCmds) !== undefined
+        ? [...(base.execCmds ?? []), ...(overrides.execCmds ?? [])]
+        : undefined,
 
-    execTests: [...(base.execTests ?? []), ...(overrides.execTests ?? [])],
+    execTests:
+      (base.execTests ?? overrides.execTests) !== undefined
+        ? [...(base.execTests ?? []), ...(overrides.execTests ?? [])]
+        : undefined,
   } as T;
 }
 
