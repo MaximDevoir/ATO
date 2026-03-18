@@ -928,6 +928,15 @@ function mergePartialProcessLaunchOptions<T extends Partial<ProcessLaunchOptions
   return {
     ...clonePartialProcessLaunchOptions(base),
     ...clonePartialProcessLaunchOptions(overrides),
+
+    // The closest we can get to a controlled deep-merge
+    extraArgs: [...(base.extraArgs ?? []), ...(overrides.extraArgs ?? [])],
+
+    excludeArgs: [...(base.excludeArgs ?? []), ...(overrides.excludeArgs ?? [])],
+
+    execCmds: [...(base.execCmds ?? []), ...(overrides.execCmds ?? [])],
+
+    execTests: [...(base.execTests ?? []), ...(overrides.execTests ?? [])],
   } as T;
 }
 
