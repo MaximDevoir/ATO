@@ -196,52 +196,6 @@ async function main() {
   }
 
   /* =========================
-   * SHELL DETECTION (platform-agnostic)
-   * Returns the executable to run and the arguments to use to execute a command.
-   * On Windows we prefer PowerShell (pwsh/powershell) with '-NoProfile -Command'.
-   * On Unix we use /bin/sh (or bash) with '-c'.
-   * ========================= */
-
-  function findShell(): { exe: string; args: string } {
-    if (process.platform === 'win32') {
-      const candidates = [
-        'C:/Program Files/PowerShell/7/pwsh.exe',
-        'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe',
-        'pwsh',
-        'powershell',
-      ];
-
-      for (const candidate of candidates) {
-        if (!candidate) continue;
-        if (candidate.includes('/') || candidate.includes('\\')) {
-          if (exists(candidate)) return { exe: normalize(candidate), args: '-NoProfile -Command' };
-        } else {
-          // assume on PATH
-          return { exe: candidate, args: '-NoProfile -Command' };
-        }
-      }
-
-      throw new Error(
-        '[BuildGraph] Could not find a shell (PowerShell). Install PowerShell (pwsh) or ensure a compatible shell is on PATH.',
-      );
-    }
-
-    // Unix-like
-    const unixCandidates = ['/bin/sh', 'sh', 'bash'];
-    for (const candidate of unixCandidates) {
-      if (candidate.includes('/') && exists(candidate)) return { exe: normalize(candidate), args: '-c' };
-      if (!candidate.includes('/')) return { exe: candidate, args: '-c' };
-    }
-
-    // Fallback
-    return { exe: 'sh', args: '-c' };
-  }
-
-  // Allow explicit overrides via env for CI or custom setups
-  const ShellExecutable = process.env.SHELL_EXECUTABLE ?? findShell().exe;
-  const ShellArguments = process.env.SHELL_ARGUMENTS ?? findShell().args;
-
-  /* =========================
    * Schema Detection
    * ========================= */
   function findBuildGraphSchema(engineDir: string): string | null {
@@ -309,8 +263,6 @@ async function main() {
     ProjectDir,
     ProjectName,
     EngineDir,
-    ShellExecutable,
-    ShellArguments,
     CompilePlatform: platforms.CompilePlatform,
     CookPlatform: platforms.CookPlatform,
     SchemaLocation,
