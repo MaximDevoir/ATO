@@ -19,10 +19,12 @@ import type {
   UnrealLagProxyOptions,
 } from './ATO.options';
 import { OrchestratorMode, RuntimePresets } from './ATO.options';
+import { FrameworkValidationReporter, formatFrameworkValidationSummaryLines } from './FrameworkValidationReporter';
 
 export * from './ATCAutomationNames';
 export { ATC_RUN_TESTS_COMMAND } from './ATCAutomationNames';
 export { OrchestratorMode, RuntimePresets } from './ATO.options';
+export * from './FrameworkValidationReporter';
 
 interface ATOInit {
   runtimeOptions?: E2ERuntimeOptions;
@@ -1138,6 +1140,8 @@ export class Orchestrator {
 }
 
 export class ATO {
+  static readonly FrameworkValidationReporter = FrameworkValidationReporter;
+
   /**
    * Imports and applies options supplied from the CLI
    */
@@ -1600,6 +1604,7 @@ export class ATO {
     };
     const observeLine = (line: string) => {
       observeAutomationLogLine(automation, line);
+      ATO.FrameworkValidationReporter.observeProcessLine(label, line);
       const metadata = parseATCClientRequestMetadataLine(line);
       if (metadata) {
         atc.requestedRemoteClients = Math.max(atc.requestedRemoteClients, metadata.requiredClients);
@@ -1780,6 +1785,9 @@ export class ATO {
       } catch {}
       await this.stopUnrealLag();
       printOrchestrationSummary(outcomes);
+      for (const line of formatFrameworkValidationSummaryLines(ATO.FrameworkValidationReporter.getReport())) {
+        console.log(line);
+      }
     }
   }
 
