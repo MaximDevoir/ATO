@@ -68,7 +68,7 @@
     <Node Name="RunDedicatedTests" Requires="Dedicated_Cook">
       <Spawn Exe="node"
              WorkingDir="$(ProjectDir)"
-             Arguments="--import tsx BuildGraph/Scripts/RunDedicatedTest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
+             Arguments="--import tsx BuildGraph/Scripts/RunDedicated.tests.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
              LogOutput="true"
              ErrorLevel="1"/>
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { ATO, Orchestrator, OrchestratorMode } from '@maximdevoir/ato';
 
+let exitCode = 0;
 const ATCListenServerTest = ATO.fromCommandLine();
 
 const orchestrator = new Orchestrator(OrchestratorMode.ListenServer).addTests().configureUnrealLag({
@@ -15,5 +16,6 @@ orchestrator.addTests('ATC.ORCHESTRATOR_LISTEN');
 
 ATCListenServerTest.addOrchestrator(orchestrator);
 
-const code = await ATCListenServerTest.start();
-process.exit(code);
+exitCode = await ATCListenServerTest.start();
+
+process.exit(exitCode);
