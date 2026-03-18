@@ -1,14 +1,14 @@
 // TODO: Support Linux/macOS. Right now Win64 and .exe is hardcoded a lot.
-import type {ChildProcess} from 'node:child_process';
+import type { ChildProcess } from 'node:child_process';
 import * as path from 'node:path';
-import {logWarningIfNetworkProfileUnstable, UnrealLagProfiles} from '@maximdevoir/unreal-lag/profiles';
-import type {BindInfo} from '@maximdevoir/unreal-lag/types';
-import {UnrealLag} from '@maximdevoir/unreal-lag/UnrealLag';
+import { logWarningIfNetworkProfileUnstable, UnrealLagProfiles } from '@maximdevoir/unreal-lag/profiles';
+import type { BindInfo } from '@maximdevoir/unreal-lag/types';
+import { UnrealLag } from '@maximdevoir/unreal-lag/UnrealLag';
 import yargs from 'yargs';
-import {hideBin} from 'yargs/helpers';
-import {ATC_CLIENT_REQUEST_LOG_PREFIX, ATC_RUN_TESTS_COMMAND} from './ATCAutomationNames';
-import {checkExistsSync} from './ATO._helpers';
-import {spawnProcess, waitForUdpPort} from './ATO.helpers';
+import { hideBin } from 'yargs/helpers';
+import { ATC_CLIENT_REQUEST_LOG_PREFIX, ATC_RUN_TESTS_COMMAND } from './ATCAutomationNames';
+import { checkExistsSync } from './ATO._helpers';
+import { spawnProcess, waitForUdpPort } from './ATO.helpers';
 import type {
   ClientOptions,
   E2ECommandLineContext,
@@ -18,11 +18,11 @@ import type {
   ServerOptions,
   UnrealLagProxyOptions,
 } from './ATO.options';
-import {OrchestratorMode, RuntimePresets} from './ATO.options';
+import { OrchestratorMode, RuntimePresets } from './ATO.options';
 
 export * from './ATCAutomationNames';
-export {ATC_RUN_TESTS_COMMAND} from './ATCAutomationNames';
-export {OrchestratorMode, RuntimePresets} from './ATO.options';
+export { ATC_RUN_TESTS_COMMAND } from './ATCAutomationNames';
+export { OrchestratorMode, RuntimePresets } from './ATO.options';
 
 interface ATOInit {
   runtimeOptions?: E2ERuntimeOptions;
@@ -149,8 +149,7 @@ function promiseProcessExitOrTimeout(processHandle: ChildProcess, timeoutSeconds
       settled = true;
       try {
         onTimeout();
-      } catch {
-      }
+      } catch {}
       resolve('timeout');
     }, timeoutSeconds * 1000);
 
@@ -753,7 +752,7 @@ function parseArgEntries(args: string[]): ParsedArgEntry[] {
     const current = args[index];
     const optionName = normalizeOptionName(current);
     if (!optionName) {
-      entries.push({tokens: [current]});
+      entries.push({ tokens: [current] });
       continue;
     }
 
@@ -765,7 +764,7 @@ function parseArgEntries(args: string[]): ParsedArgEntry[] {
       index += 1;
     }
 
-    entries.push({tokens, optionName});
+    entries.push({ tokens, optionName });
   }
 
   return entries;
@@ -904,10 +903,10 @@ function clonePartialProcessLaunchOptions<T extends Partial<ProcessLaunchOptions
 
   return {
     ...launchOptions,
-    ...(launchOptions.extraArgs ? {extraArgs: [...launchOptions.extraArgs]} : {}),
-    ...(launchOptions.excludeArgs ? {excludeArgs: [...launchOptions.excludeArgs]} : {}),
-    ...(launchOptions.execCmds ? {execCmds: [...launchOptions.execCmds]} : {}),
-    ...(launchOptions.execTests ? {execTests: [...launchOptions.execTests]} : {}),
+    ...(launchOptions.extraArgs ? { extraArgs: [...launchOptions.extraArgs] } : {}),
+    ...(launchOptions.excludeArgs ? { excludeArgs: [...launchOptions.excludeArgs] } : {}),
+    ...(launchOptions.execCmds ? { execCmds: [...launchOptions.execCmds] } : {}),
+    ...(launchOptions.execTests ? { execTests: [...launchOptions.execTests] } : {}),
   } as T;
 }
 
@@ -1071,7 +1070,7 @@ export class Orchestrator {
 
   constructor(mode: OrchestratorMode, init: OrchestratorInit = {}) {
     this.mode = mode;
-    this.runtimeOptions = {...init.runtimeOptions};
+    this.runtimeOptions = { ...init.runtimeOptions };
     this.serverOverrides = clonePartialProcessLaunchOptions(init.server);
     this.clientOverrides = clonePartialProcessLaunchOptions(init.client);
   }
@@ -1105,7 +1104,7 @@ export class Orchestrator {
   }
 
   resolveRuntimeOptions() {
-    return {...this.runtimeOptions};
+    return { ...this.runtimeOptions };
   }
 
   buildServerOptions(projectPath: string) {
@@ -1142,7 +1141,8 @@ export class ATO {
       .option('Project', {
         type: 'string',
         demandOption: true,
-        description: 'Path to the .uproject to run tests against. Example: D:/ue-projects/TemplateProject/TemplateProject.uproject',
+        description:
+          'Path to the .uproject to run tests against. Example: D:/ue-projects/TemplateProject/TemplateProject.uproject',
       })
       .option('clients', {
         type: 'number',
@@ -1203,7 +1203,7 @@ export class ATO {
   public readonly commandLineContext?: E2ECommandLineContext;
 
   constructor(init: ATOInit = {}) {
-    this.runtimeOptions = {...init.runtimeOptions};
+    this.runtimeOptions = { ...init.runtimeOptions };
     this.commandLineContext = init.commandLineContext;
   }
 
@@ -1354,10 +1354,7 @@ export class ATO {
 
     // For Standalone and ListenServer modes we want the game's regular executable (e.g. TemplateProject.exe),
     // not the server executable which usually ends with "Server.exe".
-    if (
-      atcOrchestratorMode === OrchestratorMode.Standalone ||
-      atcOrchestratorMode === OrchestratorMode.ListenServer
-    ) {
+    if (atcOrchestratorMode === OrchestratorMode.Standalone || atcOrchestratorMode === OrchestratorMode.ListenServer) {
       return this.getStandaloneCandidates(serverOptions, runtimeOptions);
     }
 
@@ -1441,27 +1438,27 @@ export class ATO {
 
     const clientTemplatePreview = clientTemplate
       ? (() => {
-        const client = resolveClientLaunchOptions(clientTemplate, 0);
-        const args = buildClientArgs(client, proxyHost, atcOrchestratorMode);
-        return {
-          exe: client.exe,
-          args,
-          command: formatCommand(client.exe, args),
-        } satisfies ResolvedPreviewCommand;
-      })()
-      : undefined;
-
-    const clientPreviews =
-      clientTemplate && maxExternalClients !== undefined
-        ? Array.from({length: maxExternalClients}, (_, clientIndex) => {
-          const client = resolveClientLaunchOptions(clientTemplate, clientIndex);
+          const client = resolveClientLaunchOptions(clientTemplate, 0);
           const args = buildClientArgs(client, proxyHost, atcOrchestratorMode);
           return {
             exe: client.exe,
             args,
             command: formatCommand(client.exe, args),
           } satisfies ResolvedPreviewCommand;
-        })
+        })()
+      : undefined;
+
+    const clientPreviews =
+      clientTemplate && maxExternalClients !== undefined
+        ? Array.from({ length: maxExternalClients }, (_, clientIndex) => {
+            const client = resolveClientLaunchOptions(clientTemplate, clientIndex);
+            const args = buildClientArgs(client, proxyHost, atcOrchestratorMode);
+            return {
+              exe: client.exe,
+              args,
+              command: formatCommand(client.exe, args),
+            } satisfies ResolvedPreviewCommand;
+          })
         : [];
 
     return {
@@ -1555,8 +1552,7 @@ export class ATO {
       console.error(`${label} exceeded maxLifetime (${timeoutSeconds}s); killing process`);
       try {
         if (process && !process.killed) process.kill();
-      } catch {
-      }
+      } catch {}
     });
 
     return {
@@ -1624,8 +1620,7 @@ export class ATO {
         if (serverStatus !== 'bound') {
           try {
             if (this.serverProc && !this.serverProc.killed) this.serverProc.kill();
-          } catch {
-          }
+          } catch {}
           const finalServerExit = await serverMonitor.exitPromise;
           outcomes.push(
             summarizeStartupFailureOutcome(orchestratorLabel, finalServerExit, serverMonitor.automation, serverStatus),
@@ -1667,16 +1662,14 @@ export class ATO {
           if (this.serverProc && !this.serverProc.killed) {
             this.serverProc.kill();
           }
-        } catch {
-        }
+        } catch {}
 
         for (const monitor of clientMonitors) {
           try {
             if (!monitor.process.killed) {
               monitor.process.kill();
             }
-          } catch {
-          }
+          } catch {}
         }
 
         const finalServerExit = await serverMonitor.exitPromise;
@@ -1715,8 +1708,7 @@ export class ATO {
 
       try {
         if (this.serverProc && !this.serverProc.killed) this.serverProc.kill();
-      } catch {
-      }
+      } catch {}
 
       const finalServerExit = await serverMonitor.exitPromise;
       outcomes.unshift(summarizeProcessOutcome(orchestratorLabel, finalServerExit, serverMonitor.automation));
@@ -1724,8 +1716,7 @@ export class ATO {
     } finally {
       try {
         if (this.serverProc && !this.serverProc.killed) this.serverProc.kill();
-      } catch {
-      }
+      } catch {}
       await this.stopUnrealLag();
       printOrchestrationSummary(outcomes);
     }
@@ -1745,15 +1736,15 @@ export class ATO {
       server: {
         address: '127.0.0.1',
         port: effectivePort,
-        selection: {profile: serverProfileName},
+        selection: { profile: serverProfileName },
       },
-      defaultClient: {profile: clientProfileName},
+      defaultClient: { profile: clientProfileName },
       autoCreateClients: true,
     });
     this.unrealLagBindInfo = await this.unrealLag.start();
 
     // Warn if chosen profiles may cause ATC coordination issues
-    const allProfiles = {...UnrealLagProfiles, ...unrealLagOptions} as Record<string, unknown>;
+    const allProfiles = { ...UnrealLagProfiles, ...unrealLagOptions } as Record<string, unknown>;
     for (const name of [serverProfileName, clientProfileName]) {
       const profile =
         (allProfiles as Record<string, unknown>)[name] ?? (UnrealLagProfiles as Record<string, unknown>)[name];
@@ -1801,8 +1792,7 @@ export class ATO {
     }
     try {
       if (this.serverProc && !this.serverProc.killed) this.serverProc.kill();
-    } catch {
-    }
+    } catch {}
     await this.stopUnrealLag();
     return FAILURE_EXIT_CODE;
   }
@@ -1854,8 +1844,7 @@ export class ATO {
           if (!serverMonitor.process.killed) {
             serverMonitor.process.kill();
           }
-        } catch {
-        }
+        } catch {}
         await serverMonitor.exitPromise;
         return false;
       }
@@ -1868,8 +1857,7 @@ export class ATO {
           if (!serverMonitor.process.killed) {
             serverMonitor.process.kill();
           }
-        } catch {
-        }
+        } catch {}
         await serverMonitor.exitPromise;
         return false;
       }
@@ -1903,8 +1891,7 @@ export class ATO {
       if (!serverMonitor.process.killed) {
         serverMonitor.process.kill();
       }
-    } catch {
-    }
+    } catch {}
     await serverMonitor.exitPromise;
     return false;
   }
@@ -1932,8 +1919,8 @@ export class ATO {
     const allClientExitResults = Promise.all(clientMonitors.map((monitor) => monitor.exitPromise));
     if (serverMonitor) {
       const completion = await Promise.race([
-        allClientExitResults.then((results) => ({kind: 'clients' as const, results})),
-        serverMonitor.exitPromise.then((serverExit) => ({kind: 'server' as const, serverExit})),
+        allClientExitResults.then((results) => ({ kind: 'clients' as const, results })),
+        serverMonitor.exitPromise.then((serverExit) => ({ kind: 'server' as const, serverExit })),
       ]);
 
       if (completion.kind === 'server') {
@@ -1946,8 +1933,7 @@ export class ATO {
         for (const monitor of pendingClients) {
           try {
             monitor.process.kill();
-          } catch {
-          }
+          } catch {}
         }
       }
     }
