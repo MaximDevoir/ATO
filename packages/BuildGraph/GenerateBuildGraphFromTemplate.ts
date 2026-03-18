@@ -264,7 +264,16 @@ async function main() {
     ProjectName,
     EngineDir,
     CompilePlatform: platforms.CompilePlatform,
-    CookPlatform: platforms.CookPlatform,
+    // Derive per-mode cook platforms so standalone/listen use non-server cooks
+    // while dedicated uses the server cook variant.
+    CookPlatformStandalone: (() => {
+      const c = platforms.CookPlatform;
+      return c.endsWith('Server') ? c.replace(/Server$/, '') : c;
+    })(),
+    CookPlatformDedicated: (() => {
+      const c = platforms.CookPlatform;
+      return c.endsWith('Server') ? c : `${c}Server`;
+    })(),
     SchemaLocation,
   };
 
@@ -324,7 +333,8 @@ async function main() {
   console.log(`  EngineDir: ${EngineDir}`);
   console.log(`  SchemaXSD: ${SchemaLocation}`);
   console.log(`  CompilePlatform: ${platforms.CompilePlatform}`);
-  console.log(`  CookPlatform: ${platforms.CookPlatform}`);
+  console.log(`  CookPlatformStandalone: ${values.CookPlatformStandalone}`);
+  console.log(`  CookPlatformDedicated: ${values.CookPlatformDedicated}`);
   if (platforms.CookPlatform === 'Mac') {
     console.warn(``);
     console.warn(

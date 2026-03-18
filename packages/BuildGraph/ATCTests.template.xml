@@ -3,109 +3,120 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="{{SchemaLocation}}">
 
-    <!-- ================= OPTIONS ================= -->
+  <!-- ================= OPTIONS ================= -->
 
-    <Option Name="ProjectFile" DefaultValue="{{ProjectFile}}" Description="Path to the Unreal Engine project file"/>
-    <Option Name="ProjectDir" DefaultValue="{{ProjectDir}}"
-            Description="Directory containing the Unreal Engine project"/>
-    <Option Name="ProjectName" DefaultValue="{{ProjectName}}" Description="Name of the Unreal Engine project"/>
-    <Option Name="EngineDir" DefaultValue="{{EngineDir}}"
-            Description="Directory containing the Unreal Engine installation"/>
+  <Option Name="ProjectFile" DefaultValue="{{ProjectFile}}" Description="Path to the Unreal Engine project file"/>
+  <Option Name="ProjectDir" DefaultValue="{{ProjectDir}}"
+          Description="Directory containing the Unreal Engine project"/>
+  <Option Name="ProjectName" DefaultValue="{{ProjectName}}" Description="Name of the Unreal Engine project"/>
+  <Option Name="EngineDir" DefaultValue="{{EngineDir}}"
+          Description="Directory containing the Unreal Engine installation"/>
 
-    <Option Name="ScriptsDir" DefaultValue="$(ProjectDir)/BuildGraph/Scripts"
-            Description="Directory containing custom scripts for the build graph"/>
-    <Option Name="CompilePlatform" DefaultValue="{{CompilePlatform}}"
-            Description="Compile target platform (e.g. Win64, Linux, LinuxArm64, Mac)"/>
-    <Option Name="CookPlatform" DefaultValue="{{CookPlatform}}" Description="Cook platform (e.g. Windows, Linux, Mac)"/>
+  <Option Name="ScriptsDir" DefaultValue="$(ProjectDir)/BuildGraph/Scripts"
+          Description="Directory containing custom scripts for the build graph"/>
+  <Option Name="CompilePlatform" DefaultValue="{{CompilePlatform}}"
+          Description="Compile target platform (e.g. Win64, Linux, LinuxArm64, Mac)"/>
+  <!-- Per-mode cook platforms: standalone/listen use non-server cooks, dedicated uses server cooks -->
+  <Option Name="CookPlatformStandalone" DefaultValue="{{CookPlatformStandalone}}"
+          Description="Cook platform for standalone/listen tests (e.g. Windows, Linux, Mac)"/>
+  <Option Name="CookPlatformDedicated" DefaultValue="{{CookPlatformDedicated}}"
+          Description="Cook platform for dedicated server tests (e.g. WindowsServer, LinuxServer, MacServer)"/>
+  <!-- Listen uses the same cook platform as Standalone -->
 
-    <!-- ================= STANDALONE ================= -->
+  <!-- ================= STANDALONE ================= -->
 
-    <Agent Name="StandaloneTests" Type="$(CompilePlatform)">
-        <Node Name="Standalone_CompileClient">
-            <Compile Target="$(ProjectName)" Platform="$(CompilePlatform)" Configuration="Development"
-                     Project="$(ProjectFile)"/>
-        </Node>
-        <Node Name="Standalone_Cook" Requires="Standalone_CompileClient">
-            <Cook Project="$(ProjectFile)" Platform="$(CookPlatform)" Maps="/Game/ThirdPerson/Lvl_ThirdPerson"
-                  Arguments="-iterate -unversioned"/>
-        </Node>
-        <Node Name="RunStandaloneTest" Requires="Standalone_Cook">
-            <Spawn Exe="node"
-                   WorkingDir="$(ProjectDir)"
-                   Arguments="--import tsx BuildGraph/Scripts/RunStandaloneTest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
-                   LogOutput="true"
-                   ErrorLevel="1"/>
-        </Node>
-    </Agent>
-    <Aggregate Name="Standalone" Requires="RunStandaloneTest"/>
-
-
-    <!-- ================= DEDICATED ================= -->
-
-    <Agent Name="DedicatedTests" Type="$(CompilePlatform)">
-        <Node Name="Dedicated_CompileServer">
-            <Compile Target="$(ProjectName)Server" Platform="$(CompilePlatform)" Configuration="Development"
-                     Project="$(ProjectFile)"/>
-        </Node>
-        <Node Name="Dedicated_CompileClient" Requires="Dedicated_CompileServer">
-            <Compile Target="$(ProjectName)" Platform="$(CompilePlatform)" Configuration="Development"
-                     Project="$(ProjectFile)"/>
-        </Node>
-        <Node Name="Dedicated_Cook" Requires="Dedicated_CompileClient">
-            <Cook Project="$(ProjectFile)" Platform="$(CookPlatform)" Maps="/Game/ThirdPerson/Lvl_ThirdPerson"
-                  Arguments="-iterate -unversioned"/>
-        </Node>
-        <Node Name="RunDedicatedTests" Requires="Dedicated_Cook">
-            <Spawn Exe="node"
-                   WorkingDir="$(ProjectDir)"
-                   Arguments="--import tsx BuildGraph/Scripts/RunDedicatedTest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
-                   LogOutput="true"
-                   ErrorLevel="1"/>
-
-        </Node>
-    </Agent>
-    <Aggregate Name="Dedicated" Requires="RunDedicatedTests"/>
+  <Agent Name="StandaloneTests" Type="$(CompilePlatform)">
+    <Node Name="Standalone_CompileClient">
+      <Compile Target="$(ProjectName)" Platform="$(CompilePlatform)" Configuration="Development"
+               Project="$(ProjectFile)"/>
+    </Node>
+    <Node Name="Standalone_Cook" Requires="Standalone_CompileClient">
+      <Cook Project="$(ProjectFile)" Platform="$(CookPlatformStandalone)"
+            Maps="/Engine/Maps/Templates/OpenWorld+/Engine/Maps/Templates/Template_Default"
+            Arguments="-iterate -unversioned"/>
+    </Node>
+    <Node Name="RunStandaloneTest" Requires="Standalone_Cook">
+      <Spawn Exe="node"
+             WorkingDir="$(ProjectDir)"
+             Arguments="--import tsx BuildGraph/Scripts/RunStandaloneTest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
+             LogOutput="true"
+             ErrorLevel="1"/>
+    </Node>
+  </Agent>
+  <Aggregate Name="Standalone" Requires="RunStandaloneTest"/>
 
 
-    <!-- ================= LISTEN SERVER ================= -->
+  <!-- ================= DEDICATED ================= -->
 
-    <Agent Name="ListenTests" Type="$(CompilePlatform)">
-        <Node Name="Listen_CompileClient">
-            <Compile Target="$(ProjectName)" Platform="$(CompilePlatform)" Configuration="Development"
-                     Project="$(ProjectFile)"/>
-        </Node>
-        <Node Name="Listen_Cook" Requires="Listen_CompileClient">
-            <Cook Project="$(ProjectFile)" Platform="$(CookPlatform)" Maps="/Game/ThirdPerson/Lvl_ThirdPerson"
-                  Arguments="-iterate -unversioned"/>
-        </Node>
-        <Node Name="RunListenTests" Requires="Listen_Cook">
-            <Spawn Exe="node"
-                   WorkingDir="$(ProjectDir)"
-                   Arguments="--import tsx BuildGraph/Scripts/RunListenServerTest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
-                   LogOutput="true"
-                   ErrorLevel="1"/>
+  <Agent Name="DedicatedTests" Type="$(CompilePlatform)">
+    <Node Name="Dedicated_CompileServer">
+      <Compile Target="$(ProjectName)Server" Platform="$(CompilePlatform)" Configuration="Development"
+               Project="$(ProjectFile)"/>
+    </Node>
+    <Node Name="Dedicated_CompileClient" Requires="Dedicated_CompileServer">
+      <Compile Target="$(ProjectName)" Platform="$(CompilePlatform)" Configuration="Development"
+               Project="$(ProjectFile)"/>
+    </Node>
+    <Node Name="Dedicated_Cook" Requires="Dedicated_CompileClient">
+      <Cook Project="$(ProjectFile)" Platform="$(CookPlatformStandalone)"
+            Maps="/Engine/Maps/Templates/OpenWorld+/Engine/Maps/Templates/Template_Default"
+            Arguments="-iterate -unversioned"/>
+      <Cook Project="$(ProjectFile)" Platform="$(CookPlatformDedicated)"
+            Maps="/Engine/Maps/Templates/OpenWorld+/Engine/Maps/Templates/Template_Default"
+            Arguments="-iterate -unversioned"/>
+    </Node>
+    <Node Name="RunDedicatedTests" Requires="Dedicated_Cook">
+      <Spawn Exe="node"
+             WorkingDir="$(ProjectDir)"
+             Arguments="--import tsx BuildGraph/Scripts/RunDedicatedTest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
+             LogOutput="true"
+             ErrorLevel="1"/>
 
-        </Node>
-    </Agent>
-    <Aggregate Name="Listen" Requires="RunListenTests"/>
+    </Node>
+  </Agent>
+  <Aggregate Name="Dedicated" Requires="RunDedicatedTests"/>
 
-    <!-- ================= PIE SERVER ================= -->
-    <Agent Name="PIETests" Type="$(CompilePlatform)">
-        <Node Name="PIE_CompileEditor">
-            <Compile Target="$(ProjectName)Editor" Platform="$(CompilePlatform)" Configuration="Development"
-                     Project="$(ProjectFile)"/>
-        </Node>
-        <Node Name="RunPIETests" Requires="PIE_CompileEditor">
-            <Spawn Exe="node"
-                   WorkingDir="$(ProjectDir)"
-                   Arguments="--import tsx BuildGraph/Scripts/RunPIETest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
-                   LogOutput="true"
-                   ErrorLevel="1"/>
 
-        </Node>
-    </Agent>
-    <Aggregate Name="PIE" Requires="RunPIETests"/>
+  <!-- ================= LISTEN SERVER ================= -->
 
-    <!-- ================= ALL TESTS ================= -->
-    <Aggregate Name="ATCTests" Requires="RunStandaloneTest;RunDedicatedTests;RunListenTests;RunPIETests"/>
+  <Agent Name="ListenTests" Type="$(CompilePlatform)">
+    <Node Name="Listen_CompileClient">
+      <Compile Target="$(ProjectName)" Platform="$(CompilePlatform)" Configuration="Development"
+               Project="$(ProjectFile)"/>
+    </Node>
+    <Node Name="Listen_Cook" Requires="Listen_CompileClient">
+      <Cook Project="$(ProjectFile)" Platform="$(CookPlatformStandalone)"
+            Maps="/Engine/Maps/Templates/OpenWorld+/Engine/Maps/Templates/Template_Default"
+            Arguments="-iterate -unversioned"/>
+    </Node>
+    <Node Name="RunListenTests" Requires="Listen_Cook">
+      <Spawn Exe="node"
+             WorkingDir="$(ProjectDir)"
+             Arguments="--import tsx BuildGraph/Scripts/RunListenServerTest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
+             LogOutput="true"
+             ErrorLevel="1"/>
+
+    </Node>
+  </Agent>
+  <Aggregate Name="Listen" Requires="RunListenTests"/>
+
+  <!-- ================= PIE SERVER ================= -->
+  <Agent Name="PIETests" Type="$(CompilePlatform)">
+    <Node Name="PIE_CompileEditor">
+      <Compile Target="$(ProjectName)Editor" Platform="$(CompilePlatform)" Configuration="Development"
+               Project="$(ProjectFile)"/>
+    </Node>
+    <Node Name="RunPIETests" Requires="PIE_CompileEditor">
+      <Spawn Exe="node"
+             WorkingDir="$(ProjectDir)"
+             Arguments="--import tsx BuildGraph/Scripts/RunPIETest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
+             LogOutput="true"
+             ErrorLevel="1"/>
+
+    </Node>
+  </Agent>
+  <Aggregate Name="PIE" Requires="RunPIETests"/>
+
+  <!-- ================= ALL TESTS ================= -->
+  <Aggregate Name="ATCTests" Requires="RunStandaloneTest;RunDedicatedTests;RunListenTests;RunPIETests"/>
 </BuildGraph>
