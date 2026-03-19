@@ -45,6 +45,27 @@
   </Agent>
   <Aggregate Name="Standalone" Requires="RunStandaloneTest"/>
 
+  <!-- ================= STANDALONE WITH EXCEPTIONS ================= -->
+
+  <Agent Name="StandaloneTestsWithExceptions" Type="$(CompilePlatform)">
+    <Node Name="StandaloneWithExceptions_CompileClient">
+      <Compile Target="$(ProjectName)" Platform="$(CompilePlatform)" Configuration="Development"
+               Project="$(ProjectFile)" Arguments="-Define=ATC_WITH_CPP_EXCEPTIONS=1"/>
+    </Node>
+    <Node Name="StandaloneWithExceptions_Cook" Requires="StandaloneWithExceptions_CompileClient">
+      <Cook Project="$(ProjectFile)" Platform="$(CookPlatformStandalone)"
+            Maps="/Engine/Maps/Templates/OpenWorld+/Engine/Maps/Templates/Template_Default"
+            Arguments="-iterate -unversioned"/>
+    </Node>
+    <Node Name="RunStandaloneTestWithExceptions" Requires="StandaloneWithExceptions_Cook">
+      <Spawn Exe="node"
+             WorkingDir="$(ProjectDir)"
+             Arguments="--import tsx BuildGraph/Scripts/RunStandaloneTest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
+             LogOutput="true"
+             ErrorLevel="1"/>
+    </Node>
+  </Agent>
+  <Aggregate Name="StandaloneWithExceptions" Requires="RunStandaloneTestWithExceptions"/>
 
   <!-- ================= DEDICATED ================= -->
 
