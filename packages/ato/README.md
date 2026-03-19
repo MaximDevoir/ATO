@@ -24,10 +24,10 @@ const e2e = ATO.fromCommandLine();
 const dedicated = new Orchestrator(OrchestratorMode.DedicatedServer)
   .addTests('MyAwesomeProject.Category.Name')
   .configureUnrealLag({
-	bindAddress: '127.0.0.1',
-	bindPort: 0,
-	serverProfile: 'Bad',
-	clientProfile: 'Bad',
+    bindAddress: '127.0.0.1',
+    bindPort: 0,
+    serverProfile: 'Bad',
+    clientProfile: 'Bad',
   });
 
 e2e.addOrchestrator(dedicated);
@@ -37,7 +37,9 @@ const code = await e2e.start();
 process.exit(code);
 ```
 
-`ATO.fromCommandLine()` still accepts runtime overrides such as `--clients`, `--port`, `--timeout`, `--serverExe`, `--clientExe`, and `--dryRun`.
-For native dedicated/listen orchestrators, omitting `--clients` allows ATO to spawn external clients on demand as the server requests them.
-You can call `addOrchestrator(...)` multiple times to run several native orchestrators sequentially from one top-level ATO session.
-
+`ATO.fromCommandLine()` still accepts runtime overrides such as `--clients`, `--port`, `--timeout`, `--serverExe`,
+`--clientExe`, and `--dryRun`.
+For native dedicated/listen orchestrators, omitting `--clients` allows ATO to spawn external clients on demand as the
+server requests them.
+You can call `addOrchestrator(...)` multiple times to run several native orchestrators sequentially from one top-level
+ATO session.
