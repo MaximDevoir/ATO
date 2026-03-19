@@ -9,6 +9,12 @@ function validateStandaloneFrameworkReport() {
     'ATC.STANDALONE_MODE.FAILING_FIRST_TASK_STOPS_SEQUENTIAL_CHAIN.',
     'ATC.STANDALONE_MODE.PARALLEL_FAILURE_COMPLETES_BLOCK_BUT_STOPS_AFTER_BLOCK.',
     'ATC.STANDALONE_MODE.NON_FATAL_EXPECT_DOES_NOT_ABORT_PARALLEL_PEERS.',
+    'ATC.EXCEPTIONS.EXPECT_ANY_THROW_REPORTS_WHEN_NOT_THROWN.',
+    'ATC.EXCEPTIONS.EXPECT_ANY_THROW_SUCCEEDS.',
+    'ATC.EXCEPTIONS.EXPECT_NO_THROW_REPORTS_THROWN_EXCEPTION.',
+    'ATC.EXCEPTIONS.EXPECT_NO_THROW_SUCCEEDS.',
+    'ATC.EXCEPTIONS.EXPECT_THROW_REPORTS_WRONG_TYPE.',
+    'ATC.EXCEPTIONS.EXPECT_THROW_SUCCEEDS.',
   ]);
 
   for (const test of validation.tests) {
@@ -245,6 +251,24 @@ function validateStandaloneFrameworkReport() {
       throw new Error('Scope C should not resolve to Scope B plan');
     }
   }
+  {
+    const ExpectExceptionUnsupportedMessageInTests = [
+      'ATC.EXCEPTIONS.EXPECT_ANY_THROW_REPORTS_WHEN_NOT_THROWN.',
+      'ATC.EXCEPTIONS.EXPECT_ANY_THROW_SUCCEEDS.',
+      'ATC.EXCEPTIONS.EXPECT_NO_THROW_REPORTS_THROWN_EXCEPTION.',
+      'ATC.EXCEPTIONS.EXPECT_NO_THROW_SUCCEEDS.',
+      'ATC.EXCEPTIONS.EXPECT_THROW_REPORTS_WRONG_TYPE.',
+      'ATC.EXCEPTIONS.EXPECT_THROW_SUCCEEDS.',
+    ];
+    for (const testPath of ExpectExceptionUnsupportedMessageInTests) {
+      const exceptionValidation = validation.getTestByPath(testPath);
+      exceptionValidation.expectResult('Fail');
+      exceptionValidation.expectNextLog({
+        type: 'Orchestrator',
+        logContains: 'C++ exceptions are disabled',
+      });
+    }
+  }
 }
 
 const ATCStandaloneTest = ATO.fromCommandLine();
@@ -255,6 +279,8 @@ const orchestrator = new Orchestrator(OrchestratorMode.Standalone);
 orchestrator.addTests('ATC.AssetAudits');
 orchestrator.addTests('ATC.STANDALONE_MODE');
 orchestrator.addTests('ATC.STANDALONE_SCOPED_PLANS');
+orchestrator.addTests('ATC.EXCEPTIONS');
+
 ATCStandaloneTest.addOrchestrator(orchestrator);
 
 let code = await ATCStandaloneTest.start();
