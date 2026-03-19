@@ -173,6 +173,78 @@ function validateStandaloneFrameworkReport() {
     source: { type: 'Orchestrator', orchestrator: 'STANDALONE' },
     fields: { state: 'Complete', completedRuns: 2, totalRuns: 2, repeatMode: 'Count', stopReason: 'MaxRunsReached' },
   });
+
+  {
+    const reusablePlanScopeA = validation.getTestByPath('ATC.STANDALONE_SCOPED_PLANS_A.ReusableDoesntCollide.');
+
+    reusablePlanScopeA.expectResult('Success');
+
+    reusablePlanScopeA.expectNextLog({
+      type: 'Orchestrator',
+      orchestrator: 'STANDALONE',
+      logContains: 'MyPlans.ScopeA.FirstTask',
+    });
+
+    reusablePlanScopeA.expectNextLog({
+      type: 'Orchestrator',
+      orchestrator: 'STANDALONE',
+      logContains: 'MyPlans.ScopeA.SecondTask',
+    });
+    if (reusablePlanScopeA.logs.some((l) => l.line.includes('ScopeB'))) {
+      throw new Error('Scope A test incorrectly used Scope B plan');
+    }
+    if (reusablePlanScopeA.logs.some((l) => l.line.includes('OuterScope'))) {
+      throw new Error('Scope A test incorrectly used global plan');
+    }
+  }
+  {
+    const reusablePlanScopeB = validation.getTestByPath('ATC.STANDALONE_SCOPED_PLANS_B.ReusableDoesntCollide.');
+
+    reusablePlanScopeB.expectResult('Success');
+
+    reusablePlanScopeB.expectNextLog({
+      type: 'Orchestrator',
+      orchestrator: 'STANDALONE',
+      logContains: 'MyPlans.ScopeB.FirstTask',
+    });
+
+    reusablePlanScopeB.expectNextLog({
+      type: 'Orchestrator',
+      orchestrator: 'STANDALONE',
+      logContains: 'MyPlans.ScopeB.SecondTask',
+    });
+
+    if (reusablePlanScopeB.logs.some((l) => l.line.includes('ScopeA'))) {
+      throw new Error('Scope B test incorrectly used Scope A plan');
+    }
+    if (reusablePlanScopeB.logs.some((l) => l.line.includes('OuterScope'))) {
+      throw new Error('Scope B test incorrectly used global plan');
+    }
+  }
+  {
+    const reusablePlanScopeC = validation.getTestByPath('ATC.STANDALONE_SCOPED_PLANS_C.ReusableDoesntCollide.');
+
+    reusablePlanScopeC.expectResult('Success');
+
+    reusablePlanScopeC.expectNextLog({
+      type: 'Orchestrator',
+      orchestrator: 'STANDALONE',
+      logContains: 'MyPlans.OuterScope.FirstTask',
+    });
+
+    reusablePlanScopeC.expectNextLog({
+      type: 'Orchestrator',
+      orchestrator: 'STANDALONE',
+      logContains: 'MyPlans.OuterScope.SecondTask',
+    });
+
+    if (reusablePlanScopeC.logs.some((l) => l.line.includes('ScopeA'))) {
+      throw new Error('Scope C should not resolve to Scope A plan');
+    }
+    if (reusablePlanScopeC.logs.some((l) => l.line.includes('ScopeB'))) {
+      throw new Error('Scope C should not resolve to Scope B plan');
+    }
+  }
 }
 
 const ATCStandaloneTest = ATO.fromCommandLine();
@@ -182,7 +254,7 @@ const orchestrator = new Orchestrator(OrchestratorMode.Standalone);
 
 orchestrator.addTests('ATC.AssetAudits');
 orchestrator.addTests('ATC.STANDALONE_MODE');
-
+orchestrator.addTests('ATC.STANDALONE_SCOPED_PLANS');
 ATCStandaloneTest.addOrchestrator(orchestrator);
 
 let code = await ATCStandaloneTest.start();
