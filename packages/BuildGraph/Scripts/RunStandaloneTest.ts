@@ -4,7 +4,7 @@ import { ATO, FrameworkValidation, Orchestrator, OrchestratorMode } from '@maxim
 function validateStandaloneFrameworkReport() {
   const validation = new FrameworkValidation(ATO.FrameworkValidationReporter.getReport()).assertNoIssues();
 
-  const allowedNonSuccessPaths = new Set([
+  const expectedFails = new Set([
     'ATC.STANDALONE_MODE.STANDALONE_REJECTS_EXTERNAL_CLIENTS.[Clients=1]',
     'ATC.STANDALONE_MODE.FAILING_FIRST_TASK_STOPS_SEQUENTIAL_CHAIN.',
     'ATC.STANDALONE_MODE.PARALLEL_FAILURE_COMPLETES_BLOCK_BUT_STOPS_AFTER_BLOCK.',
@@ -13,7 +13,7 @@ function validateStandaloneFrameworkReport() {
 
   for (const test of validation.tests) {
     const { path, result } = test.data;
-    if (allowedNonSuccessPaths.has(path)) {
+    if (expectedFails.has(path)) {
       if (result !== 'Fail' && result !== 'Error') {
         throw new Error(`Expected standalone validation test '${path}' to fail, but got '${result ?? 'Unknown'}'`);
       }
