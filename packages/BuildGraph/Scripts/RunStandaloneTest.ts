@@ -180,6 +180,135 @@ function validateStandaloneFrameworkReport() {
     fields: { state: 'Complete', completedRuns: 2, totalRuns: 2, repeatMode: 'Count', stopReason: 'MaxRunsReached' },
   });
 
+  const skipTask = validation
+    .getTestByPath('ATC.ATC_SKIP_TESTS.TASK_SKIP_ONLY_SKIPS_CURRENT_TASK.')
+    .expectResult('Success');
+  skipTask.expectNextLog({ type: 'Coordinator', coordinator: 'STANDALONE', logContains: 'SkipTask.Before' });
+  skipTask.expectNextEvent({
+    category: 'ATC_EVENT_MESSAGE',
+    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
+    fields: { kind: 'Skip', task: 'SkipOnlyCurrentTask' },
+    fieldContains: { message: 'SkipTask.Message' },
+  });
+  skipTask.expectNextLog({ type: 'Coordinator', coordinator: 'STANDALONE', logContains: 'SkipTask.NextTaskRan' });
+  if (skipTask.logs.some((entry) => entry.line.includes('SkipTask.After'))) {
+    throw new Error('ATC_SKIP_TASK unexpectedly continued executing the current task body');
+  }
+
+  const skipTest = validation.getTestByPath('ATC.ATC_SKIP_TESTS.TEST_SKIP_STOPS_CURRENT_RUN.').expectResult('Success');
+  skipTest.expectNextLog({ type: 'Coordinator', coordinator: 'STANDALONE', logContains: 'SkipTest.Before' });
+  skipTest.expectNextEvent({
+    category: 'ATC_EVENT_TEST_END',
+    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
+    fields: { testPath: 'ATC.ATC_SKIP_TESTS.TEST_SKIP_STOPS_CURRENT_RUN', success: true, skipped: true },
+    fieldContains: { message: 'SkipTest.Message' },
+  });
+  if (skipTest.logs.some((entry) => entry.line.includes('SkipTest.AfterTaskRan'))) {
+    throw new Error('ATC_SKIP unexpectedly allowed later tasks in the run to execute');
+  }
+  if (skipTest.logs.some((entry) => entry.line.includes('SkipTest.After'))) {
+    throw new Error('ATC_SKIP unexpectedly continued executing the current task body');
+  }
+
+  const skipTaskRetry = validation
+    .getTestByPath('ATC.ATC_SKIP_TESTS.SKIP_TASK_DOES_NOT_TRIGGER_RETRY.')
+    .expectResult('Success');
+  skipTaskRetry.expectNextLog({ type: 'Coordinator', coordinator: 'STANDALONE', logContains: 'SkipTaskRetry.Before' });
+  skipTaskRetry.expectNextLog({
+    type: 'Coordinator',
+    coordinator: 'STANDALONE',
+    logContains: 'SkipTaskRetry.NextTaskRan',
+  });
+  if (
+    skipTaskRetry.events.some(
+      (entry) => entry.category === 'ATC_EVENT_TASK_RETRY' && entry.fields.task === 'SkipTaskWithRetryConfigured',
+    )
+  ) {
+    throw new Error('ATC_SKIP_TASK unexpectedly triggered task retry handling');
+  }
+
+  const skipManyZero = validation.getTestByPath('ATC.ATC_SKIP_TESTS.SKIP_MANY_ZERO_IS_NOOP.').expectResult('Success');
+  skipManyZero.expectNextEvent({
+    category: 'ATC_EVENT_REPEAT',
+    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
+    fields: { state: 'RunStart', currentRun: 1, totalRuns: 2, repeatMode: 'Count' },
+  });
+  skipManyZero.expectNextEvent({
+    category: 'ATC_EVENT_REPEAT',
+    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
+    fields: { state: 'RunStart', currentRun: 2, totalRuns: 2, repeatMode: 'Count' },
+  });
+  if (
+    skipManyZero.events.some((entry) => entry.category === 'ATC_EVENT_REPEAT' && entry.fields.state === 'RunsSkipped')
+  ) {
+    throw new Error('ATC_SKIP_MANY(0) unexpectedly skipped one or more runs');
+  }
+
+  const skipMany = validation
+    .getTestByPath('ATC.ATC_SKIP_TESTS.TEST_SKIP_MANY_ADVANCES_REPEAT.')
+    .expectResult('Success');
+  skipMany.expectNextEvent({
+    category: 'ATC_EVENT_REPEAT',
+    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
+    fields: { state: 'RunStart', currentRun: 1, totalRuns: 11, repeatMode: 'Count' },
+  });
+  skipMany.expectNextLog({ type: 'Coordinator', coordinator: 'STANDALONE', logContains: 'SkipMany.Execution=1' });
+  skipMany.expectNextEvent({
+    category: 'ATC_EVENT_REPEAT',
+    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
+    fields: { state: 'RunsSkipped', afterRun: 1, skippedRuns: 4, nextRun: 6, totalRuns: 11, repeatMode: 'Count' },
+  });
+  skipMany.expectNextEvent({
+    category: 'ATC_EVENT_REPEAT',
+    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
+    fields: { state: 'RunStart', currentRun: 6, totalRuns: 11, repeatMode: 'Count' },
+  });
+  if (skipMany.logs.some((entry) => entry.line.includes('SkipMany.Continued.Execution=1'))) {
+    throw new Error('ATC_SKIP_MANY unexpectedly continued executing the current run after requesting a skip');
+  }
+  if (skipMany.logs.some((entry) => entry.line.includes('SkipMany.TailTask.Execution=1'))) {
+    throw new Error('ATC_SKIP_MANY unexpectedly allowed later tasks in the skipped run to execute');
+  }
+
+  const skipAll = validation
+    .getTestByPath('ATC.ATC_SKIP_TESTS.TEST_SKIP_ALL_STOPS_ALL_REPEATS.')
+    .expectResult('Success');
+  skipAll.expectNextEvent({
+    category: 'ATC_EVENT_REPEAT',
+    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
+    fields: { state: 'RunStart', currentRun: 1, totalRuns: 5, repeatMode: 'Count' },
+  });
+  skipAll.expectNextLog({ type: 'Coordinator', coordinator: 'STANDALONE', logContains: 'SkipAll.Execution=1' });
+  skipAll.expectNextEvent({
+    category: 'ATC_EVENT_REPEAT',
+    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
+    fields: { state: 'RunsSkipped', afterRun: 1, skippedRuns: 4, nextRun: 6, totalRuns: 5, repeatMode: 'Count' },
+  });
+  skipAll.expectNextEvent({
+    category: 'ATC_EVENT_REPEAT',
+    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
+    fields: {
+      state: 'Complete',
+      completedRuns: 5,
+      executedRuns: 1,
+      skippedRuns: 4,
+      totalRuns: 5,
+      repeatMode: 'Count',
+      stopReason: 'SkipAllRequested',
+    },
+  });
+  if (
+    skipAll.events.some(
+      (entry) =>
+        entry.category === 'ATC_EVENT_REPEAT' && entry.fields.state === 'RunStart' && entry.fields.currentRun === '2',
+    )
+  ) {
+    throw new Error('ATC_SKIP_ALL unexpectedly scheduled another concrete run after the skip-all request');
+  }
+  if (skipAll.logs.some((entry) => entry.line.includes('SkipAll.TailTaskRan'))) {
+    throw new Error('ATC_SKIP_ALL unexpectedly allowed later tasks in the skipped run to execute');
+  }
+
   {
     const reusablePlanScopeA = validation.getTestByPath('ATC.STANDALONE_SCOPED_PLANS_A.ReusableDoesntCollide.');
 
@@ -278,6 +407,7 @@ const coordinator = new Coordinator(CoordinatorMode.Standalone);
 
 coordinator.addTests('ATC.AssetAudits');
 coordinator.addTests('ATC.STANDALONE_MODE');
+coordinator.addTests('ATC.ATC_SKIP_TESTS');
 coordinator.addTests('ATC.STANDALONE_SCOPED_PLANS');
 coordinator.addTests('ATC.EXCEPTIONS');
 
