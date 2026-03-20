@@ -3,14 +3,14 @@ import type { UnrealLagProfileName } from '@maximdevoir/unreal-lag';
 // See https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-command-line-arguments-reference for list of some arguments.
 export type ProcessArgs = string[];
 
-export enum OrchestratorMode {
+export enum CoordinatorMode {
   DedicatedServer = 'DedicatedServer',
   ListenServer = 'ListenServer',
   Standalone = 'Standalone',
   PIE = 'PIE',
 }
 
-export type ATCOrchestratorLaunchMode = OrchestratorMode;
+export type ATCLaunchMode = CoordinatorMode;
 
 export interface UnrealLagProxyOptions {
   bindAddress?: string;
@@ -38,7 +38,7 @@ export interface ProcessLaunchOptions {
   execTests: string[];
   // array of commands pass into ExecCmds option.
   execCmds: string[];
-  // Whether to automatically inject ATC orchestrator/bootstrap and shutdown tests into the test queue.
+  // Whether to automatically inject ATC coordinator/bootstrap and shutdown tests into the test queue.
   // Defaults to true in RuntimePresets and can be disabled per process when not running ATC.
   automaticallyApplyBootstrapTestsCmds?: boolean;
 }
@@ -55,7 +55,7 @@ export interface ClientOptions extends ProcessLaunchOptions {
 
 export interface E2ERuntimeOptions {
   // Maximum number of external client processes available to launch for DedicatedServer / ListenServer runs.
-  // When omitted, ATO will spawn as many external clients as the native orchestrator requests.
+  // When omitted, ATO will spawn as many external clients as the native coordinator requests.
   // Standalone and PIE ignore this and run with zero external ATC clients.
   clientCount?: number;
   port?: number;

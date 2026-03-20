@@ -1,4 +1,4 @@
-import type { OrchestratorMode } from './ATO.options';
+import type { CoordinatorMode } from './ATO.options';
 
 export const ATC_RUN_TESTS_COMMAND = 'ATC.RunTests';
 export const ATC_CLIENT_BOOTSTRAP_TEST = 'ATC.ClientBootstrap';
@@ -11,7 +11,7 @@ export const ATC_ORCHESTRATOR_TESTS = {
   ListenServer: 'ZZZ.ATC.Orchestrator.ListenServer',
   Standalone: 'ZZZ.ATC.Orchestrator.Standalone',
   PIE: 'ZZZ.ATC.Orchestrator.PIE',
-} as const satisfies Record<OrchestratorMode, string>;
+} as const satisfies Record<CoordinatorMode, string>;
 
 export function getATCIndexedClientBootstrapTest(clientIndex: number) {
   return `${ATC_CLIENT_BOOTSTRAP_TEST}.${clientIndex}`;

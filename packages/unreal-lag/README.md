@@ -52,8 +52,8 @@ latency > 200 ms, or duplication > 5%).
 
 ## Orchestrator integration
 
-The multiplayer orchestrator starts `UnrealLag` automatically, then points clients at the proxy endpoint instead of the
-real server. The current runner integration configures both server and client sides through profiles in code.
+The orchestrator starts `UnrealLag` automatically, then points clients at the proxy endpoint instead of the real server.
+The current runner integration configures both server and client sides through profiles in code.
 
 ## Notes
 

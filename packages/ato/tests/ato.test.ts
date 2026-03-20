@@ -4,12 +4,12 @@ import {
   ATC_CLIENT_REQUEST_LOG_PREFIX,
   ATC_RUN_TESTS_COMMAND,
   ATO,
+  Coordinator,
+  CoordinatorMode,
   createAutomationObservationState,
   formatAutomationSummaryLine,
   getATCIndexedClientBootstrapTest,
   getAutomationTotals,
-  Orchestrator,
-  OrchestratorMode,
   observeAutomationLogLine,
   parseATCClientRequestMetadataLine,
   resolveProcessExitCode,
@@ -24,7 +24,7 @@ function createPreview() {
       projectRoot: 'D:/ue-projects/inv',
     },
   });
-  const orchestrator = new Orchestrator(OrchestratorMode.DedicatedServer)
+  const coordinator = new Coordinator(CoordinatorMode.DedicatedServer)
     .configureServer({
       exe: 'D:/fake/invServer.exe',
       automaticallyApplyBootstrapTestsCmds: false,
@@ -34,13 +34,13 @@ function createPreview() {
       exe: 'D:/fake/UnrealEditor-Cmd.exe',
       automaticallyApplyBootstrapTestsCmds: false,
     });
-  session.addOrchestrator(orchestrator);
+  session.addCoordinator(coordinator);
   const [preview] = session.preview();
   expect(preview).toBeTruthy();
   if (!preview) {
-    throw new Error('Expected preview to be available once an orchestrator is configured');
+    throw new Error('Expected preview to be available once a coordinator is configured');
   }
-  return { session, orchestrator, preview };
+  return { session, coordinator: coordinator, preview };
 }
 function getPreview(session: ATO) {
   const [preview] = session.preview();
@@ -63,12 +63,12 @@ function expectArgMissingByPrefix(args: string[], expectedMissingPrefix: string)
 }
 describe('ATO', () => {
   it('removes excluded option names case-insensitively', () => {
-    const { session, orchestrator } = createPreview();
-    orchestrator.configureServer({
+    const { session, coordinator } = createPreview();
+    coordinator.configureServer({
       extraArgs: ['--version=3.0', '-VerSiOn', '--verSion', '14', '--verSion 15', '--help', '--height=100'],
       excludeArgs: ['-version', 'h'],
     });
-    orchestrator.configureClient({
+    coordinator.configureClient({
       extraArgs: ['--version=9.9', '--verSion 12', '--help'],
       excludeArgs: ['version'],
     });
@@ -88,8 +88,8 @@ describe('ATO', () => {
     ]);
   });
   it('keeps the last named extra arg across different representations', () => {
-    const { session, orchestrator } = createPreview();
-    orchestrator.configureClient({
+    const { session, coordinator } = createPreview();
+    coordinator.configureClient({
       extraArgs: ['--outFile=a.log', '-outFile', 'b.log', 'outFILE c.log', '--MAP=one', '-map', 'two'],
       excludeArgs: [],
     });
@@ -108,8 +108,8 @@ describe('ATO', () => {
     expectArgMissing(args, '--MAP=one');
   });
   it('builds ExecCmds when only commands are supplied', () => {
-    const { session, orchestrator } = createPreview();
-    orchestrator.configureClient({ execCmds: ['Automation List', 'quit'], execTests: [] });
+    const { session, coordinator } = createPreview();
+    coordinator.configureClient({ execCmds: ['Automation List', 'quit'], execTests: [] });
     const preview = getPreview(session);
     expect(preview.clientTemplate?.args).toEqual([
       'D:/ue-projects/inv/inv.uproject',
@@ -127,8 +127,8 @@ describe('ATO', () => {
     ]);
   });
   it('appends ExecTests after ExecCmds', () => {
-    const { session, orchestrator } = createPreview();
-    orchestrator.configureClient({ execCmds: ['Automation List', 'quit'], execTests: ['AwesomeInventory', 'Smoke'] });
+    const { session, coordinator } = createPreview();
+    coordinator.configureClient({ execCmds: ['Automation List', 'quit'], execTests: ['AwesomeInventory', 'Smoke'] });
     const preview = getPreview(session);
     expect(preview.clientTemplate?.args).toEqual([
       'D:/ue-projects/inv/inv.uproject',
@@ -145,7 +145,7 @@ describe('ATO', () => {
       '-testexit=Automation Test Queue Empty',
     ]);
   });
-  it('automatically appends ATC dedicated orchestrator identity and bootstrap tests by default', () => {
+  it('automatically appends ATC dedicated coordinator identity and bootstrap tests by default', () => {
     const session = new ATO({
       commandLineContext: {
         ueRoot: 'D:/uei/UE5.7.3/Engine',
@@ -153,12 +153,12 @@ describe('ATO', () => {
         projectRoot: 'D:/ue-projects/inv',
       },
     });
-    const orchestrator = new Orchestrator(OrchestratorMode.DedicatedServer)
+    const coordinator = new Coordinator(CoordinatorMode.DedicatedServer)
       .configureServer({ exe: 'D:/fake/invServer.exe' })
       .configureClient({ exe: 'D:/fake/UnrealEditor-Cmd.exe' })
       .addTests('AwesomeInventory.ATCMacro.Test')
       .configureRuntime({ clientCount: 1 });
-    session.addOrchestrator(orchestrator);
+    session.addCoordinator(coordinator);
 
     const preview = getPreview(session);
 
@@ -175,7 +175,7 @@ describe('ATO', () => {
         projectRoot: 'D:/ue-projects/inv',
       },
     });
-    const orchestrator = new Orchestrator(OrchestratorMode.DedicatedServer)
+    const coordinator = new Coordinator(CoordinatorMode.DedicatedServer)
       .configureServer({
         exe: 'D:/fake/invServer.exe',
         execTests: ['AwesomeInventory.ATCMacro.Test'],
@@ -186,7 +186,7 @@ describe('ATO', () => {
         automaticallyApplyBootstrapTestsCmds: false,
       })
       .configureRuntime({ clientCount: 1 });
-    session.addOrchestrator(orchestrator);
+    session.addCoordinator(coordinator);
 
     const preview = getPreview(session);
 
@@ -205,18 +205,18 @@ describe('ATO', () => {
         projectRoot: 'D:/ue-projects/inv',
       },
     });
-    const orchestrator = new Orchestrator(OrchestratorMode.DedicatedServer)
+    const coordinator = new Coordinator(CoordinatorMode.DedicatedServer)
       .configureServer({
         exe: 'D:/fake/invServer.exe',
         execTests: [
           'AwesomeInventory.ATCMacro.Test',
-          'ZZZ.ATC.Orchestrator.DedicatedServer',
+          'ZZZ.ATC.Coordinator.DedicatedServer',
           'ZZZ.ATC.ClientBootstrap.Finish',
         ],
       })
       .configureClient({ exe: 'D:/fake/UnrealEditor-Cmd.exe', execTests: [ATC_CLIENT_BOOTSTRAP_TEST] })
       .configureRuntime({ clientCount: 1 });
-    session.addOrchestrator(orchestrator);
+    session.addCoordinator(coordinator);
 
     const preview = getPreview(session);
     const serverExecCmds = preview.server.args.find((arg) => arg.startsWith('-ExecCmds='));
@@ -224,18 +224,18 @@ describe('ATO', () => {
 
     expect(serverExecCmds).toContain(`${ATC_RUN_TESTS_COMMAND} --mode=DedicatedServer`);
     expect(serverExecCmds).toContain('AwesomeInventory.ATCMacro.Test*');
-    expect(serverExecCmds).toContain('ZZZ.ATC.Orchestrator.DedicatedServer*');
+    expect(serverExecCmds).toContain('ZZZ.ATC.Coordinator.DedicatedServer*');
     expect(serverExecCmds).toContain('ZZZ.ATC.ClientBootstrap.Finish*');
     expect(clientExecCmds).toContain(`${ATC_RUN_TESTS_COMMAND} --mode=Client --clientIndex=0`);
     expect(clientExecCmds).toContain(`${ATC_CLIENT_BOOTSTRAP_TEST}*`);
   });
   it('rewrites ATC bootstrap tests to the matching client slot for the first 32 clients', () => {
-    const { session, orchestrator } = createPreview();
-    orchestrator.configureClient({
+    const { session, coordinator } = createPreview();
+    coordinator.configureClient({
       automaticallyApplyBootstrapTestsCmds: true,
       execTests: [ATC_CLIENT_BOOTSTRAP_TEST],
     });
-    orchestrator.configureRuntime({ clientCount: 33 });
+    coordinator.configureRuntime({ clientCount: 33 });
     const preview = getPreview(session);
 
     expect(preview.clients[0].args).toContain(
@@ -249,14 +249,14 @@ describe('ATO', () => {
     );
   });
   it('preserves already-explicit ATC bootstrap test names', () => {
-    const { session, orchestrator } = createPreview();
-    orchestrator.configureClient({ execTests: [getATCIndexedClientBootstrapTest(7)] });
+    const { session, coordinator } = createPreview();
+    coordinator.configureClient({ execTests: [getATCIndexedClientBootstrapTest(7)] });
 
     const preview = getPreview(session);
 
     expect(preview.clientTemplate?.args).toContain(`-ExecCmds=${ATC_RUN_TESTS_COMMAND} ATC.ClientBootstrap.7*`);
   });
-  it('uses standalone ATC orchestrator identity when configured without dedicated clients', () => {
+  it('uses standalone ATC coordinator identity when configured without dedicated clients', () => {
     const session = new ATO({
       commandLineContext: {
         ueRoot: 'D:/uei/UE5.7.3/Engine',
@@ -264,10 +264,10 @@ describe('ATO', () => {
         projectRoot: 'D:/ue-projects/inv',
       },
     });
-    const orchestrator = new Orchestrator(OrchestratorMode.Standalone)
+    const coordinator = new Coordinator(CoordinatorMode.Standalone)
       .configureServer({ exe: 'D:/fake/invServer.exe' })
       .addTests('AwesomeInventory.ATCMacro.Test');
-    session.addOrchestrator(orchestrator);
+    session.addCoordinator(coordinator);
 
     const preview = getPreview(session);
 
@@ -286,7 +286,7 @@ describe('ATO', () => {
         projectRoot: 'D:/ue-projects/inv',
       },
     });
-    const orchestrator = new Orchestrator(OrchestratorMode.Standalone)
+    const coordinator = new Coordinator(CoordinatorMode.Standalone)
       .configureServer({ exe: 'D:/fake/inv.exe' })
       .addTests('AwesomeInventoryStandalone.BasicStandaloneTest')
       .configureUnrealLag({
@@ -295,7 +295,7 @@ describe('ATO', () => {
         serverProfile: 'Bad',
         clientProfile: 'Bad',
       });
-    session.addOrchestrator(orchestrator);
+    session.addCoordinator(coordinator);
 
     const preview = getPreview(session);
 
@@ -309,7 +309,7 @@ describe('ATO', () => {
         projectRoot: 'D:/ue-projects/inv',
       },
     });
-    const orchestrator = new Orchestrator(OrchestratorMode.ListenServer)
+    const coordinator = new Coordinator(CoordinatorMode.ListenServer)
       .configureServer({ exe: 'D:/fake/UnrealEditor-Cmd.exe' })
       .configureClient({ exe: 'D:/fake/UnrealEditor-Cmd.exe' })
       .configureRuntime({ clientCount: 1 })
@@ -320,7 +320,7 @@ describe('ATO', () => {
         clientProfile: 'Bad',
       })
       .addTests('AwesomeInventory.ATCMacro.PARALLEL_TEST');
-    session.addOrchestrator(orchestrator);
+    session.addCoordinator(coordinator);
 
     const preview = getPreview(session);
 
@@ -343,7 +343,7 @@ describe('ATO', () => {
         projectRoot: 'D:/ue-projects/inv',
       },
     });
-    const orchestrator = new Orchestrator(OrchestratorMode.ListenServer)
+    const coordinator = new Coordinator(CoordinatorMode.ListenServer)
       .configureServer({
         exe: 'D:/fake/UnrealEditor-Cmd.exe',
         startupMap: '/Game/ThirdPerson/Lvl_ThirdPerson',
@@ -351,15 +351,15 @@ describe('ATO', () => {
       .configureClient({ exe: 'D:/fake/UnrealEditor-Cmd.exe' })
       .configureRuntime({ clientCount: 1 })
       .addTests('AwesomeInventory.ATCMacro.PARALLEL_TEST');
-    session.addOrchestrator(orchestrator);
+    session.addCoordinator(coordinator);
 
     const preview = getPreview(session);
 
     expect(preview.server.args).toContain('/Game/ThirdPerson/Lvl_ThirdPerson?listen');
   });
   it('lets generated args override earlier user-supplied ones', () => {
-    const { session, orchestrator } = createPreview();
-    orchestrator.configureServer({
+    const { session, coordinator } = createPreview();
+    coordinator.configureServer({
       extraArgs: ['--testexit=User Override', '--ExecCmds=Automation RunTest Old'],
       excludeArgs: [],
       execCmds: ['Automation List'],
@@ -401,14 +401,14 @@ describe('ATO', () => {
         projectRoot: 'D:/ue-projects/inv',
       },
     });
-    const orchestrator = new Orchestrator(OrchestratorMode.ListenServer)
+    const coordinator = new Coordinator(CoordinatorMode.ListenServer)
       .configureServer({
         exe: 'D:/fake/UnrealEditor-Cmd.exe',
         startupMap:
           '/Game/ThirdPerson/Lvl_ThirdPerson?game=/Game/ThirdPerson/Blueprints/BP_ThirdPersonGameMode.BP_ThirdPersonGameMode_C',
       })
       .addTests('AwesomeInventory.ATCMacro.PARALLEL_TEST');
-    session.addOrchestrator(orchestrator);
+    session.addCoordinator(coordinator);
 
     const preview = getPreview(session);
 
@@ -424,11 +424,11 @@ describe('ATO', () => {
         projectRoot: 'D:/ue-projects/inv',
       },
     });
-    const orchestrator = new Orchestrator(OrchestratorMode.DedicatedServer)
+    const coordinator = new Coordinator(CoordinatorMode.DedicatedServer)
       .configureServer({ exe: 'D:/fake/invServer.exe' })
       .configureClient({ exe: 'D:/fake/UnrealEditor-Cmd.exe' })
       .addTests('AwesomeInventory.ATCMacro.Test');
-    session.addOrchestrator(orchestrator);
+    session.addCoordinator(coordinator);
 
     const preview = getPreview(session);
 
@@ -436,7 +436,7 @@ describe('ATO', () => {
     expect(preview.clientTemplate?.args).toContain(`-ExecCmds=${ATC_RUN_TESTS_COMMAND} --mode=Client --clientIndex=0`);
     expect(preview.clients).toHaveLength(0);
   });
-  it('supports multiple orchestrators in a single ATO session', () => {
+  it('supports multiple coordinators in a single ATO session', () => {
     const session = new ATO({
       commandLineContext: {
         ueRoot: 'D:/uei/UE5.7.3/Engine',
@@ -446,15 +446,15 @@ describe('ATO', () => {
     });
 
     session
-      .addOrchestrator(
-        new Orchestrator(OrchestratorMode.DedicatedServer)
+      .addCoordinator(
+        new Coordinator(CoordinatorMode.DedicatedServer)
           .configureServer({ exe: 'D:/fake/invServer.exe' })
           .configureClient({ exe: 'D:/fake/UnrealEditor-Cmd.exe' })
           .configureRuntime({ clientCount: 1 })
           .addTests('AwesomeInventory.ATCMacro.Test'),
       )
-      .addOrchestrator(
-        new Orchestrator(OrchestratorMode.Standalone)
+      .addCoordinator(
+        new Coordinator(CoordinatorMode.Standalone)
           .configureServer({ exe: 'D:/fake/UnrealEditor-Cmd.exe' })
           .addTests('AwesomeInventoryStandalone.BasicStandaloneTest'),
       );
@@ -470,8 +470,8 @@ describe('ATO', () => {
     );
   });
   it('omits the generated testexit arg when disabled', () => {
-    const { session, orchestrator } = createPreview();
-    orchestrator.configureServer({ testExit: undefined });
+    const { session, coordinator } = createPreview();
+    coordinator.configureServer({ testExit: undefined });
     const preview = getPreview(session);
     expectArgMissingByPrefix(preview.server.args, '-testexit=');
   });

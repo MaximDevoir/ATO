@@ -4,7 +4,7 @@
 
 ## Highlights
 
-- orchestrator-first native ATC runs
+- coordinator-first native ATC runs
 - on-demand external client spin-up driven by server log metadata
 - optional `UnrealLag` proxy integration
 
@@ -39,7 +39,7 @@ process.exit(code);
 
 `ATO.fromCommandLine()` still accepts runtime overrides such as `--clients`, `--port`, `--timeout`, `--serverExe`,
 `--clientExe`, and `--dryRun`.
-For native dedicated/listen orchestrators, omitting `--clients` allows ATO to spawn external clients on demand as the
+For native dedicated/listen coordinators, omitting `--clients` allows ATO to spawn external clients on demand as the
 server requests them.
-You can call `addOrchestrator(...)` multiple times to run several native orchestrators sequentially from one top-level
+You can call `addOrchestrator(...)` multiple times to run several native coordinators sequentially from one top-level
 ATO session.

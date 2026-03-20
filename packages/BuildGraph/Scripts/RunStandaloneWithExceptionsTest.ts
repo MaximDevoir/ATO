@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { ATO, FrameworkValidation, Orchestrator, OrchestratorMode } from '@maximdevoir/ato';
+import { ATO, Coordinator, CoordinatorMode, FrameworkValidation } from '@maximdevoir/ato';
 
 function validateStandaloneWithExceptionsFrameworkReport() {
   const validation = new FrameworkValidation(ATO.FrameworkValidationReporter.getReport()).assertNoIssues();
@@ -29,74 +29,74 @@ function validateStandaloneWithExceptionsFrameworkReport() {
   }
 
   validation.getTestByPath('ATC.EXCEPTIONS.EXPECT_ANY_THROW_SUCCEEDS.').expectResult('Success').expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'STANDALONE',
+    type: 'Coordinator',
+    coordinator: 'STANDALONE',
     logContains: 'ExpectAnyThrow.Success.AfterExpect',
   });
 
   const expectAnyThrowFailure = validation.getTestByPath('ATC.EXCEPTIONS.EXPECT_ANY_THROW_REPORTS_WHEN_NOT_THROWN.');
   expectAnyThrowFailure.expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'STANDALONE',
+    type: 'Coordinator',
+    coordinator: 'STANDALONE',
     logContains: 'ExpectAnyThrow.Failure.BeforeExpect',
   });
   expectAnyThrowFailure.expectNextEvent({
     category: 'ATC_EVENT_MESSAGE',
-    source: { type: 'Orchestrator', orchestrator: 'STANDALONE' },
+    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
     fields: { kind: 'NonFatalError' },
     fieldContains: { message: 'to throw an exception, but it did not throw' },
   });
   expectAnyThrowFailure.expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'STANDALONE',
+    type: 'Coordinator',
+    coordinator: 'STANDALONE',
     logContains: 'ExpectAnyThrow.Failure.AfterExpect',
   });
 
   validation.getTestByPath('ATC.EXCEPTIONS.EXPECT_THROW_SUCCEEDS.').expectResult('Success').expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'STANDALONE',
+    type: 'Coordinator',
+    coordinator: 'STANDALONE',
     logContains: 'ExpectThrow.Success.AfterExpect',
   });
 
   const expectThrowFailure = validation.getTestByPath('ATC.EXCEPTIONS.EXPECT_THROW_REPORTS_WRONG_TYPE.');
   expectThrowFailure.expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'STANDALONE',
+    type: 'Coordinator',
+    coordinator: 'STANDALONE',
     logContains: 'ExpectThrow.Failure.BeforeExpect',
   });
   expectThrowFailure.expectNextEvent({
     category: 'ATC_EVENT_MESSAGE',
-    source: { type: 'Orchestrator', orchestrator: 'STANDALONE' },
+    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
     fields: { kind: 'NonFatalError' },
     fieldContains: { message: 'to throw FString, but it threw an int32 exception: 7' },
   });
   expectThrowFailure.expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'STANDALONE',
+    type: 'Coordinator',
+    coordinator: 'STANDALONE',
     logContains: 'ExpectThrow.Failure.AfterExpect',
   });
 
   validation.getTestByPath('ATC.EXCEPTIONS.EXPECT_NO_THROW_SUCCEEDS.').expectResult('Success').expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'STANDALONE',
+    type: 'Coordinator',
+    coordinator: 'STANDALONE',
     logContains: 'ExpectNoThrow.Success.AfterExpect',
   });
 
   const expectNoThrowFailure = validation.getTestByPath('ATC.EXCEPTIONS.EXPECT_NO_THROW_REPORTS_THROWN_EXCEPTION.');
   expectNoThrowFailure.expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'STANDALONE',
+    type: 'Coordinator',
+    coordinator: 'STANDALONE',
     logContains: 'ExpectNoThrow.Failure.BeforeExpect',
   });
   expectNoThrowFailure.expectNextEvent({
     category: 'ATC_EVENT_MESSAGE',
-    source: { type: 'Orchestrator', orchestrator: 'STANDALONE' },
+    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
     fields: { kind: 'NonFatalError' },
     fieldContains: { message: 'to not throw, but it threw an FString exception: "NoThrowFailure"' },
   });
   expectNoThrowFailure.expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'STANDALONE',
+    type: 'Coordinator',
+    coordinator: 'STANDALONE',
     logContains: 'ExpectNoThrow.Failure.AfterExpect',
   });
 }
@@ -104,9 +104,9 @@ function validateStandaloneWithExceptionsFrameworkReport() {
 const ATCStandaloneWithExceptionsTest = ATO.fromCommandLine();
 ATO.FrameworkValidationReporter.reset().enable();
 
-const orchestrator = new Orchestrator(OrchestratorMode.Standalone);
-orchestrator.addTests('ATC.EXCEPTIONS');
-ATCStandaloneWithExceptionsTest.addOrchestrator(orchestrator);
+const testCoordinator = new Coordinator(CoordinatorMode.Standalone);
+testCoordinator.addTests('ATC.EXCEPTIONS');
+ATCStandaloneWithExceptionsTest.addCoordinator(testCoordinator);
 
 let code = await ATCStandaloneWithExceptionsTest.start();
 

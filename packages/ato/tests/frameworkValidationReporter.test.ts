@@ -23,7 +23,7 @@ describe('FrameworkValidationReporter', () => {
     const reporter = new FrameworkValidationReporterController();
     reporter.observeProcessLine(
       'DEDICATED',
-      '[8:10:31 AM] LogAutomationController: Display: Test Started. Name={ListenModeBasic.} Path={ATC.ORCHESTRATOR_DEDICATED.ListenModeBasic.}',
+      '[8:10:31 AM] LogAutomationController: Display: Test Started. Name={ListenModeBasic.} Path={ATC.COORDINATOR_DEDICATED.ListenModeBasic.}',
     );
     reporter.observeProcessLine('DEDICATED', '[8:10:31 AM] ATC_INTERNAL_TESTS: Display: DedicatedTask!');
 
@@ -32,8 +32,8 @@ describe('FrameworkValidationReporter', () => {
 
   it('parses runtime labels and automation controller start and end lines', () => {
     expect(parseFrameworkValidationLogSource('DEDICATED')).toEqual({
-      type: 'Orchestrator',
-      orchestrator: 'DEDICATED',
+      type: 'Coordinator',
+      coordinator: 'DEDICATED',
       label: 'DEDICATED',
     });
     expect(parseFrameworkValidationLogSource('CLIENT 7')).toEqual({
@@ -43,20 +43,20 @@ describe('FrameworkValidationReporter', () => {
     });
     expect(
       parseFrameworkValidationStartedTest(
-        'LogAutomationController: Display: Test Started. Name={ListenModeBasic.} Path={ATC.ORCHESTRATOR_DEDICATED.ListenModeBasic.}',
+        'LogAutomationController: Display: Test Started. Name={ListenModeBasic.} Path={ATC.COORDINATOR_DEDICATED.ListenModeBasic.}',
       ),
     ).toEqual({
       name: 'ListenModeBasic.',
-      path: 'ATC.ORCHESTRATOR_DEDICATED.ListenModeBasic.',
+      path: 'ATC.COORDINATOR_DEDICATED.ListenModeBasic.',
     });
     expect(
       parseFrameworkValidationCompletedTest(
-        'LogAutomationController: Display: Test Completed. Result={Success} Name={ListenModeBasic.} Path={ATC.ORCHESTRATOR_DEDICATED.ListenModeBasic.}',
+        'LogAutomationController: Display: Test Completed. Result={Success} Name={ListenModeBasic.} Path={ATC.COORDINATOR_DEDICATED.ListenModeBasic.}',
       ),
     ).toEqual({
       result: 'Success',
       name: 'ListenModeBasic.',
-      path: 'ATC.ORCHESTRATOR_DEDICATED.ListenModeBasic.',
+      path: 'ATC.COORDINATOR_DEDICATED.ListenModeBasic.',
     });
     expect(
       parseFrameworkValidationEventFields(
@@ -84,12 +84,12 @@ describe('FrameworkValidationReporter', () => {
     });
   });
 
-  it('tracks orchestrator-owned tests and captures logs from orchestrator and clients', () => {
+  it('tracks coordinator-owned tests and captures logs from coordinator and clients', () => {
     const reporter = createReporter();
 
     reporter.observeProcessLine(
       'DEDICATED',
-      '[8:10:31 AM] LogAutomationController: Display: Test Started. Name={[Clients=2]} Path={ATC.ORCHESTRATOR_DEDICATED.MSG_FROM_ALL.[Clients=2]}',
+      '[8:10:31 AM] LogAutomationController: Display: Test Started. Name={[Clients=2]} Path={ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL.[Clients=2]}',
     );
     reporter.observeProcessLine(
       'DEDICATED',
@@ -99,25 +99,22 @@ describe('FrameworkValidationReporter', () => {
     reporter.observeProcessLine('CLIENT 1', '[8:10:33 AM] ATC_INTERNAL_TESTS: Display: LogFromOne!');
     reporter.observeProcessLine(
       'DEDICATED',
-      '[8:10:34 AM] LogAutomationController: Display: Test Completed. Result={Success} Name={[Clients=2]} Path={ATC.ORCHESTRATOR_DEDICATED.MSG_FROM_ALL.[Clients=2]}',
+      '[8:10:34 AM] LogAutomationController: Display: Test Completed. Result={Success} Name={[Clients=2]} Path={ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL.[Clients=2]}',
     );
 
     const report = reporter.getReport();
     expect(report.tests).toHaveLength(1);
     expect(report.issues).toEqual([]);
     expect(report.tests[0]).toMatchObject({
-      path: 'ATC.ORCHESTRATOR_DEDICATED.MSG_FROM_ALL.[Clients=2]',
+      path: 'ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL.[Clients=2]',
       name: '[Clients=2]',
-      pathName: composeFrameworkValidationPathName(
-        'ATC.ORCHESTRATOR_DEDICATED.MSG_FROM_ALL.[Clients=2]',
-        '[Clients=2]',
-      ),
+      pathName: composeFrameworkValidationPathName('ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL.[Clients=2]', '[Clients=2]'),
       result: 'Success',
       completed: true,
-      orchestrator: 'DEDICATED',
+      coordinator: 'DEDICATED',
     });
     expect(report.tests[0]?.logs.map((log) => log.source)).toEqual([
-      { type: 'Orchestrator', orchestrator: 'DEDICATED', label: 'DEDICATED' },
+      { type: 'Coordinator', coordinator: 'DEDICATED', label: 'DEDICATED' },
       { type: 'Client', clientIndex: 0, label: 'CLIENT 0' },
       { type: 'Client', clientIndex: 1, label: 'CLIENT 1' },
     ]);
@@ -142,9 +139,9 @@ describe('FrameworkValidationReporter', () => {
   it('increments ordinals for repeated automation tests with the same path and name', () => {
     const reporter = createReporter();
     const startedLine =
-      '[8:10:31 AM] LogAutomationController: Display: Test Started. Name={ListenModeBasic.} Path={ATC.ORCHESTRATOR_DEDICATED.ListenModeBasic.}';
+      '[8:10:31 AM] LogAutomationController: Display: Test Started. Name={ListenModeBasic.} Path={ATC.COORDINATOR_DEDICATED.ListenModeBasic.}';
     const completedLine =
-      '[8:10:32 AM] LogAutomationController: Display: Test Completed. Result={Success} Name={ListenModeBasic.} Path={ATC.ORCHESTRATOR_DEDICATED.ListenModeBasic.}';
+      '[8:10:32 AM] LogAutomationController: Display: Test Completed. Result={Success} Name={ListenModeBasic.} Path={ATC.COORDINATOR_DEDICATED.ListenModeBasic.}';
 
     reporter.observeProcessLine('DEDICATED', startedLine);
     reporter.observeProcessLine('DEDICATED', completedLine);
@@ -159,7 +156,7 @@ describe('FrameworkValidationReporter', () => {
 
     reporter.observeProcessLine(
       'DEDICATED',
-      '[8:10:31 AM] LogAutomationController: Display: Test Started. Name={ListenModeBasic.} Path={ATC.ORCHESTRATOR_DEDICATED.ListenModeBasic.}',
+      '[8:10:31 AM] LogAutomationController: Display: Test Started. Name={ListenModeBasic.} Path={ATC.COORDINATOR_DEDICATED.ListenModeBasic.}',
     );
     reporter.observeProcessLine(
       'DEDICATED',
@@ -186,7 +183,7 @@ describe('FrameworkValidationReporter', () => {
     const reporter = createReporter();
     reporter.observeProcessLine(
       'DEDICATED',
-      '[8:10:31 AM] LogAutomationController: Display: Test Started. Name={[Clients=2]} Path={ATC.ORCHESTRATOR_DEDICATED.MSG_FROM_ALL.[Clients=2]}',
+      '[8:10:31 AM] LogAutomationController: Display: Test Started. Name={[Clients=2]} Path={ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL.[Clients=2]}',
     );
     reporter.observeProcessLine(
       'DEDICATED',
@@ -204,22 +201,22 @@ describe('FrameworkValidationReporter', () => {
     );
     reporter.observeProcessLine(
       'DEDICATED',
-      '[8:10:35 AM] LogAutomationController: Display: Test Completed. Result={Success} Name={[Clients=2]} Path={ATC.ORCHESTRATOR_DEDICATED.MSG_FROM_ALL.[Clients=2]}',
+      '[8:10:35 AM] LogAutomationController: Display: Test Completed. Result={Success} Name={[Clients=2]} Path={ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL.[Clients=2]}',
     );
 
     const validation = new FrameworkValidation(reporter.getReport()).assertNoIssues();
-    const test = validation.getTestByPath('ATC.ORCHESTRATOR_DEDICATED.MSG_FROM_ALL.[Clients=2]');
+    const test = validation.getTestByPath('ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL.[Clients=2]');
     test.expectResult('Success');
     expect(
       test.expectNextEvent({
         category: 'ATC_EVENT_REPEAT',
-        source: { type: 'Orchestrator', orchestrator: 'DEDICATED' },
+        source: { type: 'Coordinator', coordinator: 'DEDICATED' },
         fields: { state: 'RunStart', currentRun: 1, totalRuns: 2, repeatMode: 'Count' },
       }).category,
     ).toBe('ATC_EVENT_REPEAT');
     test.expectNextParallelLogs([
       { type: 'Client', clientIndex: 1, logContains: 'HelloFromOneParallel!' },
-      { type: 'Orchestrator', orchestrator: 'DEDICATED', logContains: 'HelloFromOrchestratorParallel!' },
+      { type: 'Coordinator', coordinator: 'DEDICATED', logContains: 'HelloFromOrchestratorParallel!' },
     ]);
     expect(test.expectNextLog({ type: 'Client', clientIndex: 0, logContains: 'HelloFromZero!' }).line).toContain(
       'HelloFromZero!',
@@ -227,7 +224,7 @@ describe('FrameworkValidationReporter', () => {
     expect(
       test.expectNextEvent({
         category: 'ATC_EVENT_TASK_RETRY',
-        source: { type: 'Orchestrator', orchestrator: 'DEDICATED' },
+        source: { type: 'Coordinator', coordinator: 'DEDICATED' },
         fields: { task: 'RecoverFromFatal', state: 'Scheduled', nextAttempt: 2, retriesRemaining: 0 },
       }).fields.task,
     ).toBe('RecoverFromFatal');
@@ -237,7 +234,7 @@ describe('FrameworkValidationReporter', () => {
     FrameworkValidationReporter.reset().enable();
     FrameworkValidationReporter.observeProcessLine(
       'DEDICATED',
-      '[8:10:31 AM] LogAutomationController: Display: Test Started. Name={ListenModeBasic.} Path={ATC.ORCHESTRATOR_DEDICATED.ListenModeBasic.}',
+      '[8:10:31 AM] LogAutomationController: Display: Test Started. Name={ListenModeBasic.} Path={ATC.COORDINATOR_DEDICATED.ListenModeBasic.}',
     );
     FrameworkValidationReporter.observeProcessLine(
       'DEDICATED',
@@ -245,7 +242,7 @@ describe('FrameworkValidationReporter', () => {
     );
     FrameworkValidationReporter.observeProcessLine(
       'DEDICATED',
-      '[8:10:31 AM] LogAutomationController: Display: Test Completed. Result={Success} Name={ListenModeBasic.} Path={ATC.ORCHESTRATOR_DEDICATED.ListenModeBasic.}',
+      '[8:10:31 AM] LogAutomationController: Display: Test Completed. Result={Success} Name={ListenModeBasic.} Path={ATC.COORDINATOR_DEDICATED.ListenModeBasic.}',
     );
 
     const report = FrameworkValidationReporter.getReport();
@@ -253,7 +250,7 @@ describe('FrameworkValidationReporter', () => {
     expect(formatFrameworkValidationSummaryLines(report)).toEqual([
       'Framework Validation',
       'Tracked 1 automation test(s) with 1 captured log(s) and 0 captured event(s)',
-      'DEDICATED | Success | ATC.ORCHESTRATOR_DEDICATED.ListenModeBasic. | logs=1 | events=0',
+      'DEDICATED | Success | ATC.COORDINATOR_DEDICATED.ListenModeBasic. | logs=1 | events=0',
     ]);
 
     FrameworkValidationReporter.reset().disable();

@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { ATO, Orchestrator, OrchestratorMode } from './../src/ATO';
+import { ATO, Coordinator, CoordinatorMode } from './../src/ATO';
 
 describe('debug pie check', () => {
   it('resolves PIE executable to engine UnrealEditor when UERoot is provided', () => {
@@ -13,8 +13,8 @@ describe('debug pie check', () => {
       'D:/ue-projects/ATC_TEST_ENV/TemplateProject/TemplateProject.uproject',
     ];
     const ato = ATO.fromCommandLine({ argv });
-    const orchestrator = new Orchestrator(OrchestratorMode.PIE);
-    ato.addOrchestrator(orchestrator);
+    const coordinator = new Coordinator(CoordinatorMode.PIE);
+    ato.addCoordinator(coordinator);
 
     const [preview] = ato.preview();
     expect(preview).toBeTruthy();

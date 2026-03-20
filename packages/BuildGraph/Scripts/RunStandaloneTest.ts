@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { ATO, FrameworkValidation, Orchestrator, OrchestratorMode } from '@maximdevoir/ato';
+import { ATO, Coordinator, CoordinatorMode, FrameworkValidation } from '@maximdevoir/ato';
 
 function validateStandaloneFrameworkReport() {
   const validation = new FrameworkValidation(ATO.FrameworkValidationReporter.getReport()).assertNoIssues();
@@ -32,8 +32,8 @@ function validateStandaloneFrameworkReport() {
   }
 
   validation.getTestByPath('ATC.STANDALONE_MODE.STANDALONE_TEST.').expectResult('Success').expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'STANDALONE',
+    type: 'Coordinator',
+    coordinator: 'STANDALONE',
     logContains: 'StandaloneTask!',
   });
 
@@ -46,8 +46,8 @@ function validateStandaloneFrameworkReport() {
 
   for (const [path, logContains] of matrixExpectations) {
     validation.getTestByPath(path).expectResult('Success').expectNextLog({
-      type: 'Orchestrator',
-      orchestrator: 'STANDALONE',
+      type: 'Coordinator',
+      coordinator: 'STANDALONE',
       logContains,
     });
   }
@@ -65,8 +65,8 @@ function validateStandaloneFrameworkReport() {
 
   for (const [path, logContains] of paramTableExpectations) {
     validation.getTestByPath(path).expectResult('Success').expectNextLog({
-      type: 'Orchestrator',
-      orchestrator: 'STANDALONE',
+      type: 'Coordinator',
+      coordinator: 'STANDALONE',
       logContains,
     });
   }
@@ -75,8 +75,8 @@ function validateStandaloneFrameworkReport() {
     .getTestByPath('ATC.STANDALONE_MODE.MAP_WORLD_OPENWORLD_RESOLVES_CURRENT_WORLD.')
     .expectResult('Success')
     .expectNextLog({
-      type: 'Orchestrator',
-      orchestrator: 'STANDALONE',
+      type: 'Coordinator',
+      coordinator: 'STANDALONE',
       logContains: 'CurrentWorld=/Engine/Maps/Templates/OpenWorld',
     });
 
@@ -84,8 +84,8 @@ function validateStandaloneFrameworkReport() {
     .getTestByPath('ATC.STANDALONE_MODE.MAP_WORLD_TEMPLATE_DEFAULT_RESOLVES_CURRENT_WORLD.')
     .expectResult('Success')
     .expectNextLog({
-      type: 'Orchestrator',
-      orchestrator: 'STANDALONE',
+      type: 'Coordinator',
+      coordinator: 'STANDALONE',
       logContains: 'CurrentWorld=/Engine/Maps/Templates/Template_Default',
     });
 
@@ -98,8 +98,8 @@ function validateStandaloneFrameworkReport() {
 
   const sequentialFailure = validation.getTestByPath('ATC.STANDALONE_MODE.FAILING_FIRST_TASK_STOPS_SEQUENTIAL_CHAIN.');
   sequentialFailure.expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'STANDALONE',
+    type: 'Coordinator',
+    coordinator: 'STANDALONE',
     logContains: 'SequentialFailure.FirstTaskRan',
   });
   if (sequentialFailure.logs.some((entry) => entry.line.includes('SequentialFailure.SecondTaskRan'))) {
@@ -110,18 +110,18 @@ function validateStandaloneFrameworkReport() {
     'ATC.STANDALONE_MODE.PARALLEL_FAILURE_COMPLETES_BLOCK_BUT_STOPS_AFTER_BLOCK.',
   );
   parallelFailure.expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'STANDALONE',
+    type: 'Coordinator',
+    coordinator: 'STANDALONE',
     logContains: 'ParallelFailure.FirstTaskRan',
   });
   parallelFailure.expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'STANDALONE',
+    type: 'Coordinator',
+    coordinator: 'STANDALONE',
     logContains: 'ParallelFailure.SecondTaskRan',
   });
   parallelFailure.expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'STANDALONE',
+    type: 'Coordinator',
+    coordinator: 'STANDALONE',
     logContains: 'ParallelFailure.ThirdTaskRan',
   });
   if (parallelFailure.logs.some((entry) => entry.line.includes('ParallelFailure.AfterParallelTaskRan'))) {
@@ -132,18 +132,18 @@ function validateStandaloneFrameworkReport() {
     'ATC.STANDALONE_MODE.NON_FATAL_EXPECT_DOES_NOT_ABORT_PARALLEL_PEERS.',
   );
   nonFatalExpect.expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'STANDALONE',
+    type: 'Coordinator',
+    coordinator: 'STANDALONE',
     logContains: 'NonFatalExpect.BeforeExpect',
   });
   nonFatalExpect.expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'STANDALONE',
+    type: 'Coordinator',
+    coordinator: 'STANDALONE',
     logContains: 'NonFatalExpect.AfterExpect',
   });
   nonFatalExpect.expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'STANDALONE',
+    type: 'Coordinator',
+    coordinator: 'STANDALONE',
     logContains: 'NonFatalExpect.SecondTaskRan',
   });
 
@@ -154,29 +154,29 @@ function validateStandaloneFrameworkReport() {
   for (let run = 0; run < 2; run += 1) {
     actorWorldRepeat.expectNextEvent({
       category: 'ATC_EVENT_REPEAT',
-      source: { type: 'Orchestrator', orchestrator: 'STANDALONE' },
+      source: { type: 'Coordinator', coordinator: 'STANDALONE' },
       fields: { state: 'RunStart', currentRun: run + 1, totalRuns: 2, repeatMode: 'Count' },
     });
     actorWorldRepeat.expectNextLog({
-      type: 'Orchestrator',
-      orchestrator: 'STANDALONE',
+      type: 'Coordinator',
+      coordinator: 'STANDALONE',
       logContains: 'ActorWorldRepeat.SetupWorldFreshActor',
     });
     actorWorldRepeat.expectNextLog({
-      type: 'Orchestrator',
-      orchestrator: 'STANDALONE',
+      type: 'Coordinator',
+      coordinator: 'STANDALONE',
       logContains: 'ActorWorldRepeat.ComponentFound',
     });
     actorWorldRepeat.expectNextEvent({
       category: 'ATC_EVENT_REPEAT',
-      source: { type: 'Orchestrator', orchestrator: 'STANDALONE' },
+      source: { type: 'Coordinator', coordinator: 'STANDALONE' },
       fields: { state: 'RunEnd', currentRun: run + 1, totalRuns: 2, repeatMode: 'Count', failed: false },
     });
   }
 
   actorWorldRepeat.expectNextEvent({
     category: 'ATC_EVENT_REPEAT',
-    source: { type: 'Orchestrator', orchestrator: 'STANDALONE' },
+    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
     fields: { state: 'Complete', completedRuns: 2, totalRuns: 2, repeatMode: 'Count', stopReason: 'MaxRunsReached' },
   });
 
@@ -186,14 +186,14 @@ function validateStandaloneFrameworkReport() {
     reusablePlanScopeA.expectResult('Success');
 
     reusablePlanScopeA.expectNextLog({
-      type: 'Orchestrator',
-      orchestrator: 'STANDALONE',
+      type: 'Coordinator',
+      coordinator: 'STANDALONE',
       logContains: 'MyPlans.ScopeA.FirstTask',
     });
 
     reusablePlanScopeA.expectNextLog({
-      type: 'Orchestrator',
-      orchestrator: 'STANDALONE',
+      type: 'Coordinator',
+      coordinator: 'STANDALONE',
       logContains: 'MyPlans.ScopeA.SecondTask',
     });
     if (reusablePlanScopeA.logs.some((l) => l.line.includes('ScopeB'))) {
@@ -209,14 +209,14 @@ function validateStandaloneFrameworkReport() {
     reusablePlanScopeB.expectResult('Success');
 
     reusablePlanScopeB.expectNextLog({
-      type: 'Orchestrator',
-      orchestrator: 'STANDALONE',
+      type: 'Coordinator',
+      coordinator: 'STANDALONE',
       logContains: 'MyPlans.ScopeB.FirstTask',
     });
 
     reusablePlanScopeB.expectNextLog({
-      type: 'Orchestrator',
-      orchestrator: 'STANDALONE',
+      type: 'Coordinator',
+      coordinator: 'STANDALONE',
       logContains: 'MyPlans.ScopeB.SecondTask',
     });
 
@@ -233,14 +233,14 @@ function validateStandaloneFrameworkReport() {
     reusablePlanScopeC.expectResult('Success');
 
     reusablePlanScopeC.expectNextLog({
-      type: 'Orchestrator',
-      orchestrator: 'STANDALONE',
+      type: 'Coordinator',
+      coordinator: 'STANDALONE',
       logContains: 'MyPlans.OuterScope.FirstTask',
     });
 
     reusablePlanScopeC.expectNextLog({
-      type: 'Orchestrator',
-      orchestrator: 'STANDALONE',
+      type: 'Coordinator',
+      coordinator: 'STANDALONE',
       logContains: 'MyPlans.OuterScope.SecondTask',
     });
 
@@ -264,7 +264,7 @@ function validateStandaloneFrameworkReport() {
       const exceptionValidation = validation.getTestByPath(testPath);
       exceptionValidation.expectResult('Fail');
       exceptionValidation.expectNextLog({
-        type: 'Orchestrator',
+        type: 'Coordinator',
         logContains: 'C++ exceptions are disabled',
       });
     }
@@ -274,14 +274,14 @@ function validateStandaloneFrameworkReport() {
 const ATCStandaloneTest = ATO.fromCommandLine();
 ATO.FrameworkValidationReporter.reset().enable();
 
-const orchestrator = new Orchestrator(OrchestratorMode.Standalone);
+const coordinator = new Coordinator(CoordinatorMode.Standalone);
 
-orchestrator.addTests('ATC.AssetAudits');
-orchestrator.addTests('ATC.STANDALONE_MODE');
-orchestrator.addTests('ATC.STANDALONE_SCOPED_PLANS');
-orchestrator.addTests('ATC.EXCEPTIONS');
+coordinator.addTests('ATC.AssetAudits');
+coordinator.addTests('ATC.STANDALONE_MODE');
+coordinator.addTests('ATC.STANDALONE_SCOPED_PLANS');
+coordinator.addTests('ATC.EXCEPTIONS');
 
-ATCStandaloneTest.addOrchestrator(orchestrator);
+ATCStandaloneTest.addCoordinator(coordinator);
 
 let code = await ATCStandaloneTest.start();
 

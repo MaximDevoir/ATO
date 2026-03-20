@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ATO, Orchestrator, OrchestratorMode } from '../src/ATO';
+import { ATO, Coordinator, CoordinatorMode } from '../src/ATO';
 
 describe('debug preview', () => {
   it('client default includes LiveCoding flag', () => {
@@ -10,16 +10,16 @@ describe('debug preview', () => {
         projectRoot: 'D:/ue-projects/proj',
       },
     });
-    const orchestrator = new Orchestrator(OrchestratorMode.DedicatedServer)
+    const coordinator = new Coordinator(CoordinatorMode.DedicatedServer)
       .configureServer({
         exe: 'D:/fake/projServer.exe',
         automaticallyApplyBootstrapTestsCmds: false,
         testExit: 'Automation Test Queue Empty',
       })
       .configureClient({ exe: 'D:/fake/UnrealEditor-Cmd.exe', automaticallyApplyBootstrapTestsCmds: false });
-    session.addOrchestrator(orchestrator);
+    session.addCoordinator(coordinator);
 
-    orchestrator.configureClient({ execCmds: ['Automation List', 'quit'], execTests: [] });
+    coordinator.configureClient({ execCmds: ['Automation List', 'quit'], execTests: [] });
     const [preview] = session.preview();
     expect(preview.clientTemplate?.args).toContain('-LiveCoding=0');
   });

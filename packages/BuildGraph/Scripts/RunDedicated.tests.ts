@@ -1,29 +1,29 @@
 #!/usr/bin/env node
-import { ATO, FrameworkValidation, Orchestrator, OrchestratorMode } from '@maximdevoir/ato';
+import { ATO, Coordinator, CoordinatorMode, FrameworkValidation } from '@maximdevoir/ato';
 
 function validateDedicatedFrameworkReport() {
   const validation = new FrameworkValidation(ATO.FrameworkValidationReporter.getReport()).assertNoIssues();
 
-  validation.getTestByPath('ATC.ORCHESTRATOR_DEDICATED.ListenModeBasic.').expectResult('Success').expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'DEDICATED',
+  validation.getTestByPath('ATC.COORDINATOR_DEDICATED.ListenModeBasic.').expectResult('Success').expectNextLog({
+    type: 'Coordinator',
+    coordinator: 'DEDICATED',
     logContains: 'DedicatedTask!',
   });
 
   const repeatedDedicatedTest = validation
-    .getTestByPath('ATC.ORCHESTRATOR_DEDICATED.MSG_FROM_ALL.[Clients=2]')
+    .getTestByPath('ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL.[Clients=2]')
     .expectResult('Success');
 
   for (let run = 0; run < 4; run += 1) {
     repeatedDedicatedTest.expectNextEvent({
       category: 'ATC_EVENT_REPEAT',
-      source: { type: 'Orchestrator', orchestrator: 'DEDICATED' },
+      source: { type: 'Coordinator', coordinator: 'DEDICATED' },
       fields: { state: 'RunStart', currentRun: run + 1, totalRuns: 4, repeatMode: 'Count' },
     });
     repeatedDedicatedTest.expectNextLog({
-      type: 'Orchestrator',
-      orchestrator: 'DEDICATED',
-      logContains: 'InitialLogFromDedicatedOrchestrator!',
+      type: 'Coordinator',
+      coordinator: 'DEDICATED',
+      logContains: 'InitialLogFromDedicatedCoordinator!',
     });
     repeatedDedicatedTest.expectNextLog({
       type: 'Client',
@@ -37,106 +37,106 @@ function validateDedicatedFrameworkReport() {
     });
     repeatedDedicatedTest.expectNextEvent({
       category: 'ATC_EVENT_REPEAT',
-      source: { type: 'Orchestrator', orchestrator: 'DEDICATED' },
+      source: { type: 'Coordinator', coordinator: 'DEDICATED' },
       fields: { state: 'RunEnd', currentRun: run + 1, totalRuns: 4, repeatMode: 'Count', failed: false },
     });
   }
 
   repeatedDedicatedTest.expectNextEvent({
     category: 'ATC_EVENT_REPEAT',
-    source: { type: 'Orchestrator', orchestrator: 'DEDICATED' },
+    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
     fields: { state: 'Complete', completedRuns: 4, totalRuns: 4, repeatMode: 'Count', stopReason: 'MaxRunsReached' },
   });
 
   const retryAndMessagesTest = validation
-    .getTestByPath('ATC.ORCHESTRATOR_DEDICATED.RETRY_AND_MESSAGES.')
+    .getTestByPath('ATC.COORDINATOR_DEDICATED.RETRY_AND_MESSAGES.')
     .expectResult('Success');
 
   retryAndMessagesTest.expectNextEvent({
     category: 'ATC_EVENT_MESSAGE',
-    source: { type: 'Orchestrator', orchestrator: 'DEDICATED' },
+    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
     fields: { kind: 'NonFatalError', task: 'RecoverFromNonFatal' },
     fieldContains: { message: 'Expected false to be true' },
   });
   retryAndMessagesTest.expectNextEvent({
     category: 'ATC_EVENT_TASK_RETRY',
-    source: { type: 'Orchestrator', orchestrator: 'DEDICATED' },
+    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
     fields: { task: 'RecoverFromNonFatal', state: 'Scheduled', nextAttempt: 2, retriesRemaining: 0 },
   });
   retryAndMessagesTest.expectNextEvent({
     category: 'ATC_EVENT_TASK_RETRY',
-    source: { type: 'Orchestrator', orchestrator: 'DEDICATED' },
+    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
     fields: { task: 'RecoverFromNonFatal', state: 'Executing', attempt: 2, retriesRemaining: 0 },
   });
   retryAndMessagesTest.expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'DEDICATED',
+    type: 'Coordinator',
+    coordinator: 'DEDICATED',
     logContains: 'RecoveredFromNonFatal!',
   });
   retryAndMessagesTest.expectNextEvent({
     category: 'ATC_EVENT_MESSAGE',
-    source: { type: 'Orchestrator', orchestrator: 'DEDICATED' },
+    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
     fields: { kind: 'FatalError', task: 'RecoverFromFatal' },
     fieldContains: { message: 'RecoverFromFatal.FirstAttempt' },
   });
   retryAndMessagesTest.expectNextEvent({
     category: 'ATC_EVENT_TASK_RETRY',
-    source: { type: 'Orchestrator', orchestrator: 'DEDICATED' },
+    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
     fields: { task: 'RecoverFromFatal', state: 'Scheduled', nextAttempt: 2, retriesRemaining: 0 },
   });
   retryAndMessagesTest.expectNextEvent({
     category: 'ATC_EVENT_TASK_RETRY',
-    source: { type: 'Orchestrator', orchestrator: 'DEDICATED' },
+    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
     fields: { task: 'RecoverFromFatal', state: 'Executing', attempt: 2, retriesRemaining: 0 },
   });
   retryAndMessagesTest.expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'DEDICATED',
+    type: 'Coordinator',
+    coordinator: 'DEDICATED',
     logContains: 'RecoveredFromFatal!',
   });
   retryAndMessagesTest.expectNextEvent({
     category: 'ATC_EVENT_MESSAGE',
-    source: { type: 'Orchestrator', orchestrator: 'DEDICATED' },
+    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
     fields: { kind: 'Warning', task: 'EmitWarning' },
     fieldContains: { message: 'EmitWarning.WarningKind' },
   });
   retryAndMessagesTest.expectNextLog({
-    type: 'Orchestrator',
-    orchestrator: 'DEDICATED',
+    type: 'Coordinator',
+    coordinator: 'DEDICATED',
     logContains: 'WarningIssued!',
   });
   retryAndMessagesTest.expectNextEvent({
     category: 'ATC_EVENT_MESSAGE',
-    source: { type: 'Orchestrator', orchestrator: 'DEDICATED' },
+    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
     fields: { kind: 'Skip', task: 'EmitSkip' },
     fieldContains: { message: 'EmitSkip.SkipKind' },
   });
 
   const repeatUntilFailTest = validation
-    .getTestByPath('ATC.ORCHESTRATOR_DEDICATED.REPEAT_UNTIL_FAIL_TRACKING.')
+    .getTestByPath('ATC.COORDINATOR_DEDICATED.REPEAT_UNTIL_FAIL_TRACKING.')
     .expectResult('Success');
 
   for (let run = 0; run < 3; run += 1) {
     repeatUntilFailTest.expectNextEvent({
       category: 'ATC_EVENT_REPEAT',
-      source: { type: 'Orchestrator', orchestrator: 'DEDICATED' },
+      source: { type: 'Coordinator', coordinator: 'DEDICATED' },
       fields: { state: 'RunStart', currentRun: run + 1, totalRuns: 3, repeatMode: 'UntilFail' },
     });
     repeatUntilFailTest.expectNextLog({
-      type: 'Orchestrator',
-      orchestrator: 'DEDICATED',
+      type: 'Coordinator',
+      coordinator: 'DEDICATED',
       logContains: 'RepeatUntilFailTick!',
     });
     repeatUntilFailTest.expectNextEvent({
       category: 'ATC_EVENT_REPEAT',
-      source: { type: 'Orchestrator', orchestrator: 'DEDICATED' },
+      source: { type: 'Coordinator', coordinator: 'DEDICATED' },
       fields: { state: 'RunEnd', currentRun: run + 1, totalRuns: 3, repeatMode: 'UntilFail', failed: false },
     });
   }
 
   repeatUntilFailTest.expectNextEvent({
     category: 'ATC_EVENT_REPEAT',
-    source: { type: 'Orchestrator', orchestrator: 'DEDICATED' },
+    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
     fields: {
       state: 'Complete',
       completedRuns: 3,
@@ -150,17 +150,17 @@ function validateDedicatedFrameworkReport() {
 const ATCDedicatedTest = ATO.fromCommandLine();
 ATO.FrameworkValidationReporter.reset().enable();
 
-const orchestrator = new Orchestrator(OrchestratorMode.DedicatedServer).addTests().configureUnrealLag({
+const coordinator = new Coordinator(CoordinatorMode.DedicatedServer).addTests().configureUnrealLag({
   bindAddress: '127.0.0.1',
   bindPort: 0,
   serverProfile: 'Bad',
   clientProfile: 'Bad',
 });
 
-orchestrator.addTests('ATC.AssetAudits');
-orchestrator.addTests('ATC.ORCHESTRATOR_DEDICATED');
+coordinator.addTests('ATC.AssetAudits');
+coordinator.addTests('ATC.COORDINATOR_DEDICATED');
 
-ATCDedicatedTest.addOrchestrator(orchestrator);
+ATCDedicatedTest.addCoordinator(coordinator);
 
 let code = await ATCDedicatedTest.start();
 

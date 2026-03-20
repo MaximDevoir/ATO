@@ -18,12 +18,12 @@ import type {
   ServerOptions,
   UnrealLagProxyOptions,
 } from './ATO.options';
-import { OrchestratorMode, RuntimePresets } from './ATO.options';
+import { CoordinatorMode, RuntimePresets } from './ATO.options';
 import { FrameworkValidationReporter, formatFrameworkValidationSummaryLines } from './FrameworkValidationReporter';
 
 export * from './ATCAutomationNames';
 export { ATC_RUN_TESTS_COMMAND } from './ATCAutomationNames';
-export { OrchestratorMode, RuntimePresets } from './ATO.options';
+export { CoordinatorMode, RuntimePresets } from './ATO.options';
 export * from './FrameworkValidationReporter';
 
 interface ATOInit {
@@ -74,7 +74,7 @@ interface ResolvedLaunchPlan {
   effectiveTimeout: number;
   server: ResolvedServerOptions;
   clientTemplate?: ResolvedClientTemplate;
-  atcOrchestratorMode: OrchestratorMode;
+  atcCoordinatorMode: CoordinatorMode;
   maxExternalClients?: number;
   preview: ResolvedPreview;
   dryRun: boolean;
@@ -104,7 +104,7 @@ interface ATCObservationState {
 const FAILURE_EXIT_CODE = 1;
 
 type ProcessExitResult = number | 'timeout';
-type ATCRunTestsMode = OrchestratorMode | 'Client';
+type ATCRunTestsMode = CoordinatorMode | 'Client';
 
 type AutomationTerminalResult = 'Success' | 'Fail' | 'Error' | 'NotRun' | 'Unknown';
 
@@ -820,10 +820,10 @@ function resolveListenStartupUrl(startupMap: string | undefined) {
 function buildServerArgs(
   serverOptions: ServerOptions,
   port?: number,
-  atcOrchestratorMode: OrchestratorMode = OrchestratorMode.DedicatedServer,
+  atcCoordinatorMode: CoordinatorMode = CoordinatorMode.DedicatedServer,
 ) {
   const positionals = [serverOptions.project];
-  if (atcOrchestratorMode === 'ListenServer') {
+  if (atcCoordinatorMode === 'ListenServer') {
     const listenStartupUrl = resolveListenStartupUrl(serverOptions.startupMap);
     if (listenStartupUrl) {
       positionals.push(listenStartupUrl);
@@ -833,9 +833,9 @@ function buildServerArgs(
   // Clone configured extra args. For non-dedicated modes we need to ensure '-server' is removed
   // so that ListenServer / Standalone don't accidentally have both '-game' and '-server'.
   let extraArgs = [...(serverOptions.extraArgs ?? [])];
-  if (atcOrchestratorMode !== 'DedicatedServer') {
+  if (atcCoordinatorMode !== 'DedicatedServer') {
     extraArgs = extraArgs.filter((a) => a !== '-server');
-    if (atcOrchestratorMode !== 'PIE' && !extraArgs.includes('-game')) {
+    if (atcCoordinatorMode !== 'PIE' && !extraArgs.includes('-game')) {
       extraArgs.unshift('-game');
     }
   }
@@ -850,7 +850,7 @@ function buildServerArgs(
       ...serverOptions,
       extraArgs,
     },
-    shouldAutomaticallyApplyBootstrapTests(serverOptions) ? atcOrchestratorMode : undefined,
+    shouldAutomaticallyApplyBootstrapTests(serverOptions) ? atcCoordinatorMode : undefined,
   );
 }
 
@@ -874,10 +874,10 @@ function buildProcessArgsWithATCRunTestsMode(
 function buildClientArgs(
   clientOptions: ResolvedClientOptions,
   hostOverride: string | undefined,
-  atcOrchestratorMode: OrchestratorMode,
+  atcCoordinatorMode: CoordinatorMode,
 ) {
   const runTestsMode: ATCRunTestsMode | undefined =
-    shouldAutomaticallyApplyBootstrapTests(clientOptions) && shouldApplyRemoteClientBootstrap(atcOrchestratorMode)
+    shouldAutomaticallyApplyBootstrapTests(clientOptions) && shouldApplyRemoteClientBootstrap(atcCoordinatorMode)
       ? 'Client'
       : undefined;
   return buildProcessArgsWithATCRunTestsMode(
@@ -989,15 +989,15 @@ function shouldAutomaticallyApplyBootstrapTests(launchOptions: ProcessLaunchOpti
   return launchOptions.automaticallyApplyBootstrapTestsCmds !== false;
 }
 
-function shouldApplyRemoteClientBootstrap(mode: OrchestratorMode) {
+function shouldApplyRemoteClientBootstrap(mode: CoordinatorMode) {
   return mode === 'DedicatedServer' || mode === 'ListenServer';
 }
 
-function requiresNetworkServer(mode: OrchestratorMode) {
+function requiresNetworkServer(mode: CoordinatorMode) {
   return mode === 'DedicatedServer' || mode === 'ListenServer';
 }
 
-function requiresImmediateNetworkServer(serverOptions: ServerOptions, mode: OrchestratorMode) {
+function requiresImmediateNetworkServer(serverOptions: ServerOptions, mode: CoordinatorMode) {
   if (mode === 'DedicatedServer') {
     return true;
   }
@@ -1005,7 +1005,7 @@ function requiresImmediateNetworkServer(serverOptions: ServerOptions, mode: Orch
   return mode === 'ListenServer' && !!serverOptions.startupMap;
 }
 
-function resolveOrchestratorProcessLabel(mode: OrchestratorMode) {
+function resolveCoordinatorProcessLabel(mode: CoordinatorMode) {
   switch (mode) {
     case 'DedicatedServer':
       return 'DEDICATED';
@@ -1020,11 +1020,11 @@ function resolveOrchestratorProcessLabel(mode: OrchestratorMode) {
   return 'SERVER';
 }
 
-function usesDedicatedServerExecutable(mode: OrchestratorMode) {
+function usesDedicatedServerExecutable(mode: CoordinatorMode) {
   return mode === 'DedicatedServer';
 }
 
-function resolveMaxExternalClientCount(mode: OrchestratorMode, runtimeClientCount: number | undefined) {
+function resolveMaxExternalClientCount(mode: CoordinatorMode, runtimeClientCount: number | undefined) {
   if (mode === 'Standalone' || mode === 'PIE') {
     return 0;
   }
@@ -1050,11 +1050,11 @@ function resolveClientLaunchOptions(
 function isATCBootstrapOrchestration(
   server: ResolvedServerOptions,
   clientTemplate: ResolvedClientTemplate | undefined,
-  atcOrchestratorMode: OrchestratorMode,
+  atcCoordinatorMode: CoordinatorMode,
 ) {
   return (
     !!clientTemplate &&
-    shouldApplyRemoteClientBootstrap(atcOrchestratorMode) &&
+    shouldApplyRemoteClientBootstrap(atcCoordinatorMode) &&
     shouldAutomaticallyApplyBootstrapTests(server) &&
     shouldAutomaticallyApplyBootstrapTests(clientTemplate)
   );
@@ -1068,21 +1068,21 @@ function findFirstExisting(candidates: string[]) {
   return candidates.find(Boolean) ?? '';
 }
 
-interface OrchestratorInit {
+interface CoordinatorInit {
   runtimeOptions?: E2ERuntimeOptions;
   server?: Partial<ServerOptions>;
   client?: Partial<ClientOptions>;
 }
 
-export class Orchestrator {
-  readonly mode: OrchestratorMode;
+export class Coordinator {
+  readonly mode: CoordinatorMode;
 
   private runtimeOptions: E2ERuntimeOptions;
   private serverOverrides: Partial<ServerOptions>;
   private clientOverrides: Partial<ClientOptions>;
   unrealLagOptions?: UnrealLagProxyOptions;
 
-  constructor(mode: OrchestratorMode, init: OrchestratorInit = {}) {
+  constructor(mode: CoordinatorMode, init: CoordinatorInit = {}) {
     this.mode = mode;
     this.runtimeOptions = { ...init.runtimeOptions };
     this.serverOverrides = clonePartialProcessLaunchOptions(init.server);
@@ -1128,7 +1128,7 @@ export class Orchestrator {
     }
     // ListenServer should not launch the Server executable mode flag. Remove any '-server' arg so
     // buildServerArgs can add '-game' appropriately for non-dedicated launches.
-    if (this.mode === OrchestratorMode.ListenServer && server.extraArgs) {
+    if (this.mode === CoordinatorMode.ListenServer && server.extraArgs) {
       server.extraArgs = server.extraArgs.filter((a) => a !== '-server');
     }
     return server;
@@ -1167,8 +1167,7 @@ export class ATO {
       })
       .option('port', {
         type: 'number',
-        description:
-          'UDP port the server should bind to; the orchestrator waits for this port before launching clients',
+        description: 'UDP port the server should bind to; the coordinator waits for this port before launching clients',
       })
       .option('timeout', {
         type: 'number',
@@ -1177,12 +1176,12 @@ export class ATO {
       .option('serverExe', {
         type: 'string',
         description:
-          'Optional override path to the server executable; otherwise the orchestrator probes common project locations',
+          'Optional override path to the server executable; otherwise the coordinator probes common project locations',
       })
       .option('clientExe', {
         type: 'string',
         description:
-          'Optional override path to the client executable; otherwise the orchestrator probes common locations',
+          'Optional override path to the client executable; otherwise the coordinator probes common locations',
       })
       .option('dryRun', {
         type: 'boolean',
@@ -1210,7 +1209,7 @@ export class ATO {
     });
   }
 
-  orchestrators: Orchestrator[] = [];
+  coordinators: Coordinator[] = [];
   serverProc?: ChildProcess;
   unrealLag?: UnrealLag;
   unrealLagBindInfo?: BindInfo;
@@ -1239,13 +1238,13 @@ export class ATO {
     return this;
   }
 
-  addOrchestrator(orchestrator: Orchestrator) {
-    this.orchestrators.push(orchestrator);
+  addCoordinator(coordinator: Coordinator) {
+    this.coordinators.push(coordinator);
     return this;
   }
 
   preview() {
-    if (this.orchestrators.length === 0) {
+    if (this.coordinators.length === 0) {
       return [];
     }
 
@@ -1253,8 +1252,8 @@ export class ATO {
   }
 
   async start(): Promise<number> {
-    if (this.orchestrators.length === 0) {
-      console.error('No orchestrators configured');
+    if (this.coordinators.length === 0) {
+      console.error('No coordinators configured');
       return 2;
     }
 
@@ -1269,7 +1268,7 @@ export class ATO {
     let finalExitCode = 0;
     for (const plan of plans) {
       if (plan.dryRun) {
-        this.printDryRunPreview(plan.preview, plan.atcOrchestratorMode);
+        this.printDryRunPreview(plan.preview, plan.atcCoordinatorMode);
         continue;
       }
 
@@ -1287,29 +1286,29 @@ export class ATO {
   }
 
   private resolveLaunchPlans() {
-    return this.orchestrators.map((orchestrator) => this.resolveLaunchPlan(orchestrator));
+    return this.coordinators.map((coordinator) => this.resolveLaunchPlan(coordinator));
   }
 
-  private resolveLaunchPlan(orchestrator: Orchestrator): ResolvedLaunchPlan {
+  private resolveLaunchPlan(coordinator: Coordinator): ResolvedLaunchPlan {
     const effectiveRuntimeOptions = {
       ...this.runtimeOptions,
-      ...orchestrator.resolveRuntimeOptions(),
+      ...coordinator.resolveRuntimeOptions(),
     };
     const effectivePort = effectiveRuntimeOptions.port ?? 7777;
-    const serverOptions = orchestrator.buildServerOptions(this.projectPath);
+    const serverOptions = coordinator.buildServerOptions(this.projectPath);
     const effectiveTimeout = effectiveRuntimeOptions.timeoutSeconds ?? serverOptions.timeoutSeconds ?? 60;
-    const atcOrchestratorMode = orchestrator.mode;
-    const maxExternalClients = resolveMaxExternalClientCount(atcOrchestratorMode, effectiveRuntimeOptions.clientCount);
+    const atcCoordinatorMode = coordinator.mode;
+    const maxExternalClients = resolveMaxExternalClientCount(atcCoordinatorMode, effectiveRuntimeOptions.clientCount);
 
-    const server = this.resolveServerOptions(orchestrator, atcOrchestratorMode, effectiveRuntimeOptions);
-    const clientTemplate = this.resolveClientTemplate(orchestrator, atcOrchestratorMode, effectiveRuntimeOptions);
+    const server = this.resolveServerOptions(coordinator, atcCoordinatorMode, effectiveRuntimeOptions);
+    const clientTemplate = this.resolveClientTemplate(coordinator, atcCoordinatorMode, effectiveRuntimeOptions);
 
     return {
       effectivePort,
       effectiveTimeout,
       server,
       clientTemplate,
-      atcOrchestratorMode,
+      atcCoordinatorMode: atcCoordinatorMode,
       maxExternalClients,
       preview: this.buildPreview(
         server,
@@ -1317,23 +1316,23 @@ export class ATO {
         maxExternalClients,
         effectivePort,
         effectiveTimeout,
-        atcOrchestratorMode,
-        orchestrator.unrealLagOptions,
+        atcCoordinatorMode,
+        coordinator.unrealLagOptions,
       ),
       dryRun: effectiveRuntimeOptions.dryRun ?? false,
-      unrealLagOptions: orchestrator.unrealLagOptions,
+      unrealLagOptions: coordinator.unrealLagOptions,
     };
   }
 
   private resolveServerOptions(
-    orchestrator: Orchestrator,
-    atcOrchestratorMode: OrchestratorMode,
+    coordinator: Coordinator,
+    atcCoordinatorMode: CoordinatorMode,
     runtimeOptions: E2ERuntimeOptions,
   ): ResolvedServerOptions {
-    const serverOptions = orchestrator.buildServerOptions(this.projectPath);
+    const serverOptions = coordinator.buildServerOptions(this.projectPath);
 
     // For PIE mode prefer launching the Unreal Editor (from ueRoot) when available.
-    if (atcOrchestratorMode === OrchestratorMode.PIE) {
+    if (atcCoordinatorMode === CoordinatorMode.PIE) {
       // If the user provided an Engine root, always use the engine's UnrealEditor executable for PIE.
       if (this.ueRoot) {
         const engineEditor = path.join(this.ueRoot, 'Binaries', 'Win64', 'UnrealEditor.exe');
@@ -1350,7 +1349,7 @@ export class ATO {
         serverOptions.exe ?? '',
         runtimeOptions.serverExe ?? '',
         projectEditor,
-        ...this.getPrimaryCandidates(serverOptions, atcOrchestratorMode, runtimeOptions),
+        ...this.getPrimaryCandidates(serverOptions, atcCoordinatorMode, runtimeOptions),
       ];
       return {
         ...serverOptions,
@@ -1362,20 +1361,20 @@ export class ATO {
     return {
       ...serverOptions,
       execTests: [...(serverOptions.execTests ?? [])],
-      exe: findFirstExisting(this.getPrimaryCandidates(serverOptions, atcOrchestratorMode, runtimeOptions)),
+      exe: findFirstExisting(this.getPrimaryCandidates(serverOptions, atcCoordinatorMode, runtimeOptions)),
     };
   }
 
   private resolveClientTemplate(
-    orchestrator: Orchestrator,
-    atcOrchestratorMode: OrchestratorMode,
+    coordinator: Coordinator,
+    atcCoordinatorMode: CoordinatorMode,
     runtimeOptions: E2ERuntimeOptions,
   ) {
-    if (!shouldApplyRemoteClientBootstrap(atcOrchestratorMode)) {
+    if (!shouldApplyRemoteClientBootstrap(atcCoordinatorMode)) {
       return undefined;
     }
 
-    const clientOptions = orchestrator.buildClientOptions(this.projectPath);
+    const clientOptions = coordinator.buildClientOptions(this.projectPath);
     return {
       ...clientOptions,
       exe: findFirstExisting(this.getClientCandidates(clientOptions, runtimeOptions)),
@@ -1384,24 +1383,24 @@ export class ATO {
   }
 
   /**
-   * Determines the primary candidates for server executable based on orchestrator mode and runtime options.
+   * Determines the primary candidates for server executable based on coordinator mode and runtime options.
    */
   private getPrimaryCandidates(
     serverOptions: ServerOptions,
-    atcOrchestratorMode: OrchestratorMode,
+    atcCoordinatorMode: CoordinatorMode,
     runtimeOptions: E2ERuntimeOptions,
   ) {
-    if (usesDedicatedServerExecutable(atcOrchestratorMode)) {
+    if (usesDedicatedServerExecutable(atcCoordinatorMode)) {
       return this.getDedicatedServerCandidates(serverOptions, runtimeOptions);
     }
 
     // For Standalone and ListenServer modes we want the game's regular executable (e.g. TemplateProject.exe),
     // not the server executable which usually ends with "Server.exe".
-    if (atcOrchestratorMode === OrchestratorMode.Standalone || atcOrchestratorMode === OrchestratorMode.ListenServer) {
+    if (atcCoordinatorMode === CoordinatorMode.Standalone || atcCoordinatorMode === CoordinatorMode.ListenServer) {
       return this.getStandaloneCandidates(serverOptions, runtimeOptions);
     }
 
-    if (atcOrchestratorMode === OrchestratorMode.PIE) {
+    if (atcCoordinatorMode === CoordinatorMode.PIE) {
       return this.getPieCandidates(serverOptions, runtimeOptions);
     }
 
@@ -1482,15 +1481,15 @@ export class ATO {
     maxExternalClients: number | undefined,
     port: number,
     timeoutSeconds: number,
-    atcOrchestratorMode: OrchestratorMode,
+    atcCoordinatorMode: CoordinatorMode,
     unrealLagOptions: UnrealLagProxyOptions | undefined,
   ): ResolvedPreview {
     const serverArgs = buildServerArgs(
       serverOptions,
-      requiresNetworkServer(atcOrchestratorMode) ? port : undefined,
-      atcOrchestratorMode,
+      requiresNetworkServer(atcCoordinatorMode) ? port : undefined,
+      atcCoordinatorMode,
     );
-    const unrealLagPreview = this.buildUnrealLagPreview(port, timeoutSeconds, atcOrchestratorMode, unrealLagOptions);
+    const unrealLagPreview = this.buildUnrealLagPreview(port, timeoutSeconds, atcCoordinatorMode, unrealLagOptions);
     const proxyHost = unrealLagPreview
       ? this.formatProxyHost(unrealLagPreview.bindAddress, unrealLagPreview.bindPort)
       : undefined;
@@ -1504,7 +1503,7 @@ export class ATO {
     const clientTemplatePreview = clientTemplate
       ? (() => {
           const client = resolveClientLaunchOptions(clientTemplate, 0);
-          const args = buildClientArgs(client, proxyHost, atcOrchestratorMode);
+          const args = buildClientArgs(client, proxyHost, atcCoordinatorMode);
           return {
             exe: client.exe,
             args,
@@ -1517,7 +1516,7 @@ export class ATO {
       clientTemplate && maxExternalClients !== undefined
         ? Array.from({ length: maxExternalClients }, (_, clientIndex) => {
             const client = resolveClientLaunchOptions(clientTemplate, clientIndex);
-            const args = buildClientArgs(client, proxyHost, atcOrchestratorMode);
+            const args = buildClientArgs(client, proxyHost, atcCoordinatorMode);
             return {
               exe: client.exe,
               args,
@@ -1538,10 +1537,10 @@ export class ATO {
   private buildUnrealLagPreview(
     port: number,
     timeoutSeconds: number,
-    atcOrchestratorMode: OrchestratorMode | undefined,
+    atcCoordinatorMode: CoordinatorMode | undefined,
     unrealLagOptions: UnrealLagProxyOptions | undefined,
   ) {
-    if (!unrealLagOptions || (atcOrchestratorMode && !requiresNetworkServer(atcOrchestratorMode))) return undefined;
+    if (!unrealLagOptions || (atcCoordinatorMode && !requiresNetworkServer(atcCoordinatorMode))) return undefined;
 
     return {
       bindAddress: unrealLagOptions.bindAddress ?? '127.0.0.1',
@@ -1558,13 +1557,13 @@ export class ATO {
     return `${bindAddress}:${displayPort}`;
   }
 
-  private printDryRunPreview(preview: ResolvedPreview, atcOrchestratorMode: OrchestratorMode) {
-    const orchestratorLabel = resolveOrchestratorProcessLabel(atcOrchestratorMode);
+  private printDryRunPreview(preview: ResolvedPreview, atcCoordinatorMode: CoordinatorMode) {
+    const coordinatorLabel = resolveCoordinatorProcessLabel(atcCoordinatorMode);
     if (preview.unrealLag) {
       console.log('[DRYRUN] UnrealLag ->', JSON.stringify(preview.unrealLag));
     }
-    console.log(`[DRYRUN] ${orchestratorLabel} -> ${preview.server.command}`);
-    console.log(`[DRYRUN-ARGS] ${orchestratorLabel} ARGS:`, JSON.stringify(preview.server.args));
+    console.log(`[DRYRUN] ${coordinatorLabel} -> ${preview.server.command}`);
+    console.log(`[DRYRUN-ARGS] ${coordinatorLabel} ARGS:`, JSON.stringify(preview.server.args));
     if (preview.clientTemplate) {
       console.log(
         `[DRYRUN] Client Template -> ${preview.clientTemplate.command} (max=${String(preview.maxExternalClients ?? 0)})`,
@@ -1634,30 +1633,30 @@ export class ATO {
     const outcomes: ProcessOutcome[] = [];
     let serverMonitor: MonitoredProcess | undefined;
     const clientMonitors: MonitoredProcess[] = [];
-    const orchestratorLabel = resolveOrchestratorProcessLabel(plan.atcOrchestratorMode);
+    const coordinatorLabel = resolveCoordinatorProcessLabel(plan.atcCoordinatorMode);
 
     try {
       const bootstrapOrchestration = isATCBootstrapOrchestration(
         plan.server,
         plan.clientTemplate,
-        plan.atcOrchestratorMode,
+        plan.atcCoordinatorMode,
       );
       const serverMaxLifetime = plan.server.maxLifetime ?? 600;
-      const proxyClientHost = requiresNetworkServer(plan.atcOrchestratorMode)
+      const proxyClientHost = requiresNetworkServer(plan.atcCoordinatorMode)
         ? await this.startUnrealLag(plan.effectivePort, plan.unrealLagOptions)
         : undefined;
 
       const serverArgs = buildServerArgs(
         plan.server,
-        requiresNetworkServer(plan.atcOrchestratorMode) ? plan.effectivePort : undefined,
-        plan.atcOrchestratorMode,
+        requiresNetworkServer(plan.atcCoordinatorMode) ? plan.effectivePort : undefined,
+        plan.atcCoordinatorMode,
       );
-      console.log(`[SPAWN] ${orchestratorLabel} -> ${formatCommand(plan.server.exe, serverArgs)}`);
-      console.log(`[SPAWN-ARGS] ${orchestratorLabel} ARGS:`, JSON.stringify(serverArgs));
+      console.log(`[SPAWN] ${coordinatorLabel} -> ${formatCommand(plan.server.exe, serverArgs)}`);
+      console.log(`[SPAWN-ARGS] ${coordinatorLabel} ARGS:`, JSON.stringify(serverArgs));
       serverMonitor = this.createMonitoredProcess(
         plan.server.exe,
         serverArgs,
-        orchestratorLabel,
+        coordinatorLabel,
         serverMaxLifetime,
         hasAutomationCommands(plan.server),
       );
@@ -1667,7 +1666,7 @@ export class ATO {
       if (serverPid <= 0) {
         console.error('Failed to obtain server PID');
         outcomes.push({
-          label: orchestratorLabel,
+          label: coordinatorLabel,
           rawExitResult: -1,
           effectiveExitCode: FAILURE_EXIT_CODE,
           reason: 'failed to obtain server pid',
@@ -1676,7 +1675,7 @@ export class ATO {
         return FAILURE_EXIT_CODE;
       }
 
-      if (requiresImmediateNetworkServer(plan.server, plan.atcOrchestratorMode)) {
+      if (requiresImmediateNetworkServer(plan.server, plan.atcCoordinatorMode)) {
         const serverStatus = await this.waitForServerReady(
           serverPid,
           plan.effectivePort,
@@ -1689,7 +1688,7 @@ export class ATO {
           } catch {}
           const finalServerExit = await serverMonitor.exitPromise;
           outcomes.push(
-            summarizeStartupFailureOutcome(orchestratorLabel, finalServerExit, serverMonitor.automation, serverStatus),
+            summarizeStartupFailureOutcome(coordinatorLabel, finalServerExit, serverMonitor.automation, serverStatus),
           );
           return this.handleServerStartupFailure(serverStatus);
         }
@@ -1697,7 +1696,7 @@ export class ATO {
 
       if (bootstrapOrchestration) {
         if (
-          plan.atcOrchestratorMode === OrchestratorMode.DedicatedServer &&
+          plan.atcCoordinatorMode === CoordinatorMode.DedicatedServer &&
           plan.clientTemplate &&
           plan.maxExternalClients !== undefined &&
           clientMonitors.length < plan.maxExternalClients
@@ -1706,7 +1705,7 @@ export class ATO {
             plan.clientTemplate,
             clientMonitors.length,
             plan.maxExternalClients,
-            plan.atcOrchestratorMode,
+            plan.atcCoordinatorMode,
             proxyClientHost,
             clientMonitors,
           );
@@ -1715,7 +1714,7 @@ export class ATO {
         const bootstrapRequestResult = await this.monitorATCClientRequestsUntilAutomationTerminal(
           plan.clientTemplate,
           plan.maxExternalClients,
-          plan.atcOrchestratorMode,
+          plan.atcCoordinatorMode,
           proxyClientHost,
           clientMonitors,
           serverMonitor,
@@ -1739,7 +1738,7 @@ export class ATO {
         }
 
         const finalServerExit = await serverMonitor.exitPromise;
-        outcomes.unshift(summarizeProcessOutcome(orchestratorLabel, finalServerExit, serverMonitor.automation));
+        outcomes.unshift(summarizeProcessOutcome(coordinatorLabel, finalServerExit, serverMonitor.automation));
 
         const clientOutcomes = await this.waitForClientMonitors(clientMonitors);
         outcomes.push(...clientOutcomes);
@@ -1753,7 +1752,7 @@ export class ATO {
 
       if (!plan.clientTemplate) {
         const finalServerExit = await serverMonitor.exitPromise;
-        outcomes.unshift(summarizeProcessOutcome(orchestratorLabel, finalServerExit, serverMonitor.automation));
+        outcomes.unshift(summarizeProcessOutcome(coordinatorLabel, finalServerExit, serverMonitor.automation));
         return outcomes.some((outcome) => outcome.effectiveExitCode !== 0) ? FAILURE_EXIT_CODE : 0;
       }
 
@@ -1763,7 +1762,7 @@ export class ATO {
           plan.clientTemplate,
           clientMonitors.length,
           eagerClientCount,
-          plan.atcOrchestratorMode,
+          plan.atcCoordinatorMode,
           proxyClientHost,
           clientMonitors,
         );
@@ -1777,7 +1776,7 @@ export class ATO {
       } catch {}
 
       const finalServerExit = await serverMonitor.exitPromise;
-      outcomes.unshift(summarizeProcessOutcome(orchestratorLabel, finalServerExit, serverMonitor.automation));
+      outcomes.unshift(summarizeProcessOutcome(coordinatorLabel, finalServerExit, serverMonitor.automation));
       return outcomes.some((outcome) => outcome.effectiveExitCode !== 0) ? FAILURE_EXIT_CODE : 0;
     } finally {
       try {
@@ -1870,13 +1869,13 @@ export class ATO {
     clientTemplate: ResolvedClientTemplate,
     fromIndex: number,
     toExclusiveIndex: number,
-    atcOrchestratorMode: OrchestratorMode,
+    atcCoordinatorMode: CoordinatorMode,
     proxyClientHost: string | undefined,
     clientMonitors: MonitoredProcess[],
   ) {
     for (let clientIndex = fromIndex; clientIndex < toExclusiveIndex; clientIndex += 1) {
       const client = resolveClientLaunchOptions(clientTemplate, clientIndex);
-      const args = buildClientArgs(client, proxyClientHost, atcOrchestratorMode);
+      const args = buildClientArgs(client, proxyClientHost, atcCoordinatorMode);
       const prefix = `CLIENT ${client.clientIndex}`;
       console.log(`[SPAWN] ${prefix} -> ${formatCommand(client.exe, args)}`);
       console.log(`[SPAWN-ARGS] ${prefix} ARGS:`, JSON.stringify(args));
@@ -1895,7 +1894,7 @@ export class ATO {
   private async monitorATCClientRequestsUntilAutomationTerminal(
     clientTemplate: ResolvedClientTemplate | undefined,
     maxExternalClients: number | undefined,
-    atcOrchestratorMode: OrchestratorMode,
+    atcCoordinatorMode: CoordinatorMode,
     proxyClientHost: string | undefined,
     clientMonitors: MonitoredProcess[],
     serverMonitor: MonitoredProcess,
@@ -1907,7 +1906,7 @@ export class ATO {
       const requestedRemoteClients = serverMonitor.atc.requestedRemoteClients;
       if (requestedRemoteClients > 0 && !clientTemplate) {
         console.error(
-          `[ATO] ATC requested ${requestedRemoteClients} remote client(s), but this orchestrator mode does not provide external clients`,
+          `[ATO] ATC requested ${requestedRemoteClients} remote client(s), but this coordinator mode does not provide external clients`,
         );
         try {
           if (!serverMonitor.process.killed) {
@@ -1936,7 +1935,7 @@ export class ATO {
           clientTemplate,
           clientMonitors.length,
           requestedRemoteClients,
-          atcOrchestratorMode,
+          atcCoordinatorMode,
           proxyClientHost,
           clientMonitors,
         );

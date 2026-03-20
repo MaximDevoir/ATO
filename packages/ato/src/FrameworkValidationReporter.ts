@@ -1,9 +1,9 @@
-export type FrameworkValidationOrchestratorLabel = 'DEDICATED' | 'LISTEN' | 'STANDALONE' | 'PIE' | 'SERVER';
+export type FrameworkValidationCoordinatorLabel = 'DEDICATED' | 'LISTEN' | 'STANDALONE' | 'PIE' | 'SERVER';
 export type FrameworkValidationTestResult = 'Success' | 'Fail' | 'Error' | 'NotRun' | 'Unknown';
 
-export interface FrameworkValidationOrchestratorLogSource {
-  type: 'Orchestrator';
-  orchestrator: FrameworkValidationOrchestratorLabel;
+export interface FrameworkValidationCoordinatorLogSource {
+  type: 'Coordinator';
+  coordinator: FrameworkValidationCoordinatorLabel;
   label: string;
 }
 
@@ -13,9 +13,7 @@ export interface FrameworkValidationClientLogSource {
   label: string;
 }
 
-export type FrameworkValidationLogSource =
-  | FrameworkValidationOrchestratorLogSource
-  | FrameworkValidationClientLogSource;
+export type FrameworkValidationLogSource = FrameworkValidationCoordinatorLogSource | FrameworkValidationClientLogSource;
 
 export interface FrameworkValidationLogEntry {
   sequence: number;
@@ -37,7 +35,7 @@ export interface FrameworkValidationTestRun {
   path: string;
   name: string;
   pathName: string;
-  orchestrator: FrameworkValidationOrchestratorLabel;
+  coordinator: FrameworkValidationCoordinatorLabel;
   result?: FrameworkValidationTestResult;
   completed: boolean;
   startedSequence: number;
@@ -54,7 +52,7 @@ export interface FrameworkValidationReport {
 }
 
 export interface FrameworkValidationStartedTest {
-  orchestrator: FrameworkValidationOrchestratorLabel;
+  coordinator: FrameworkValidationCoordinatorLabel;
   path: string;
   name: string;
 }
@@ -63,9 +61,9 @@ export interface FrameworkValidationCompletedTest extends FrameworkValidationSta
   result: FrameworkValidationTestResult;
 }
 
-export interface FrameworkValidationOrchestratorLogExpectation {
-  type: 'Orchestrator';
-  orchestrator?: FrameworkValidationOrchestratorLabel;
+export interface FrameworkValidationCoordinatorLogExpectation {
+  type: 'Coordinator';
+  coordinator?: FrameworkValidationCoordinatorLabel;
   logContains: string;
 }
 
@@ -76,15 +74,15 @@ export interface FrameworkValidationClientLogExpectation {
 }
 
 export type FrameworkValidationLogExpectation =
-  | FrameworkValidationOrchestratorLogExpectation
+  | FrameworkValidationCoordinatorLogExpectation
   | FrameworkValidationClientLogExpectation;
 
 export interface FrameworkValidationEventExpectation {
   category: string;
   source?:
     | {
-        type: 'Orchestrator';
-        orchestrator?: FrameworkValidationOrchestratorLabel;
+        type: 'Coordinator';
+        coordinator?: FrameworkValidationCoordinatorLabel;
       }
     | {
         type: 'Client';
@@ -130,8 +128,8 @@ export function parseFrameworkValidationLogSource(label: string): FrameworkValid
     case 'PIE':
     case 'SERVER':
       return {
-        type: 'Orchestrator',
-        orchestrator: normalized,
+        type: 'Coordinator',
+        coordinator: normalized,
         label,
       };
   }
@@ -150,7 +148,7 @@ export function parseFrameworkValidationLogSource(label: string): FrameworkValid
 
 export function parseFrameworkValidationStartedTest(
   line: string,
-): Omit<FrameworkValidationStartedTest, 'orchestrator'> | undefined {
+): Omit<FrameworkValidationStartedTest, 'coordinator'> | undefined {
   const match = frameworkValidationStartedPattern.exec(line);
   if (!match) {
     return undefined;
@@ -164,7 +162,7 @@ export function parseFrameworkValidationStartedTest(
 
 export function parseFrameworkValidationCompletedTest(
   line: string,
-): Omit<FrameworkValidationCompletedTest, 'orchestrator'> | undefined {
+): Omit<FrameworkValidationCompletedTest, 'coordinator'> | undefined {
   const match = frameworkValidationCompletedPattern.exec(line);
   if (!match) {
     return undefined;
@@ -277,8 +275,8 @@ function cloneFrameworkValidationSource(source: FrameworkValidationLogSource): F
   }
 
   return {
-    type: 'Orchestrator',
-    orchestrator: source.orchestrator,
+    type: 'Coordinator',
+    coordinator: source.coordinator,
     label: source.label,
   };
 }
@@ -308,7 +306,7 @@ function cloneFrameworkValidationTestRun(test: FrameworkValidationTestRun): Fram
     path: test.path,
     name: test.name,
     pathName: test.pathName,
-    orchestrator: test.orchestrator,
+    coordinator: test.coordinator,
     result: test.result,
     completed: test.completed,
     startedSequence: test.startedSequence,
@@ -390,7 +388,7 @@ export class FrameworkValidationReporterController {
       path,
       name,
       pathName,
-      orchestrator: startedTest.orchestrator,
+      coordinator: startedTest.coordinator,
       completed: false,
       startedSequence: this.nextSequence(),
       logs: [],
@@ -414,9 +412,9 @@ export class FrameworkValidationReporterController {
       throw new Error('FrameworkValidationReporter lost track of the active test state');
     }
 
-    if (activeTest.orchestrator !== completedTest.orchestrator) {
+    if (activeTest.coordinator !== completedTest.coordinator) {
       this.recordIssue(
-        `FrameworkValidationReporter.endTest() completed '${composeFrameworkValidationPathName(completedTest.path, completedTest.name)}' from '${completedTest.orchestrator}', but the active test started on '${activeTest.orchestrator}'`,
+        `FrameworkValidationReporter.endTest() completed '${composeFrameworkValidationPathName(completedTest.path, completedTest.name)}' from '${completedTest.coordinator}', but the active test started on '${activeTest.coordinator}'`,
       );
     }
 
@@ -479,11 +477,11 @@ export class FrameworkValidationReporterController {
       return;
     }
 
-    if (source.type === 'Orchestrator') {
+    if (source.type === 'Coordinator') {
       const startedTest = parseFrameworkValidationStartedTest(line);
       if (startedTest) {
         this.startTest({
-          orchestrator: source.orchestrator,
+          coordinator: source.coordinator,
           ...startedTest,
         });
         return;
@@ -492,7 +490,7 @@ export class FrameworkValidationReporterController {
       const completedTest = parseFrameworkValidationCompletedTest(line);
       if (completedTest) {
         this.endTest({
-          orchestrator: source.orchestrator,
+          coordinator: source.coordinator,
           ...completedTest,
         });
         return;
@@ -528,15 +526,15 @@ function formatExpectation(expectation: FrameworkValidationLogExpectation) {
     return `Client ${expectation.clientIndex} containing '${expectation.logContains}'`;
   }
 
-  const orchestratorSuffix = expectation.orchestrator ? ` (${expectation.orchestrator})` : '';
-  return `Orchestrator${orchestratorSuffix} containing '${expectation.logContains}'`;
+  const coordinatorSuffix = expectation.coordinator ? ` (${expectation.coordinator})` : '';
+  return `Coordinator${coordinatorSuffix} containing '${expectation.logContains}'`;
 }
 
 function formatEventExpectation(expectation: FrameworkValidationEventExpectation) {
   const sourceDescription = expectation.source
     ? expectation.source.type === 'Client'
       ? ` from Client ${expectation.source.clientIndex}`
-      : ` from Orchestrator${expectation.source.orchestrator ? ` (${expectation.source.orchestrator})` : ''}`
+      : ` from Coordinator${expectation.source.coordinator ? ` (${expectation.source.coordinator})` : ''}`
     : '';
   return `${expectation.category}${sourceDescription}`;
 }
@@ -554,8 +552,8 @@ function matchesFrameworkValidationExpectation(
   }
 
   return (
-    entry.source.type === 'Orchestrator' &&
-    (expectation.orchestrator === undefined || entry.source.orchestrator === expectation.orchestrator) &&
+    entry.source.type === 'Coordinator' &&
+    (expectation.coordinator === undefined || entry.source.coordinator === expectation.coordinator) &&
     entry.line.includes(expectation.logContains)
   );
 }
@@ -574,8 +572,8 @@ function matchesFrameworkValidationEventExpectation(
         return false;
       }
     } else if (
-      entry.source.type !== 'Orchestrator' ||
-      (expectation.source.orchestrator !== undefined && entry.source.orchestrator !== expectation.source.orchestrator)
+      entry.source.type !== 'Coordinator' ||
+      (expectation.source.coordinator !== undefined && entry.source.coordinator !== expectation.source.coordinator)
     ) {
       return false;
     }
@@ -833,7 +831,7 @@ export function formatFrameworkValidationSummaryLines(report: FrameworkValidatio
     const ordinalSuffix = test.ordinal > 1 ? ` #${test.ordinal}` : '';
     const status = test.result ?? (test.completed ? 'Unknown' : 'InProgress');
     lines.push(
-      `${test.orchestrator} | ${status} | ${test.path}${ordinalSuffix} | logs=${test.logs.length} | events=${test.events.length}`,
+      `${test.coordinator} | ${status} | ${test.path}${ordinalSuffix} | logs=${test.logs.length} | events=${test.events.length}`,
     );
   }
 
