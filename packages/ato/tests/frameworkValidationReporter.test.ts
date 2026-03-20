@@ -175,8 +175,31 @@ describe('FrameworkValidationReporter', () => {
 
   it('captures ATC_INTERNAL_TESTS and future ATC_EVENT markers only', () => {
     expect(shouldCaptureFrameworkValidationLine('ATC_INTERNAL_TESTS: Display: Hello')).toBe(true);
+    expect(shouldCaptureFrameworkValidationLine('LogTemp: Display: ATC_INTERNAL_TESTS: Running as Standalone')).toBe(
+      true,
+    );
     expect(shouldCaptureFrameworkValidationLine('ATC_EVENT_TEST_START: Display: Hello')).toBe(true);
     expect(shouldCaptureFrameworkValidationLine('LogTemp: Display: [ATC] Starting test')).toBe(false);
+  });
+
+  it('captures PIE banner lines emitted through LogTemp while a PIE-owned test is active', () => {
+    const reporter = createReporter();
+
+    reporter.observeProcessLine(
+      'PIE',
+      '[8:10:31 AM] LogAutomationController: Display: Test Started. Name={RUNS_EACH_COORDINATOR.} Path={ATC.PIE_MATRIX.MULTI_MODE.RUNS_EACH_COORDINATOR.}',
+    );
+    reporter.observeProcessLine('PIE', '[8:10:31 AM] LogTemp: Display: ATC_INTERNAL_TESTS: Running as Standalone');
+    reporter.observeProcessLine(
+      'PIE',
+      '[8:10:32 AM] LogAutomationController: Display: Test Completed. Result={Success} Name={RUNS_EACH_COORDINATOR.} Path={ATC.PIE_MATRIX.MULTI_MODE.RUNS_EACH_COORDINATOR.}',
+    );
+
+    const report = reporter.getReport();
+    expect(report.tests).toHaveLength(1);
+    expect(report.tests[0]?.coordinator).toBe('PIE');
+    expect(report.tests[0]?.logs).toHaveLength(1);
+    expect(report.tests[0]?.logs[0]?.line).toContain('Running as Standalone');
   });
 
   it('supports sequential and parallel validator expectations per test', () => {

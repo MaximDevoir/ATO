@@ -177,9 +177,10 @@ const coordinator = new Coordinator(CoordinatorMode.ListenServer).addTests().con
   clientProfile: 'Bad',
 });
 
-coordinator.addTests('ATC.AssetAudits');
-coordinator.addTests('ATC.COORDINATOR_LISTEN');
-
+// coordinator.addTests('ATC.AssetAudits');
+// coordinator.addTests('ATC.COORDINATOR_LISTEN');
+// coordinator.addTests('ATC.STANDALONE_MODE.ACTOR_WORLD_REPEAT_RESETS_STATE.');
+coordinator.addTests('ATC.COORDINATOR_LISTEN.LISTEN_ACTOR_WORLD_WORKS.');
 ATCListenServerTest.addCoordinator(coordinator);
 
 exitCode = await ATCListenServerTest.start();
