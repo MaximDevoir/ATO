@@ -15,6 +15,7 @@ function validateStandaloneFrameworkReport() {
     'ATC.EXCEPTIONS.EXPECT_NO_THROW_SUCCEEDS.',
     'ATC.EXCEPTIONS.EXPECT_THROW_REPORTS_WRONG_TYPE.',
     'ATC.EXCEPTIONS.EXPECT_THROW_SUCCEEDS.',
+    'ATC.RegistryRegressionConflicts.LATE_SUITE_CONFLICTS_SURFACE_AFTER_EARLY_TEST_LOCAL_CONFIG.[ConfigurationError]',
   ]);
 
   for (const test of validation.tests) {
@@ -88,6 +89,21 @@ function validateStandaloneFrameworkReport() {
       coordinator: 'STANDALONE',
       logContains: 'CurrentWorld=/Engine/Maps/Templates/Template_Default',
     });
+
+  validation
+    .getTestByPath('RegistryRegressionDefaults.LATE_SUITE_DEFAULTS_APPLY_AFTER_EARLY_TEST_LOCAL_CONFIG.')
+    .expectResult('Success')
+    .expectNextLog({
+      type: 'Coordinator',
+      coordinator: 'STANDALONE',
+      logContains: 'LateSuiteDefaults.CurrentWorld=/Engine/Maps/Templates/Template_Default',
+    });
+
+  validation
+    .getTestByPath(
+      'ATC.RegistryRegressionConflicts.LATE_SUITE_CONFLICTS_SURFACE_AFTER_EARLY_TEST_LOCAL_CONFIG.[ConfigurationError]',
+    )
+    .expectResult('Fail');
 
   const standaloneClients = validation.getTestByPath(
     'ATC.STANDALONE_MODE.STANDALONE_REJECTS_EXTERNAL_CLIENTS.[Clients=1]',
@@ -410,6 +426,8 @@ coordinator.addTests('ATC.STANDALONE_MODE');
 coordinator.addTests('ATC.ATC_SKIP_TESTS');
 coordinator.addTests('ATC.STANDALONE_SCOPED_PLANS');
 coordinator.addTests('ATC.EXCEPTIONS');
+coordinator.addTests('RegistryRegressionDefaults');
+coordinator.addTests('ATC.RegistryRegressionConflicts');
 
 ATCStandaloneTest.addCoordinator(coordinator);
 
