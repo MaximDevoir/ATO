@@ -21,59 +21,13 @@
           Description="Cook platform for standalone/listen tests (e.g. Windows, Linux, Mac)"/>
   <Option Name="CookPlatformDedicated" DefaultValue="{{CookPlatformDedicated}}"
           Description="Cook platform for dedicated server tests (e.g. WindowsServer, LinuxServer, MacServer)"/>
+  <Option Name="CookMaps"
+          DefaultValue="/Engine/Maps/Templates/OpenWorld+/Engine/Maps/Templates/Template_Default"
+          Description="The maps to cook"/>
+
   <!-- Listen uses the same cook platform as Standalone -->
-
-
-  <!-- ================= GAME BUILD ================= -->
   <Agent Name="Default" Type="$(CompilePlatform)">
-
-    <Node Name="CompileGame">
-      <Compile Target="$(ProjectName)"
-               Platform="$(CompilePlatform)"
-               Configuration="Development"
-               Project="$(ProjectFile)"/>
-    </Node>
-
-    <Node Name="CompileGameWithExceptions">
-      <Compile Target="$(ProjectName)"
-               Platform="$(CompilePlatform)"
-               Configuration="Development"
-               Project="$(ProjectFile)"
-               Arguments="-Define=ATC_WITH_CPP_EXCEPTIONS=1"/>
-    </Node>
-
-    <Node Name="CookGame" Requires="CompileGame">
-      <Cook Project="$(ProjectFile)"
-            Platform="$(CookPlatformStandalone)"
-            Maps="/Engine/Maps/Templates/OpenWorld+/Engine/Maps/Templates/Template_Default"
-            Arguments="-iterate -unversioned"/>
-    </Node>
-
-    <Node Name="CookGameWithExceptions" Requires="CompileGameWithExceptions">
-      <Cook Project="$(ProjectFile)"
-            Platform="$(CookPlatformStandalone)"
-            Maps="/Engine/Maps/Templates/OpenWorld+/Engine/Maps/Templates/Template_Default"
-            Arguments="-iterate -unversioned"/>
-    </Node>
-
-    <!-- ================= SERVER BUILD ================= -->
-
-    <Node Name="CompileServer">
-      <Compile Target="$(ProjectName)Server"
-               Platform="$(CompilePlatform)"
-               Configuration="Development"
-               Project="$(ProjectFile)"/>
-    </Node>
-
-    <Node Name="CookServer" Requires="CompileServer">
-      <Cook Project="$(ProjectFile)"
-            Platform="$(CookPlatformDedicated)"
-            Maps="/Engine/Maps/Templates/OpenWorld+/Engine/Maps/Templates/Template_Default"
-            Arguments="-iterate -unversioned"/>
-    </Node>
-
-    <!-- ================= EDITOR BUILD ================= -->
-
+    <!-- ================= TOOLCHAIN ================= -->
     <Node Name="CompileEditor">
       <Compile Target="$(ProjectName)Editor"
                Platform="$(CompilePlatform)"
@@ -81,9 +35,47 @@
                Project="$(ProjectFile)"/>
     </Node>
 
-    <!-- ================= STANDALONE ================= -->
+    <!-- ================= RUNTIME BUILDS ================= -->
+    <Node Name="CompileGame">
+      <Compile Target="$(ProjectName)"
+               Platform="$(CompilePlatform)"
+               Configuration="Development"
+               Project="$(ProjectFile)"/>
+    </Node>
+    <Node Name="CompileGameWithExceptions">
+      <Compile Target="$(ProjectName)"
+               Platform="$(CompilePlatform)"
+               Configuration="Development"
+               Project="$(ProjectFile)"
+               Arguments="-Define=ATC_WITH_CPP_EXCEPTIONS=1"/>
+    </Node>
+    <Node Name="CompileServer">
+      <Compile Target="$(ProjectName)Server"
+               Platform="$(CompilePlatform)"
+               Configuration="Development"
+               Project="$(ProjectFile)"/>
+    </Node>
 
-    <Node Name="RunStandaloneTest" Requires="CookGame">
+    <!-- ================= COOK ================= -->
+    <!-- Client cook -->
+    <Node Name="CookGame" Requires="CompileEditor">
+      <Cook Project="$(ProjectFile)"
+            Platform="$(CookPlatformStandalone)"
+            Maps="$(CookMaps)"
+            Arguments="-iterate -unversioned"/>
+    </Node>
+
+    <!-- Server cook -->
+    <Node Name="CookServer" Requires="CompileEditor">
+      <Cook Project="$(ProjectFile)"
+            Platform="$(CookPlatformDedicated)"
+            Maps="$(CookMaps)"
+            Arguments="-iterate -unversioned"/>
+    </Node>
+
+    <!-- ================= RUN: STANDALONE ================= -->
+    <Node Name="RunStandaloneTest"
+          Requires="CookGame;CompileGame">
       <Spawn Exe="node"
              WorkingDir="$(ProjectDir)"
              Arguments="--import tsx BuildGraph/Scripts/RunStandaloneTest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
@@ -91,9 +83,9 @@
              ErrorLevel="1"/>
     </Node>
 
-    <!-- ================= STANDALONE WITH EXCEPTIONS ================= -->
-
-    <Node Name="RunStandaloneTestWithExceptions" Requires="CookGameWithExceptions">
+    <!-- ================= RUN: STANDALONE (EXCEPTIONS) ================= -->
+    <Node Name="RunStandaloneTestWithExceptions"
+          Requires="CookGame;CompileGameWithExceptions">
       <Spawn Exe="node"
              WorkingDir="$(ProjectDir)"
              Arguments="--import tsx BuildGraph/Scripts/RunStandaloneWithExceptionsTest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
@@ -101,40 +93,37 @@
              ErrorLevel="1"/>
     </Node>
 
-    <!-- ================= DEDICATED ================= -->
-
-    <Node Name="RunDedicatedTests" Requires="CookGame;CookServer">
-      <Spawn Exe="node"
-             WorkingDir="$(ProjectDir)"
-             Arguments="--import tsx BuildGraph/Scripts/RunDedicated.tests.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
-             LogOutput="true"
-             ErrorLevel="1"/>
-
-    </Node>
-
-    <!-- ================= LISTEN SERVER ================= -->
-
-    <Node Name="RunListenTests" Requires="CookGame">
+    <!-- ================= RUN: LISTEN ================= -->
+    <Node Name="RunListenTests"
+          Requires="CookGame;CompileGame">
       <Spawn Exe="node"
              WorkingDir="$(ProjectDir)"
              Arguments="--import tsx BuildGraph/Scripts/RunListenServerTest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
              LogOutput="true"
              ErrorLevel="1"/>
-
     </Node>
 
-    <!-- ================= PIE SERVER ================= -->
-    <Node Name="RunPIETests" Requires="CompileEditor">
+    <!-- ================= RUN: DEDICATED ================= -->
+    <Node Name="RunDedicatedTests"
+          Requires="CookGame;CookServer;CompileGame;CompileServer">
+      <Spawn Exe="node"
+             WorkingDir="$(ProjectDir)"
+             Arguments="--import tsx BuildGraph/Scripts/RunDedicated.tests.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
+             LogOutput="true"
+             ErrorLevel="1"/>
+    </Node>
+
+    <!-- ================= RUN: PIE ================= -->
+    <Node Name="RunPIETests"
+          Requires="CompileEditor">
       <Spawn Exe="node"
              WorkingDir="$(ProjectDir)"
              Arguments="--import tsx BuildGraph/Scripts/RunPIETest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
              LogOutput="true"
              ErrorLevel="1"/>
-
     </Node>
   </Agent>
 
-  <!-- ================= ALL TESTS ================= -->
   <!-- ================= AGGREGATES ================= -->
 
   <Aggregate Name="StandaloneWithExceptions" Requires="RunStandaloneTestWithExceptions"/>
