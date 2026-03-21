@@ -75,6 +75,15 @@ describe('ATO', () => {
     const preview = getPreview(session);
     expect(preview.server.args).toEqual([
       'D:/ue-projects/inv/inv.uproject',
+      '-server',
+      '-log',
+      '-stdout',
+      '-FullStdOutLogOutputs',
+      '-unattended',
+      '-nullrhi',
+      '-NoSplash',
+      '-Verbose',
+      '-LiveCoding=0',
       '--help',
       '--height=100',
       '-port=7777',
@@ -83,6 +92,14 @@ describe('ATO', () => {
     expect(preview.clientTemplate?.args).toEqual([
       'D:/ue-projects/inv/inv.uproject',
       '127.0.0.1',
+      '-game',
+      '-stdout',
+      '-FullStdOutLogOutputs',
+      '-unattended',
+      '-nosound',
+      '-nullrhi',
+      '-NoSplash',
+      '-LiveCoding=0',
       '--help',
       '-testexit=Automation Test Queue Empty',
     ]);
@@ -98,6 +115,14 @@ describe('ATO', () => {
     expect(args).toEqual([
       'D:/ue-projects/inv/inv.uproject',
       '127.0.0.1',
+      '-game',
+      '-stdout',
+      '-FullStdOutLogOutputs',
+      '-unattended',
+      '-nosound',
+      '-nullrhi',
+      '-NoSplash',
+      '-LiveCoding=0',
       'outFILE c.log',
       '-map',
       'two',
@@ -125,6 +150,28 @@ describe('ATO', () => {
       '-ExecCmds=Automation List; quit',
       '-testexit=Automation Test Queue Empty',
     ]);
+  });
+  it('preserves repeated ATIEndpoint args while still deduping other named options', () => {
+    const { session, coordinator } = createPreview();
+    coordinator.configureServer({
+      extraArgs: [
+        '-ATIEndpoint=(Host="127.0.0.1",Port=7001,ConnectTimeoutSeconds=0.25)',
+        '-ATIEndpoint=(Host="127.0.0.1",Port=7002,ConnectTimeoutSeconds=0.5)',
+        '-Foo=one',
+        '-Foo=two',
+      ],
+      excludeArgs: [],
+    });
+
+    const preview = getPreview(session);
+    const atiEndpointArgs = preview.server.args.filter((arg) => arg.startsWith('-ATIEndpoint='));
+
+    expect(atiEndpointArgs).toEqual([
+      '-ATIEndpoint=(Host="127.0.0.1",Port=7001,ConnectTimeoutSeconds=0.25)',
+      '-ATIEndpoint=(Host="127.0.0.1",Port=7002,ConnectTimeoutSeconds=0.5)',
+    ]);
+    expect(preview.server.args).toContain('-Foo=two');
+    expectArgMissing(preview.server.args, '-Foo=one');
   });
   it('appends ExecTests after ExecCmds', () => {
     const { session, coordinator } = createPreview();
@@ -369,6 +416,15 @@ describe('ATO', () => {
     const preview = getPreview(session);
     expect(preview.server.args).toEqual([
       'D:/ue-projects/inv/inv.uproject',
+      '-server',
+      '-log',
+      '-stdout',
+      '-FullStdOutLogOutputs',
+      '-unattended',
+      '-nullrhi',
+      '-NoSplash',
+      '-Verbose',
+      '-LiveCoding=0',
       '-port=7777',
       `-ExecCmds=Automation List; ${ATC_RUN_TESTS_COMMAND} AwesomeInventory*`,
       '-testexit=Automation Test Queue Empty',

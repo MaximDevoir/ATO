@@ -1,6 +1,8 @@
 // TODO: Support Linux/macOS. Right now Win64 and .exe is hardcoded a lot.
 import type { ChildProcess } from 'node:child_process';
+import { mkdir } from 'node:fs/promises';
 import * as path from 'node:path';
+import { ATIService, NDJSONConsumer, TerminalConsumer } from '@maximdevoir/ati';
 import { logWarningIfNetworkProfileUnstable, UnrealLagProfiles } from '@maximdevoir/unreal-lag/profiles';
 import type { BindInfo } from '@maximdevoir/unreal-lag/types';
 import { UnrealLag } from '@maximdevoir/unreal-lag/UnrealLag';
@@ -10,6 +12,10 @@ import { ATC_CLIENT_REQUEST_LOG_PREFIX, ATC_RUN_TESTS_COMMAND } from './ATCAutom
 import { checkExistsSync } from './ATO._helpers';
 import { spawnProcess, waitForUdpPort } from './ATO.helpers';
 import type {
+  ATIEndpointOptions,
+  ATINDJSONConsumerOptions,
+  ATIRuntimeOptions,
+  ATIServiceOptions,
   ClientOptions,
   E2ECommandLineContext,
   E2ECommandLineOptions,
@@ -29,6 +35,7 @@ export * from './FrameworkValidationReporter';
 interface ATOInit {
   runtimeOptions?: E2ERuntimeOptions;
   commandLineContext?: E2ECommandLineContext;
+  atiOptions?: ATIRuntimeOptions;
 }
 
 interface ResolvedServerOptions extends ServerOptions {
@@ -79,6 +86,23 @@ interface ResolvedLaunchPlan {
   preview: ResolvedPreview;
   dryRun: boolean;
   unrealLagOptions?: UnrealLagProxyOptions;
+}
+
+interface ResolvedATIServiceOptions {
+  label: string;
+  host: string;
+  port: number;
+  connectTimeoutSeconds: number;
+  validateSchema: boolean;
+  maxEventSizeBytes: number;
+  ndjson: false | Required<ATINDJSONConsumerOptions>;
+  terminal: boolean;
+}
+
+interface StartedATIService {
+  label: string;
+  endpoint: ATIEndpointOptions;
+  service: ATIService;
 }
 
 interface ParsedCommandLineArguments {
@@ -717,6 +741,8 @@ interface ParsedArgEntry {
   optionName?: string;
 }
 
+const repeatableNamedOptions = new Set(['atiendpoint']);
+
 function normalizeOptionName(raw: string): string | undefined {
   const trimmed = raw.trim();
   if (!trimmed) return undefined;
@@ -784,12 +810,17 @@ function filterExcludedArgEntries(entries: ParsedArgEntry[], excludeArgs: string
 function keepLastNamedArgEntries(entries: ParsedArgEntry[]) {
   const lastIndexByOption = new Map<string, number>();
   entries.forEach((entry, index) => {
-    if (entry.optionName) {
+    if (entry.optionName && !repeatableNamedOptions.has(entry.optionName)) {
       lastIndexByOption.set(entry.optionName, index);
     }
   });
 
-  return entries.filter((entry, index) => !entry.optionName || lastIndexByOption.get(entry.optionName) === index);
+  return entries.filter(
+    (entry, index) =>
+      !entry.optionName ||
+      repeatableNamedOptions.has(entry.optionName) ||
+      lastIndexByOption.get(entry.optionName) === index,
+  );
 }
 
 function flattenArgEntries(entries: ParsedArgEntry[]) {
@@ -807,6 +838,102 @@ function dedupeFinalNamedArgs(positionals: string[], args: string[]) {
   const parsedEntries = parseArgEntries(args);
   const dedupedEntries = keepLastNamedArgEntries(parsedEntries);
   return positionals.concat(flattenArgEntries(dedupedEntries));
+}
+
+function appendResolvedExtraArgs(baseArgs: string[], extraArgs: string[]) {
+  if (extraArgs.length === 0) {
+    return [...baseArgs];
+  }
+
+  const positionals: string[] = [];
+  for (const arg of baseArgs) {
+    if (normalizeOptionName(arg) !== undefined) {
+      break;
+    }
+    positionals.push(arg);
+  }
+
+  return dedupeFinalNamedArgs(positionals, baseArgs.slice(positionals.length).concat(extraArgs));
+}
+
+function sanitizeATIPathSegment(value: string) {
+  return value.replace(/[<>:"/\\|?*]+/g, '_').trim() || 'ATI';
+}
+
+function resolveATIRunLabel(mode: CoordinatorMode) {
+  switch (mode) {
+    case CoordinatorMode.DedicatedServer:
+      return 'Dedicated';
+    case CoordinatorMode.ListenServer:
+      return 'Listen';
+    case CoordinatorMode.Standalone:
+      return 'Standalone';
+    case CoordinatorMode.PIE:
+      return 'PIE';
+  }
+}
+
+function resolveATINDJSONDirectory(projectRoot: string, label: string, directory?: string) {
+  if (!directory) {
+    return path.join(projectRoot, 'Saved', 'Logs', 'ATI', sanitizeATIPathSegment(label));
+  }
+
+  return path.isAbsolute(directory) ? directory : path.join(projectRoot, directory);
+}
+
+function cloneATINDJSONConsumerOptions(
+  options?: false | ATINDJSONConsumerOptions,
+): false | ATINDJSONConsumerOptions | undefined {
+  if (options === false) {
+    return false;
+  }
+
+  if (!options) {
+    return options;
+  }
+
+  return { ...options };
+}
+
+function cloneATIServiceOptions(options: ATIServiceOptions) {
+  return {
+    ...options,
+    ...(options.ndjson !== undefined ? { ndjson: cloneATINDJSONConsumerOptions(options.ndjson) } : {}),
+  } satisfies ATIServiceOptions;
+}
+
+function cloneATIRuntimeOptions(options?: ATIRuntimeOptions): ATIRuntimeOptions {
+  if (!options) {
+    return {};
+  }
+
+  return {
+    ...options,
+    ...(options.services ? { services: options.services.map(cloneATIServiceOptions) } : {}),
+  };
+}
+
+function mergeATIRuntimeOptions(base: ATIRuntimeOptions | undefined, overrides?: ATIRuntimeOptions) {
+  const clonedBase = cloneATIRuntimeOptions(base);
+  const clonedOverrides = cloneATIRuntimeOptions(overrides);
+  return {
+    ...clonedBase,
+    ...clonedOverrides,
+    ...(clonedOverrides.services ? { services: clonedOverrides.services.map(cloneATIServiceOptions) } : {}),
+  } satisfies ATIRuntimeOptions;
+}
+
+function formatATIEndpointArg(endpoint: ATIEndpointOptions) {
+  const connectTimeoutSeconds = endpoint.connectTimeoutSeconds ?? 0.25;
+  return `-ATIEndpoint=(Host="${endpoint.host}",Port=${endpoint.port},ConnectTimeoutSeconds=${connectTimeoutSeconds})`;
+}
+
+function buildATIReporterArgs(endpoints: ATIEndpointOptions[]) {
+  if (endpoints.length === 0) {
+    return [];
+  }
+
+  return ['-ATIEnableTcpReporting=1', ...endpoints.map((endpoint) => formatATIEndpointArg(endpoint))];
 }
 
 function resolveListenStartupUrl(startupMap: string | undefined) {
@@ -920,10 +1047,22 @@ function mergeProcessLaunchOptions<T extends ProcessLaunchOptions>(base: T, over
   return {
     ...cloneProcessLaunchOptions(base),
     ...overrides,
-    extraArgs: overrides.extraArgs !== undefined ? [...overrides.extraArgs] : [...(base.extraArgs ?? [])],
-    excludeArgs: overrides.excludeArgs !== undefined ? [...overrides.excludeArgs] : [...(base.excludeArgs ?? [])],
-    execCmds: overrides.execCmds !== undefined ? [...overrides.execCmds] : [...(base.execCmds ?? [])],
-    execTests: overrides.execTests !== undefined ? [...overrides.execTests] : [...(base.execTests ?? [])],
+    extraArgs:
+      (base.extraArgs ?? overrides.extraArgs) !== undefined
+        ? [...(base.extraArgs ?? []), ...(overrides.extraArgs ?? [])]
+        : [],
+    excludeArgs:
+      (base.excludeArgs ?? overrides.excludeArgs) !== undefined
+        ? [...(base.excludeArgs ?? []), ...(overrides.excludeArgs ?? [])]
+        : [],
+    execCmds:
+      (base.execCmds ?? overrides.execCmds) !== undefined
+        ? [...(base.execCmds ?? []), ...(overrides.execCmds ?? [])]
+        : [],
+    execTests:
+      (base.execTests ?? overrides.execTests) !== undefined
+        ? [...(base.execTests ?? []), ...(overrides.execTests ?? [])]
+        : [],
   } as T;
 }
 
@@ -1215,10 +1354,12 @@ export class ATO {
   unrealLagBindInfo?: BindInfo;
 
   private runtimeOptions: E2ERuntimeOptions;
+  private atiOptions: ATIRuntimeOptions;
   public readonly commandLineContext?: E2ECommandLineContext;
 
   constructor(init: ATOInit = {}) {
     this.runtimeOptions = { ...init.runtimeOptions };
+    this.atiOptions = mergeATIRuntimeOptions({ enabled: true }, init.atiOptions);
     this.commandLineContext = init.commandLineContext;
   }
 
@@ -1235,6 +1376,11 @@ export class ATO {
       ...this.runtimeOptions,
       ...opts,
     };
+    return this;
+  }
+
+  configureATI(opts: ATIRuntimeOptions) {
+    this.atiOptions = mergeATIRuntimeOptions(this.atiOptions, opts);
     return this;
   }
 
@@ -1576,6 +1722,111 @@ export class ATO {
     });
   }
 
+  private resolveATIServiceOptions(plan: ResolvedLaunchPlan) {
+    if (this.atiOptions.enabled === false) {
+      return [];
+    }
+
+    const configuredServices =
+      this.atiOptions.services && this.atiOptions.services.length > 0 ? this.atiOptions.services : [{}];
+    const projectRoot = path.dirname(this.projectPath);
+    const defaultLabel = resolveATIRunLabel(plan.atcCoordinatorMode);
+
+    return configuredServices.map((service, index) => {
+      const label =
+        service.label?.trim() || (configuredServices.length === 1 ? defaultLabel : `${defaultLabel}-${index + 1}`);
+      const ndjson =
+        service.ndjson === false
+          ? false
+          : {
+              directory: resolveATINDJSONDirectory(projectRoot, label, service.ndjson?.directory),
+              fileName: service.ndjson?.fileName ?? '',
+              maxFileSizeBytes: service.ndjson?.maxFileSizeBytes ?? 0,
+            };
+
+      return {
+        label,
+        host: service.host ?? '127.0.0.1',
+        port: service.port ?? 0,
+        connectTimeoutSeconds: service.connectTimeoutSeconds ?? 0.25,
+        validateSchema: service.validateSchema ?? true,
+        maxEventSizeBytes: service.maxEventSizeBytes ?? 1024 * 1024,
+        ndjson,
+        terminal: service.terminal ?? false,
+      } satisfies ResolvedATIServiceOptions;
+    });
+  }
+
+  private async startATIForPlan(plan: ResolvedLaunchPlan): Promise<StartedATIService[]> {
+    const startedServices: StartedATIService[] = [];
+    for (const serviceOptions of this.resolveATIServiceOptions(plan)) {
+      if (serviceOptions.ndjson === false && !serviceOptions.terminal) {
+        console.warn(`[ATI] ${serviceOptions.label} has no consumers configured; skipping managed ATI service`);
+        continue;
+      }
+
+      try {
+        if (serviceOptions.ndjson !== false) {
+          await mkdir(serviceOptions.ndjson.directory, { recursive: true });
+        }
+
+        const service = new ATIService({
+          host: serviceOptions.host,
+          port: serviceOptions.port,
+          validateSchema: serviceOptions.validateSchema,
+          maxEventSizeBytes: serviceOptions.maxEventSizeBytes,
+        });
+
+        if (serviceOptions.ndjson !== false) {
+          service.addConsumer(
+            new NDJSONConsumer({
+              directory: serviceOptions.ndjson.directory,
+              ...(serviceOptions.ndjson.fileName ? { fileName: serviceOptions.ndjson.fileName } : {}),
+              ...(serviceOptions.ndjson.maxFileSizeBytes > 0
+                ? { maxFileSizeBytes: serviceOptions.ndjson.maxFileSizeBytes }
+                : {}),
+            }),
+          );
+        }
+
+        if (serviceOptions.terminal) {
+          service.addConsumer(new TerminalConsumer());
+        }
+
+        await service.start();
+        const endpoint = service.getEndpoint();
+        console.log(`[ATI] ${serviceOptions.label} listening on ${endpoint.host}:${endpoint.port}`);
+        startedServices.push({
+          label: serviceOptions.label,
+          service,
+          endpoint: {
+            host: endpoint.host,
+            port: endpoint.port,
+            connectTimeoutSeconds: serviceOptions.connectTimeoutSeconds,
+          },
+        });
+      } catch (error) {
+        console.warn(
+          `[ATI] Failed to start managed ATI service '${serviceOptions.label}': ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    }
+
+    return startedServices;
+  }
+
+  private async stopATIForPlan(startedServices: StartedATIService[]) {
+    for (const startedService of [...startedServices].reverse()) {
+      try {
+        await startedService.service.stop();
+      } catch (error) {
+        console.warn(
+          `[ATI] Failed to stop managed ATI service '${startedService.label}': ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    }
+  }
+
   private validateExecutables(plan: ResolvedLaunchPlan) {
     if (!checkExistsSync(plan.server.exe)) {
       console.error(`Server executable not found: ${plan.server.exe}`);
@@ -1633,6 +1884,7 @@ export class ATO {
     const outcomes: ProcessOutcome[] = [];
     let serverMonitor: MonitoredProcess | undefined;
     const clientMonitors: MonitoredProcess[] = [];
+    let startedATI: StartedATIService[] = [];
     const coordinatorLabel = resolveCoordinatorProcessLabel(plan.atcCoordinatorMode);
 
     try {
@@ -1645,11 +1897,15 @@ export class ATO {
       const proxyClientHost = requiresNetworkServer(plan.atcCoordinatorMode)
         ? await this.startUnrealLag(plan.effectivePort, plan.unrealLagOptions)
         : undefined;
+      startedATI = await this.startATIForPlan(plan);
 
-      const serverArgs = buildServerArgs(
-        plan.server,
-        requiresNetworkServer(plan.atcCoordinatorMode) ? plan.effectivePort : undefined,
-        plan.atcCoordinatorMode,
+      const serverArgs = appendResolvedExtraArgs(
+        buildServerArgs(
+          plan.server,
+          requiresNetworkServer(plan.atcCoordinatorMode) ? plan.effectivePort : undefined,
+          plan.atcCoordinatorMode,
+        ),
+        buildATIReporterArgs(startedATI.map((startedService) => startedService.endpoint)),
       );
       console.log(`[SPAWN] ${coordinatorLabel} -> ${formatCommand(plan.server.exe, serverArgs)}`);
       console.log(`[SPAWN-ARGS] ${coordinatorLabel} ARGS:`, JSON.stringify(serverArgs));
@@ -1782,6 +2038,7 @@ export class ATO {
       try {
         if (this.serverProc && !this.serverProc.killed) this.serverProc.kill();
       } catch {}
+      await this.stopATIForPlan(startedATI);
       await this.stopUnrealLag();
       printOrchestrationSummary(outcomes);
       for (const line of formatFrameworkValidationSummaryLines(ATO.FrameworkValidationReporter.getReport())) {

@@ -364,7 +364,8 @@ coordinator.addTests('ATC.COORDINATOR_LISTEN.CLIENTS_ALL_IN_OPEN_WORLD');
 coordinator.addTests('ATC.PIE_MATRIX');
 ATCPIETest.addCoordinator(coordinator);
 
-let code = await ATCPIETest.start();
+let code = 0;
+code = await ATCPIETest.start();
 
 if (code === 0) {
   try {

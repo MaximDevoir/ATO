@@ -108,7 +108,8 @@ const testCoordinator = new Coordinator(CoordinatorMode.Standalone);
 testCoordinator.addTests('ATC.EXCEPTIONS');
 ATCStandaloneWithExceptionsTest.addCoordinator(testCoordinator);
 
-let code = await ATCStandaloneWithExceptionsTest.start();
+let code = 0;
+code = await ATCStandaloneWithExceptionsTest.start();
 
 try {
   validateStandaloneWithExceptionsFrameworkReport();

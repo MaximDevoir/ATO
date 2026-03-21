@@ -1,5 +1,5 @@
 {
-  "name": "@maximdevoir/ato",
+  "name": "@maximdevoir/ati",
   "version": "1.0.3",
   "type": "module",
   "sideEffects": false,
@@ -14,12 +14,7 @@
     }
   },
   "types": "./src/index.ts",
-  "dependencies": {
-    "@maximdevoir/unreal-lag": "workspace:^",
-    "@maximdevoir/ati": "workspace:^",
-    "@types/yargs": "17.0.35",
-    "yargs": "18.0.0"
-  },
+  "dependencies": {},
   "scripts": {
     "lint": "biome lint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",

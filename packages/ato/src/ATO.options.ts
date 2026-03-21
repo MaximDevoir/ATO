@@ -19,6 +19,34 @@ export interface UnrealLagProxyOptions {
   clientProfile?: UnrealLagProfileName;
 }
 
+export interface ATIEndpointOptions {
+  host: string;
+  port: number;
+  connectTimeoutSeconds?: number;
+}
+
+export interface ATINDJSONConsumerOptions {
+  directory?: string;
+  fileName?: string;
+  maxFileSizeBytes?: number;
+}
+
+export interface ATIServiceOptions {
+  label?: string;
+  host?: string;
+  port?: number;
+  connectTimeoutSeconds?: number;
+  validateSchema?: boolean;
+  maxEventSizeBytes?: number;
+  ndjson?: false | ATINDJSONConsumerOptions;
+  terminal?: boolean;
+}
+
+export interface ATIRuntimeOptions {
+  enabled?: boolean;
+  services?: ATIServiceOptions[];
+}
+
 export interface ProcessLaunchOptions {
   // optional absolute path; when omitted the orchestrator will probe common locations
   exe?: string;

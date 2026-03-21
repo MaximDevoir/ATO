@@ -431,7 +431,8 @@ coordinator.addTests('ATC.RegistryRegressionConflicts');
 
 ATCStandaloneTest.addCoordinator(coordinator);
 
-let code = await ATCStandaloneTest.start();
+let code = 0;
+code = await ATCStandaloneTest.start();
 
 try {
   validateStandaloneFrameworkReport();

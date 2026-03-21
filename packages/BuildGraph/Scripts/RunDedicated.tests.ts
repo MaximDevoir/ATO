@@ -162,7 +162,8 @@ coordinator.addTests('ATC.COORDINATOR_DEDICATED');
 
 ATCDedicatedTest.addCoordinator(coordinator);
 
-let code = await ATCDedicatedTest.start();
+let code = 0;
+code = await ATCDedicatedTest.start();
 
 if (code === 0) {
   try {
