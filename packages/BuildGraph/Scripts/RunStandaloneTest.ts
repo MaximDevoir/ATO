@@ -1,16 +1,31 @@
 #!/usr/bin/env node
+import { existsSync } from 'node:fs';
 import * as path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { loadLatestATISimpleReporterFromDirectory } from '@maximdevoir/ati';
 import { ATO, Coordinator, CoordinatorMode, FrameworkValidation } from '@maximdevoir/ato';
 
+function resolveSnapshotRelativeTo(scriptMetaUrl: string) {
+  const scriptPath = fileURLToPath(scriptMetaUrl);
+  const scriptDir = path.dirname(scriptPath);
+  if (existsSync(path.join(scriptDir, '__snapshots__'))) {
+    return scriptMetaUrl;
+  }
+
+  return pathToFileURL(
+    path.resolve(scriptDir, '..', '..', 'ATO', 'packages', 'buildgraph', 'Scripts', path.basename(scriptPath)),
+  );
+}
+
 async function validateStandaloneFrameworkReport(ato: ATO) {
+  const snapshotRelativeTo = resolveSnapshotRelativeTo(import.meta.url);
   const simpleReporter = await loadLatestATISimpleReporterFromDirectory(
     path.join(path.dirname(ato.projectPath), 'Saved', 'Logs', 'ATI', 'Standalone'),
   );
   const validation = new FrameworkValidation(ATO.FrameworkValidationReporter.getReport(), {
     simpleReporter,
     updateSnapshots: ato.shouldUpdateSnapshots,
-    snapshotRelativeTo: import.meta.url,
+    snapshotRelativeTo,
   }).assertNoIssues();
 
   const expectedFails = new Set([
@@ -215,22 +230,16 @@ async function validateStandaloneFrameworkReport(ato: ATO) {
     throw new Error('ATC_SKIP unexpectedly continued executing the current task body');
   }
 
-  const skipTaskRetry = validation
+  const _skipTaskRetry = validation
     .getTestByPath('ATC.ATC_SKIP_TESTS.SKIP_TASK_DOES_NOT_TRIGGER_RETRY.')
     .expectResult('Success');
-  skipTaskRetry.expectNextLog({ type: 'Coordinator', coordinator: 'STANDALONE', logContains: 'SkipTaskRetry.Before' });
-  skipTaskRetry.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'STANDALONE',
-    logContains: 'SkipTaskRetry.NextTaskRan',
-  });
-  if (
-    skipTaskRetry.events.some(
-      (entry) => entry.category === 'ATC_EVENT_TASK_RETRY' && entry.fields.task === 'SkipTaskWithRetryConfigured',
-    )
-  ) {
-    throw new Error('ATC_SKIP_TASK unexpectedly triggered task retry handling');
-  }
+  await validation
+    .getBySimpleReporterPath([
+      'testsByEffectiveCoordinatorMode',
+      'Standalone',
+      'ATC.ATC_SKIP_TESTS.SKIP_TASK_DOES_NOT_TRIGGER_RETRY::0',
+    ])
+    .toMatchFileSnapshot('./__snapshots__/RunStandaloneTest.skipTaskRetry.snapshot.json');
 
   const _skipManyZero = validation.getTestByPath('ATC.ATC_SKIP_TESTS.SKIP_MANY_ZERO_IS_NOOP.').expectResult('Success');
   await validation

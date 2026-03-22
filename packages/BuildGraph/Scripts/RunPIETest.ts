@@ -1,353 +1,99 @@
 #!/usr/bin/env node
+import { existsSync } from 'node:fs';
+import * as path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { loadLatestATISimpleReporterFromDirectory } from '@maximdevoir/ati';
 import { ATO, Coordinator, CoordinatorMode, FrameworkValidation } from '@maximdevoir/ato';
 
-function validatePIEFrameworkReport() {
-  const validation = new FrameworkValidation(ATO.FrameworkValidationReporter.getReport()).assertNoIssues();
-
-  const dedicatedBasicTest = validation
-    .getTestByPath('ATC.COORDINATOR_DEDICATED.ListenModeBasic.')
-    .expectResult('Success');
-  dedicatedBasicTest.expectNextLog({ type: 'Coordinator', coordinator: 'PIE', logContains: 'Running as Dedicated' });
-  dedicatedBasicTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'VariantStart', effectiveMode: 'Dedicated', currentVariant: 1, totalVariants: 1 },
-  });
-  dedicatedBasicTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'PIE',
-    logContains: 'DedicatedTask!',
-  });
-  dedicatedBasicTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'VariantEnd', effectiveMode: 'Dedicated', currentVariant: 1, totalVariants: 1, success: true },
-  });
-
-  const repeatedDedicatedTest = validation
-    .getTestByPath('ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL.[Clients=2]')
-    .expectResult('Success');
-
-  for (let run = 0; run < 4; run += 1) {
-    repeatedDedicatedTest.expectNextEvent({
-      category: 'ATC_EVENT_REPEAT',
-      source: { type: 'Coordinator', coordinator: 'PIE' },
-      fields: { state: 'RunStart', currentRun: run + 1, totalRuns: 4, repeatMode: 'Count' },
-    });
-    repeatedDedicatedTest.expectNextEvent({
-      category: 'ATC_EVENT_COORDINATOR_MATRIX',
-      source: { type: 'Coordinator', coordinator: 'PIE' },
-      fields: { state: 'VariantStart', effectiveMode: 'Dedicated', currentVariant: 1, totalVariants: 1 },
-    });
-    repeatedDedicatedTest.expectNextLog({
-      type: 'Coordinator',
-      coordinator: 'PIE',
-      logContains: 'InitialLogFromDedicatedCoordinator!',
-    });
-    repeatedDedicatedTest.expectNextLog({ type: 'Coordinator', coordinator: 'PIE', logContains: 'LogFromOne!' });
-    repeatedDedicatedTest.expectNextLog({ type: 'Coordinator', coordinator: 'PIE', logContains: 'LogFromZero!' });
-    repeatedDedicatedTest.expectNextEvent({
-      category: 'ATC_EVENT_COORDINATOR_MATRIX',
-      source: { type: 'Coordinator', coordinator: 'PIE' },
-      fields: { state: 'VariantEnd', effectiveMode: 'Dedicated', currentVariant: 1, totalVariants: 1, success: true },
-    });
-    repeatedDedicatedTest.expectNextEvent({
-      category: 'ATC_EVENT_REPEAT',
-      source: { type: 'Coordinator', coordinator: 'PIE' },
-      fields: { state: 'RunEnd', currentRun: run + 1, totalRuns: 4, repeatMode: 'Count', failed: false },
-    });
+function resolveSnapshotRelativeTo(scriptMetaUrl: string) {
+  const scriptPath = fileURLToPath(scriptMetaUrl);
+  const scriptDir = path.dirname(scriptPath);
+  if (existsSync(path.join(scriptDir, '__snapshots__'))) {
+    return scriptMetaUrl;
   }
 
-  repeatedDedicatedTest.expectNextEvent({
-    category: 'ATC_EVENT_REPEAT',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'Complete', completedRuns: 4, totalRuns: 4, repeatMode: 'Count', stopReason: 'MaxRunsReached' },
-  });
+  return pathToFileURL(
+    path.resolve(scriptDir, '..', '..', 'ATO', 'packages', 'buildgraph', 'Scripts', path.basename(scriptPath)),
+  );
+}
 
-  const retryAndMessagesTest = validation
-    .getTestByPath('ATC.COORDINATOR_DEDICATED.RETRY_AND_MESSAGES.')
-    .expectResult('Success');
+async function validatePIEFrameworkReport(ato: ATO) {
+  const simpleReporter = await loadLatestATISimpleReporterFromDirectory(
+    path.join(path.dirname(ato.projectPath), 'Saved', 'Logs', 'ATI', 'PIE'),
+  );
+  const validation = new FrameworkValidation(ATO.FrameworkValidationReporter.getReport(), {
+    simpleReporter,
+    updateSnapshots: ato.shouldUpdateSnapshots,
+    snapshotRelativeTo: resolveSnapshotRelativeTo(import.meta.url),
+  }).assertNoIssues();
 
-  retryAndMessagesTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'VariantStart', effectiveMode: 'Dedicated', currentVariant: 1, totalVariants: 1 },
-  });
-  retryAndMessagesTest.expectNextEvent({
-    category: 'ATC_EVENT_MESSAGE',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { kind: 'NonFatalError', task: 'RecoverFromNonFatal' },
-    fieldContains: { message: 'Expected false to be true' },
-  });
-  retryAndMessagesTest.expectNextEvent({
-    category: 'ATC_EVENT_TASK_RETRY',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { task: 'RecoverFromNonFatal', state: 'Scheduled', nextAttempt: 2, retriesRemaining: 0 },
-  });
-  retryAndMessagesTest.expectNextEvent({
-    category: 'ATC_EVENT_TASK_RETRY',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { task: 'RecoverFromNonFatal', state: 'Executing', attempt: 2, retriesRemaining: 0 },
-  });
-  retryAndMessagesTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'PIE',
-    logContains: 'RecoveredFromNonFatal!',
-  });
-  retryAndMessagesTest.expectNextEvent({
-    category: 'ATC_EVENT_MESSAGE',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { kind: 'FatalError', task: 'RecoverFromFatal' },
-    fieldContains: { message: 'RecoverFromFatal.FirstAttempt' },
-  });
-  retryAndMessagesTest.expectNextEvent({
-    category: 'ATC_EVENT_TASK_RETRY',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { task: 'RecoverFromFatal', state: 'Scheduled', nextAttempt: 2, retriesRemaining: 0 },
-  });
-  retryAndMessagesTest.expectNextEvent({
-    category: 'ATC_EVENT_TASK_RETRY',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { task: 'RecoverFromFatal', state: 'Executing', attempt: 2, retriesRemaining: 0 },
-  });
-  retryAndMessagesTest.expectNextLog({ type: 'Coordinator', coordinator: 'PIE', logContains: 'RecoveredFromFatal!' });
-  retryAndMessagesTest.expectNextEvent({
-    category: 'ATC_EVENT_MESSAGE',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { kind: 'Warning', task: 'EmitWarning' },
-    fieldContains: { message: 'EmitWarning.WarningKind' },
-  });
-  retryAndMessagesTest.expectNextLog({ type: 'Coordinator', coordinator: 'PIE', logContains: 'WarningIssued!' });
-  retryAndMessagesTest.expectNextEvent({
-    category: 'ATC_EVENT_MESSAGE',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { kind: 'Skip', task: 'EmitSkip' },
-    fieldContains: { message: 'EmitSkip.SkipKind' },
-  });
-  retryAndMessagesTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'VariantEnd', effectiveMode: 'Dedicated', currentVariant: 1, totalVariants: 1, success: true },
-  });
-
-  const repeatUntilFailTest = validation
-    .getTestByPath('ATC.COORDINATOR_DEDICATED.REPEAT_UNTIL_FAIL_TRACKING.')
-    .expectResult('Success');
-
-  for (let run = 0; run < 3; run += 1) {
-    repeatUntilFailTest.expectNextEvent({
-      category: 'ATC_EVENT_REPEAT',
-      source: { type: 'Coordinator', coordinator: 'PIE' },
-      fields: { state: 'RunStart', currentRun: run + 1, totalRuns: 3, repeatMode: 'UntilFail' },
-    });
-    repeatUntilFailTest.expectNextEvent({
-      category: 'ATC_EVENT_COORDINATOR_MATRIX',
-      source: { type: 'Coordinator', coordinator: 'PIE' },
-      fields: { state: 'VariantStart', effectiveMode: 'Dedicated', currentVariant: 1, totalVariants: 1 },
-    });
-    repeatUntilFailTest.expectNextLog({ type: 'Coordinator', coordinator: 'PIE', logContains: 'RepeatUntilFailTick!' });
-    repeatUntilFailTest.expectNextEvent({
-      category: 'ATC_EVENT_COORDINATOR_MATRIX',
-      source: { type: 'Coordinator', coordinator: 'PIE' },
-      fields: { state: 'VariantEnd', effectiveMode: 'Dedicated', currentVariant: 1, totalVariants: 1, success: true },
-    });
-    repeatUntilFailTest.expectNextEvent({
-      category: 'ATC_EVENT_REPEAT',
-      source: { type: 'Coordinator', coordinator: 'PIE' },
-      fields: { state: 'RunEnd', currentRun: run + 1, totalRuns: 3, repeatMode: 'UntilFail', failed: false },
-    });
+  for (const test of validation.tests) {
+    test.expectResult('Success');
   }
 
-  repeatUntilFailTest.expectNextEvent({
-    category: 'ATC_EVENT_REPEAT',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: {
-      state: 'Complete',
-      completedRuns: 3,
-      totalRuns: 3,
-      repeatMode: 'UntilFail',
-      stopReason: 'MaxRunsReached',
-    },
-  });
+  await validation
+    .getBySimpleReporterPath([
+      'testsByEffectiveCoordinatorMode',
+      'Dedicated',
+      'ATC.COORDINATOR_DEDICATED.ListenModeBasic::0',
+    ])
+    .toMatchFileSnapshot('./__snapshots__/RunPIETest.listenModeBasic.snapshot.json');
 
-  const listenOpenWorldTest = validation
-    .getTestByPath('ATC.COORDINATOR_LISTEN.CLIENTS_ALL_IN_OPEN_WORLD.[Clients=2]')
-    .expectResult('Success');
-  listenOpenWorldTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'PIE',
-    logContains: 'Running as Listen Server',
-  });
-  listenOpenWorldTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'VariantStart', effectiveMode: 'ListenServer', currentVariant: 1, totalVariants: 1 },
-  });
-  listenOpenWorldTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'PIE',
-    logContains: 'ClientWorld.OpenWorld=/Engine/Maps/Templates/OpenWorld',
-  });
-  listenOpenWorldTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'PIE',
-    logContains: 'ClientWorld.OpenWorld=/Engine/Maps/Templates/OpenWorld',
-  });
-  listenOpenWorldTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'VariantEnd', effectiveMode: 'ListenServer', currentVariant: 1, totalVariants: 1, success: true },
-  });
+  await validation
+    .getBySimpleReporterPath([
+      'testsByEffectiveCoordinatorMode',
+      'Dedicated',
+      'ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL::0',
+    ])
+    .toMatchFileSnapshot('./__snapshots__/RunPIETest.msgFromAll.snapshot.json');
 
-  const multiModeTest = validation
-    .getTestByPath('ATC.PIE_MATRIX.MULTI_MODE.RUNS_EACH_COORDINATOR.')
-    .expectResult('Success');
-  multiModeTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'PIE',
-    logContains: 'Multiple Coordinator Modes: Standalone | Listen Server',
-  });
-  multiModeTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'Modes', modes: 'Standalone | Listen Server', totalVariants: 2 },
-  });
-  multiModeTest.expectNextLog({ type: 'Coordinator', coordinator: 'PIE', logContains: 'Running as Standalone' });
-  multiModeTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'VariantStart', effectiveMode: 'Standalone', currentVariant: 1, totalVariants: 2 },
-  });
-  multiModeTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'PIE',
-    logContains: 'PIEMatrix.MultiMode.Standalone',
-  });
-  multiModeTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'VariantEnd', effectiveMode: 'Standalone', currentVariant: 1, totalVariants: 2, success: true },
-  });
-  multiModeTest.expectNextLog({ type: 'Coordinator', coordinator: 'PIE', logContains: 'Running as Listen Server' });
-  multiModeTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'VariantStart', effectiveMode: 'ListenServer', currentVariant: 2, totalVariants: 2 },
-  });
-  multiModeTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'PIE',
-    logContains: 'PIEMatrix.MultiMode.ListenServer',
-  });
-  multiModeTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'VariantEnd', effectiveMode: 'ListenServer', currentVariant: 2, totalVariants: 2, success: true },
-  });
+  await validation
+    .getBySimpleReporterPath([
+      'testsByEffectiveCoordinatorMode',
+      'Dedicated',
+      'ATC.COORDINATOR_DEDICATED.RETRY_AND_MESSAGES::0',
+    ])
+    .toMatchFileSnapshot('./__snapshots__/RunPIETest.retryAndMessages.snapshot.json');
 
-  const nestedIntersectionTest = validation
-    .getTestByPath('ATC.PIE_MATRIX.NESTED_INTERSECTION.CHILD_MASK.LOG_EFFECTIVE_MODE.')
-    .expectResult('Success');
-  nestedIntersectionTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'PIE',
-    logContains: 'Multiple Coordinator Modes: Listen Server | Dedicated',
-  });
-  nestedIntersectionTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'Modes', modes: 'Listen Server | Dedicated', totalVariants: 2 },
-  });
-  nestedIntersectionTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'PIE',
-    logContains: 'Running as Listen Server',
-  });
-  nestedIntersectionTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'VariantStart', effectiveMode: 'ListenServer', currentVariant: 1, totalVariants: 2 },
-  });
-  nestedIntersectionTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'PIE',
-    logContains: 'PIEMatrix.NestedIntersection.ListenServer',
-  });
-  nestedIntersectionTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'VariantEnd', effectiveMode: 'ListenServer', currentVariant: 1, totalVariants: 2, success: true },
-  });
-  nestedIntersectionTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'PIE',
-    logContains: 'Running as Dedicated',
-  });
-  nestedIntersectionTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'VariantStart', effectiveMode: 'Dedicated', currentVariant: 2, totalVariants: 2 },
-  });
-  nestedIntersectionTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'PIE',
-    logContains: 'PIEMatrix.NestedIntersection.Dedicated',
-  });
-  nestedIntersectionTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'VariantEnd', effectiveMode: 'Dedicated', currentVariant: 2, totalVariants: 2, success: true },
-  });
+  await validation
+    .getBySimpleReporterPath([
+      'testsByEffectiveCoordinatorMode',
+      'Dedicated',
+      'ATC.COORDINATOR_DEDICATED.REPEAT_UNTIL_FAIL_TRACKING::0',
+    ])
+    .toMatchFileSnapshot('./__snapshots__/RunPIETest.repeatUntilFailTracking.snapshot.json');
 
-  const nestedOverrideTest = validation
-    .getTestByPath('ATC.PIE_MATRIX.NESTED_OVERRIDE.CHILD_OVERRIDE.LOG_EFFECTIVE_MODE.')
-    .expectResult('Success');
-  nestedOverrideTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'PIE',
-    logContains: 'Multiple Coordinator Modes: Standalone | Listen Server',
-  });
-  nestedOverrideTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'Modes', modes: 'Standalone | Listen Server', totalVariants: 2 },
-  });
-  nestedOverrideTest.expectNextLog({ type: 'Coordinator', coordinator: 'PIE', logContains: 'Running as Standalone' });
-  nestedOverrideTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'VariantStart', effectiveMode: 'Standalone', currentVariant: 1, totalVariants: 2 },
-  });
-  nestedOverrideTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'PIE',
-    logContains: 'PIEMatrix.NestedOverride.Standalone',
-  });
-  nestedOverrideTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'VariantEnd', effectiveMode: 'Standalone', currentVariant: 1, totalVariants: 2, success: true },
-  });
-  nestedOverrideTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'PIE',
-    logContains: 'Running as Listen Server',
-  });
-  nestedOverrideTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'VariantStart', effectiveMode: 'ListenServer', currentVariant: 2, totalVariants: 2 },
-  });
-  nestedOverrideTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'PIE',
-    logContains: 'PIEMatrix.NestedOverride.ListenServer',
-  });
-  nestedOverrideTest.expectNextEvent({
-    category: 'ATC_EVENT_COORDINATOR_MATRIX',
-    source: { type: 'Coordinator', coordinator: 'PIE' },
-    fields: { state: 'VariantEnd', effectiveMode: 'ListenServer', currentVariant: 2, totalVariants: 2, success: true },
-  });
+  await validation
+    .getBySimpleReporterPath([
+      'testsByEffectiveCoordinatorMode',
+      'ListenServer',
+      'ATC.COORDINATOR_LISTEN.CLIENTS_ALL_IN_OPEN_WORLD::0',
+    ])
+    .toMatchFileSnapshot('./__snapshots__/RunPIETest.listenClientsAllInOpenWorld.snapshot.json');
+
+  await validation
+    .getBySimpleReporterPath([
+      'testsByEffectiveCoordinatorMode',
+      'Standalone',
+      'ATC.PIE_MATRIX.MULTI_MODE.RUNS_EACH_COORDINATOR::0',
+    ])
+    .toMatchFileSnapshot('./__snapshots__/RunPIETest.multiMode.snapshot.json');
+
+  await validation
+    .getBySimpleReporterPath([
+      'testsByEffectiveCoordinatorMode',
+      'Dedicated',
+      'ATC.PIE_MATRIX.NESTED_INTERSECTION.CHILD_MASK.LOG_EFFECTIVE_MODE::0',
+    ])
+    .toMatchFileSnapshot('./__snapshots__/RunPIETest.nestedIntersection.snapshot.json');
+
+  await validation
+    .getBySimpleReporterPath([
+      'testsByEffectiveCoordinatorMode',
+      'Standalone',
+      'ATC.PIE_MATRIX.NESTED_OVERRIDE.CHILD_OVERRIDE.LOG_EFFECTIVE_MODE::0',
+    ])
+    .toMatchFileSnapshot('./__snapshots__/RunPIETest.nestedOverride.snapshot.json');
 }
 
 const ATCPIETest = ATO.fromCommandLine();
@@ -369,7 +115,7 @@ code = await ATCPIETest.start();
 
 if (code === 0) {
   try {
-    validatePIEFrameworkReport();
+    await validatePIEFrameworkReport(ATCPIETest);
     console.log('Framework validation passed');
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);

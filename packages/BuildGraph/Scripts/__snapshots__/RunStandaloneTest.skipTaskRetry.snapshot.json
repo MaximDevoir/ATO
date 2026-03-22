@@ -1,0 +1,150 @@
+{
+  "coordinatorMode": "Standalone",
+  "currentRunIndex": 1,
+  "effectiveCoordinatorModes": [
+    "Standalone"
+  ],
+  "invocationIndex": 0,
+  "key": "ATC.ATC_SKIP_TESTS.SKIP_TASK_DOES_NOT_TRIGGER_RETRY::0",
+  "maxRuns": 1,
+  "metadata": [
+    {
+      "name": "automationLabel",
+      "value": ""
+    },
+    {
+      "name": "repeatMode",
+      "value": "None"
+    },
+    {
+      "name": "repeatTotalRuns",
+      "value": "1"
+    }
+  ],
+  "parameters": [
+    {
+      "name": "Clients",
+      "value": "0"
+    }
+  ],
+  "phase": "Completed",
+  "repeatMode": "None",
+  "result": {
+    "durationSeconds": "<dynamic:durationSeconds>",
+    "message": "Test completed with 1 warning(s); first: SkipTaskRetry.Message",
+    "messageCount": 1,
+    "skipAllRemainingRuns": false,
+    "skipped": false,
+    "skipRunsRequested": 0,
+    "sourceFile": "<dynamic:sourceFile>",
+    "sourceFunction": "<dynamic:sourceFunction>",
+    "sourceLine": "<dynamic:sourceLine>",
+    "success": true
+  },
+  "runs": [
+    {
+      "executions": {
+        "Standalone": {
+          "coordinatorMode": "Standalone",
+          "effectiveCoordinatorMode": "Standalone",
+          "finishedAt": "<dynamic:finishedAt>",
+          "phase": "Completed",
+          "plans": {
+            "__Test_ATC.ATC_SKIP_TESTS.SKIP_TASK_DOES_NOT_TRIGGER_RETRY": {
+              "planName": "__Test_ATC.ATC_SKIP_TESTS.SKIP_TASK_DOES_NOT_TRIGGER_RETRY",
+              "status": "Passed",
+              "success": true,
+              "tasks": {
+                "AfterSkippedRetryTaskStillRuns": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "Success",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "startTime": "<dynamic:startTime>",
+                      "status": "Passed",
+                      "success": true,
+                      "targetClientIndex": -1,
+                      "taskRole": "Server",
+                      "taskTarget": "Coordinator",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "AfterSkippedRetryTaskStillRuns"
+                },
+                "SkipTaskWithRetryConfigured": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [
+                        {
+                          "file": "<dynamic:file>",
+                          "line": "<dynamic:line>",
+                          "message": "SkipTaskRetry.Message",
+                          "sourceFunction": "<dynamic:sourceFunction>"
+                        }
+                      ],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 3,
+                      "message": "SkipTaskRetry.Message",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": true,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "startTime": "<dynamic:startTime>",
+                      "status": "Skipped",
+                      "success": true,
+                      "targetClientIndex": -1,
+                      "taskRole": "Server",
+                      "taskTarget": "Coordinator",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "SkipTaskWithRetryConfigured"
+                }
+              }
+            }
+          },
+          "result": {
+            "durationSeconds": "<dynamic:durationSeconds>",
+            "message": "Test completed with 1 warning(s); first: SkipTaskRetry.Message",
+            "messageCount": 1,
+            "skipped": false,
+            "sourceFile": "<dynamic:sourceFile>",
+            "sourceFunction": "<dynamic:sourceFunction>",
+            "sourceLine": "<dynamic:sourceLine>",
+            "success": true
+          },
+          "startedAt": "<dynamic:startedAt>",
+          "testId": "<dynamic:testId>",
+          "travelSessionId": "<dynamic:travelSessionId>"
+        }
+      },
+      "meta": {
+        "completedRuns": 1,
+        "executedRuns": 1,
+        "invocationIndex": 0,
+        "repeatMode": "None",
+        "skippedRuns": 0,
+        "stopReason": "MaxRunsReached",
+        "totalRuns": 1
+      },
+      "runIndex": 1,
+      "status": "Passed"
+    }
+  ],
+  "testId": "<dynamic:testId>",
+  "testPath": "ATC.ATC_SKIP_TESTS.SKIP_TASK_DOES_NOT_TRIGGER_RETRY"
+}

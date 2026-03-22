@@ -1,0 +1,180 @@
+{
+  "coordinatorMode": "Dedicated",
+  "currentRunIndex": 1,
+  "effectiveCoordinatorModes": [
+    "PIE",
+    "Listen Server",
+    "Dedicated",
+    "ListenServer"
+  ],
+  "invocationIndex": 0,
+  "key": "ATC.PIE_MATRIX.NESTED_INTERSECTION.CHILD_MASK.LOG_EFFECTIVE_MODE::0",
+  "maxRuns": 1,
+  "metadata": [
+    {
+      "name": "automationLabel",
+      "value": ""
+    },
+    {
+      "name": "repeatMode",
+      "value": "None"
+    },
+    {
+      "name": "repeatTotalRuns",
+      "value": "1"
+    }
+  ],
+  "parameters": [
+    {
+      "name": "Clients",
+      "value": "0"
+    }
+  ],
+  "phase": "Completed",
+  "repeatMode": "None",
+  "result": {
+    "durationSeconds": "<dynamic:durationSeconds>",
+    "message": "ATC test completed successfully",
+    "messageCount": 0,
+    "skipAllRemainingRuns": false,
+    "skipped": false,
+    "skipRunsRequested": 0,
+    "sourceFile": "<dynamic:sourceFile>",
+    "sourceFunction": "<dynamic:sourceFunction>",
+    "sourceLine": "<dynamic:sourceLine>",
+    "success": true
+  },
+  "runs": [
+    {
+      "executions": {
+        "Dedicated": {
+          "coordinatorMode": "PIE",
+          "currentVariant": 2,
+          "effectiveCoordinatorMode": "Dedicated",
+          "finishedAt": "<dynamic:finishedAt>",
+          "phase": "Completed",
+          "plans": {
+            "__Test_ATC.PIE_MATRIX.NESTED_INTERSECTION.CHILD_MASK.LOG_EFFECTIVE_MODE": {
+              "planName": "__Test_ATC.PIE_MATRIX.NESTED_INTERSECTION.CHILD_MASK.LOG_EFFECTIVE_MODE",
+              "status": "Passed",
+              "success": true,
+              "tasks": {
+                "LogEffectiveCoordinatorMode": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "Success",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "startTime": "<dynamic:startTime>",
+                      "status": "Passed",
+                      "success": true,
+                      "targetClientIndex": -1,
+                      "taskRole": "Server",
+                      "taskTarget": "Coordinator",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "LogEffectiveCoordinatorMode"
+                }
+              }
+            }
+          },
+          "result": {
+            "durationSeconds": "<dynamic:durationSeconds>",
+            "message": "ATC test completed successfully",
+            "messageCount": 0,
+            "skipped": false,
+            "sourceFile": "<dynamic:sourceFile>",
+            "sourceFunction": "<dynamic:sourceFunction>",
+            "sourceLine": "<dynamic:sourceLine>",
+            "success": true
+          },
+          "startedAt": "<dynamic:startedAt>",
+          "testId": "<dynamic:testId>",
+          "totalVariants": 2,
+          "travelSessionId": "<dynamic:travelSessionId>"
+        },
+        "ListenServer": {
+          "coordinatorMode": "PIE",
+          "currentVariant": 1,
+          "effectiveCoordinatorMode": "ListenServer",
+          "finishedAt": "<dynamic:finishedAt>",
+          "phase": "Completed",
+          "plans": {
+            "__Test_ATC.PIE_MATRIX.NESTED_INTERSECTION.CHILD_MASK.LOG_EFFECTIVE_MODE": {
+              "planName": "__Test_ATC.PIE_MATRIX.NESTED_INTERSECTION.CHILD_MASK.LOG_EFFECTIVE_MODE",
+              "status": "Passed",
+              "success": true,
+              "tasks": {
+                "LogEffectiveCoordinatorMode": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "Success",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "startTime": "<dynamic:startTime>",
+                      "status": "Passed",
+                      "success": true,
+                      "targetClientIndex": -1,
+                      "taskRole": "Server",
+                      "taskTarget": "Coordinator",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "LogEffectiveCoordinatorMode"
+                }
+              }
+            }
+          },
+          "result": {
+            "durationSeconds": "<dynamic:durationSeconds>",
+            "message": "ATC test completed successfully",
+            "messageCount": 0,
+            "skipped": false,
+            "sourceFile": "<dynamic:sourceFile>",
+            "sourceFunction": "<dynamic:sourceFunction>",
+            "sourceLine": "<dynamic:sourceLine>",
+            "success": true
+          },
+          "startedAt": "<dynamic:startedAt>",
+          "testId": "<dynamic:testId>",
+          "totalVariants": 2,
+          "travelSessionId": "<dynamic:travelSessionId>"
+        }
+      },
+      "meta": {
+        "completedRuns": 1,
+        "currentVariant": 2,
+        "executedRuns": 1,
+        "invocationIndex": 0,
+        "repeatMode": "None",
+        "skippedRuns": 0,
+        "stopReason": "MaxRunsReached",
+        "totalRuns": 1,
+        "totalVariants": 2
+      },
+      "runIndex": 1,
+      "status": "Passed"
+    }
+  ],
+  "testId": "<dynamic:testId>",
+  "testPath": "ATC.PIE_MATRIX.NESTED_INTERSECTION.CHILD_MASK.LOG_EFFECTIVE_MODE"
+}

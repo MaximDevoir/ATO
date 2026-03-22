@@ -1,0 +1,241 @@
+{
+  "coordinatorMode": "Dedicated",
+  "currentRunIndex": 1,
+  "effectiveCoordinatorModes": [
+    "Dedicated"
+  ],
+  "invocationIndex": 0,
+  "key": "ATC.COORDINATOR_DEDICATED.RETRY_AND_MESSAGES::0",
+  "maxRuns": 1,
+  "metadata": [
+    {
+      "name": "automationLabel",
+      "value": ""
+    },
+    {
+      "name": "repeatMode",
+      "value": "None"
+    },
+    {
+      "name": "repeatTotalRuns",
+      "value": "1"
+    }
+  ],
+  "parameters": [
+    {
+      "name": "Clients",
+      "value": "0"
+    }
+  ],
+  "phase": "Completed",
+  "repeatMode": "None",
+  "result": {
+    "durationSeconds": "<dynamic:durationSeconds>",
+    "message": "Test completed with 2 warning(s); first: EmitWarning.WarningKind",
+    "messageCount": 2,
+    "skipAllRemainingRuns": false,
+    "skipped": false,
+    "skipRunsRequested": 0,
+    "sourceFile": "<dynamic:sourceFile>",
+    "sourceFunction": "<dynamic:sourceFunction>",
+    "sourceLine": "<dynamic:sourceLine>",
+    "success": true
+  },
+  "runs": [
+    {
+      "executions": {
+        "Dedicated": {
+          "coordinatorMode": "Dedicated",
+          "effectiveCoordinatorMode": "Dedicated",
+          "finishedAt": "<dynamic:finishedAt>",
+          "phase": "Completed",
+          "plans": {
+            "__Test_ATC.COORDINATOR_DEDICATED.RETRY_AND_MESSAGES": {
+              "planName": "__Test_ATC.COORDINATOR_DEDICATED.RETRY_AND_MESSAGES",
+              "status": "Passed",
+              "success": true,
+              "tasks": {
+                "EmitSkip": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [
+                        {
+                          "file": "<dynamic:file>",
+                          "line": "<dynamic:line>",
+                          "message": "EmitSkip.SkipKind",
+                          "sourceFunction": "<dynamic:sourceFunction>"
+                        }
+                      ],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "EmitSkip.SkipKind",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": true,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "startTime": "<dynamic:startTime>",
+                      "status": "Skipped",
+                      "success": true,
+                      "targetClientIndex": -1,
+                      "taskRole": "Server",
+                      "taskTarget": "Coordinator",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "EmitSkip"
+                },
+                "EmitWarning": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [
+                        {
+                          "file": "<dynamic:file>",
+                          "line": "<dynamic:line>",
+                          "message": "EmitWarning.WarningKind",
+                          "sourceFunction": "<dynamic:sourceFunction>"
+                        }
+                      ],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "EmitWarning.WarningKind",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "startTime": "<dynamic:startTime>",
+                      "status": "Passed",
+                      "success": true,
+                      "targetClientIndex": -1,
+                      "taskRole": "Server",
+                      "taskTarget": "Coordinator",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "EmitWarning"
+                },
+                "RecoverFromFatal": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "maxRetries": 1,
+                      "message": "RecoverFromFatal.FirstAttempt",
+                      "retriesRemaining": 0,
+                      "retryDelaySeconds": 0.25,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "startTime": "<dynamic:startTime>",
+                      "status": "Retrying",
+                      "targetClientIndex": -1,
+                      "taskRole": "Server",
+                      "taskTarget": "Coordinator",
+                      "timeoutSeconds": 0
+                    },
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 2,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 1,
+                      "message": "Success",
+                      "retriesRemaining": 0,
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "startTime": "<dynamic:startTime>",
+                      "status": "Passed",
+                      "success": true,
+                      "taskTarget": "Coordinator"
+                    }
+                  ],
+                  "taskName": "RecoverFromFatal"
+                },
+                "RecoverFromNonFatal": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "maxRetries": 1,
+                      "message": "Expected false to be true, but it was false",
+                      "retriesRemaining": 0,
+                      "retryDelaySeconds": 0.25,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "startTime": "<dynamic:startTime>",
+                      "status": "Retrying",
+                      "targetClientIndex": -1,
+                      "taskRole": "Server",
+                      "taskTarget": "Coordinator",
+                      "timeoutSeconds": 0
+                    },
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 2,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 1,
+                      "message": "Success",
+                      "retriesRemaining": 0,
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "startTime": "<dynamic:startTime>",
+                      "status": "Passed",
+                      "success": true,
+                      "taskTarget": "Coordinator"
+                    }
+                  ],
+                  "taskName": "RecoverFromNonFatal"
+                }
+              }
+            }
+          },
+          "result": {
+            "durationSeconds": "<dynamic:durationSeconds>",
+            "message": "Test completed with 2 warning(s); first: EmitWarning.WarningKind",
+            "messageCount": 2,
+            "skipped": false,
+            "sourceFile": "<dynamic:sourceFile>",
+            "sourceFunction": "<dynamic:sourceFunction>",
+            "sourceLine": "<dynamic:sourceLine>",
+            "success": true
+          },
+          "startedAt": "<dynamic:startedAt>",
+          "testId": "<dynamic:testId>",
+          "travelSessionId": "<dynamic:travelSessionId>"
+        }
+      },
+      "meta": {
+        "completedRuns": 1,
+        "executedRuns": 1,
+        "invocationIndex": 0,
+        "repeatMode": "None",
+        "skippedRuns": 0,
+        "stopReason": "MaxRunsReached",
+        "totalRuns": 1
+      },
+      "runIndex": 1,
+      "status": "Passed"
+    }
+  ],
+  "testId": "<dynamic:testId>",
+  "testPath": "ATC.COORDINATOR_DEDICATED.RETRY_AND_MESSAGES"
+}

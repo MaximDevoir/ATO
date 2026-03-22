@@ -1,150 +1,67 @@
 #!/usr/bin/env node
+import { existsSync } from 'node:fs';
+import * as path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { loadLatestATISimpleReporterFromDirectory } from '@maximdevoir/ati';
 import { ATO, Coordinator, CoordinatorMode, FrameworkValidation } from '@maximdevoir/ato';
 
-function validateDedicatedFrameworkReport() {
-  const validation = new FrameworkValidation(ATO.FrameworkValidationReporter.getReport()).assertNoIssues();
-
-  validation.getTestByPath('ATC.COORDINATOR_DEDICATED.ListenModeBasic.').expectResult('Success').expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'DEDICATED',
-    logContains: 'DedicatedTask!',
-  });
-
-  const repeatedDedicatedTest = validation
-    .getTestByPath('ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL.[Clients=2]')
-    .expectResult('Success');
-
-  for (let run = 0; run < 4; run += 1) {
-    repeatedDedicatedTest.expectNextEvent({
-      category: 'ATC_EVENT_REPEAT',
-      source: { type: 'Coordinator', coordinator: 'DEDICATED' },
-      fields: { state: 'RunStart', currentRun: run + 1, totalRuns: 4, repeatMode: 'Count' },
-    });
-    repeatedDedicatedTest.expectNextLog({
-      type: 'Coordinator',
-      coordinator: 'DEDICATED',
-      logContains: 'InitialLogFromDedicatedCoordinator!',
-    });
-    repeatedDedicatedTest.expectNextLog({
-      type: 'Client',
-      clientIndex: 1,
-      logContains: 'LogFromOne!',
-    });
-    repeatedDedicatedTest.expectNextLog({
-      type: 'Client',
-      clientIndex: 0,
-      logContains: 'LogFromZero!',
-    });
-    repeatedDedicatedTest.expectNextEvent({
-      category: 'ATC_EVENT_REPEAT',
-      source: { type: 'Coordinator', coordinator: 'DEDICATED' },
-      fields: { state: 'RunEnd', currentRun: run + 1, totalRuns: 4, repeatMode: 'Count', failed: false },
-    });
+function resolveSnapshotRelativeTo(scriptMetaUrl: string) {
+  const scriptPath = fileURLToPath(scriptMetaUrl);
+  const scriptDir = path.dirname(scriptPath);
+  if (existsSync(path.join(scriptDir, '__snapshots__'))) {
+    return scriptMetaUrl;
   }
 
-  repeatedDedicatedTest.expectNextEvent({
-    category: 'ATC_EVENT_REPEAT',
-    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
-    fields: { state: 'Complete', completedRuns: 4, totalRuns: 4, repeatMode: 'Count', stopReason: 'MaxRunsReached' },
-  });
+  return pathToFileURL(
+    path.resolve(scriptDir, '..', '..', 'ATO', 'packages', 'buildgraph', 'Scripts', path.basename(scriptPath)),
+  );
+}
 
-  const retryAndMessagesTest = validation
-    .getTestByPath('ATC.COORDINATOR_DEDICATED.RETRY_AND_MESSAGES.')
-    .expectResult('Success');
+async function validateDedicatedFrameworkReport(ato: ATO) {
+  const simpleReporter = await loadLatestATISimpleReporterFromDirectory(
+    path.join(path.dirname(ato.projectPath), 'Saved', 'Logs', 'ATI', 'Dedicated'),
+  );
+  const validation = new FrameworkValidation(ATO.FrameworkValidationReporter.getReport(), {
+    simpleReporter,
+    updateSnapshots: ato.shouldUpdateSnapshots,
+    snapshotRelativeTo: resolveSnapshotRelativeTo(import.meta.url),
+  }).assertNoIssues();
 
-  retryAndMessagesTest.expectNextEvent({
-    category: 'ATC_EVENT_MESSAGE',
-    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
-    fields: { kind: 'NonFatalError', task: 'RecoverFromNonFatal' },
-    fieldContains: { message: 'Expected false to be true' },
-  });
-  retryAndMessagesTest.expectNextEvent({
-    category: 'ATC_EVENT_TASK_RETRY',
-    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
-    fields: { task: 'RecoverFromNonFatal', state: 'Scheduled', nextAttempt: 2, retriesRemaining: 0 },
-  });
-  retryAndMessagesTest.expectNextEvent({
-    category: 'ATC_EVENT_TASK_RETRY',
-    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
-    fields: { task: 'RecoverFromNonFatal', state: 'Executing', attempt: 2, retriesRemaining: 0 },
-  });
-  retryAndMessagesTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'DEDICATED',
-    logContains: 'RecoveredFromNonFatal!',
-  });
-  retryAndMessagesTest.expectNextEvent({
-    category: 'ATC_EVENT_MESSAGE',
-    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
-    fields: { kind: 'FatalError', task: 'RecoverFromFatal' },
-    fieldContains: { message: 'RecoverFromFatal.FirstAttempt' },
-  });
-  retryAndMessagesTest.expectNextEvent({
-    category: 'ATC_EVENT_TASK_RETRY',
-    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
-    fields: { task: 'RecoverFromFatal', state: 'Scheduled', nextAttempt: 2, retriesRemaining: 0 },
-  });
-  retryAndMessagesTest.expectNextEvent({
-    category: 'ATC_EVENT_TASK_RETRY',
-    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
-    fields: { task: 'RecoverFromFatal', state: 'Executing', attempt: 2, retriesRemaining: 0 },
-  });
-  retryAndMessagesTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'DEDICATED',
-    logContains: 'RecoveredFromFatal!',
-  });
-  retryAndMessagesTest.expectNextEvent({
-    category: 'ATC_EVENT_MESSAGE',
-    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
-    fields: { kind: 'Warning', task: 'EmitWarning' },
-    fieldContains: { message: 'EmitWarning.WarningKind' },
-  });
-  retryAndMessagesTest.expectNextLog({
-    type: 'Coordinator',
-    coordinator: 'DEDICATED',
-    logContains: 'WarningIssued!',
-  });
-  retryAndMessagesTest.expectNextEvent({
-    category: 'ATC_EVENT_MESSAGE',
-    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
-    fields: { kind: 'Skip', task: 'EmitSkip' },
-    fieldContains: { message: 'EmitSkip.SkipKind' },
-  });
-
-  const repeatUntilFailTest = validation
-    .getTestByPath('ATC.COORDINATOR_DEDICATED.REPEAT_UNTIL_FAIL_TRACKING.')
-    .expectResult('Success');
-
-  for (let run = 0; run < 3; run += 1) {
-    repeatUntilFailTest.expectNextEvent({
-      category: 'ATC_EVENT_REPEAT',
-      source: { type: 'Coordinator', coordinator: 'DEDICATED' },
-      fields: { state: 'RunStart', currentRun: run + 1, totalRuns: 3, repeatMode: 'UntilFail' },
-    });
-    repeatUntilFailTest.expectNextLog({
-      type: 'Coordinator',
-      coordinator: 'DEDICATED',
-      logContains: 'RepeatUntilFailTick!',
-    });
-    repeatUntilFailTest.expectNextEvent({
-      category: 'ATC_EVENT_REPEAT',
-      source: { type: 'Coordinator', coordinator: 'DEDICATED' },
-      fields: { state: 'RunEnd', currentRun: run + 1, totalRuns: 3, repeatMode: 'UntilFail', failed: false },
-    });
+  for (const test of validation.tests) {
+    test.expectResult('Success');
   }
 
-  repeatUntilFailTest.expectNextEvent({
-    category: 'ATC_EVENT_REPEAT',
-    source: { type: 'Coordinator', coordinator: 'DEDICATED' },
-    fields: {
-      state: 'Complete',
-      completedRuns: 3,
-      totalRuns: 3,
-      repeatMode: 'UntilFail',
-      stopReason: 'MaxRunsReached',
-    },
-  });
+  await validation
+    .getBySimpleReporterPath([
+      'testsByEffectiveCoordinatorMode',
+      'Dedicated',
+      'ATC.COORDINATOR_DEDICATED.ListenModeBasic::0',
+    ])
+    .toMatchFileSnapshot('./__snapshots__/RunDedicated.tests.listenModeBasic.snapshot.json');
+
+  await validation
+    .getBySimpleReporterPath([
+      'testsByEffectiveCoordinatorMode',
+      'Dedicated',
+      'ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL::0',
+    ])
+    .toMatchFileSnapshot('./__snapshots__/RunDedicated.tests.msgFromAll.snapshot.json');
+
+  await validation
+    .getBySimpleReporterPath([
+      'testsByEffectiveCoordinatorMode',
+      'Dedicated',
+      'ATC.COORDINATOR_DEDICATED.RETRY_AND_MESSAGES::0',
+    ])
+    .toMatchFileSnapshot('./__snapshots__/RunDedicated.tests.retryAndMessages.snapshot.json');
+
+  await validation
+    .getBySimpleReporterPath([
+      'testsByEffectiveCoordinatorMode',
+      'Dedicated',
+      'ATC.COORDINATOR_DEDICATED.REPEAT_UNTIL_FAIL_TRACKING::0',
+    ])
+    .toMatchFileSnapshot('./__snapshots__/RunDedicated.tests.repeatUntilFailTracking.snapshot.json');
 }
 
 const ATCDedicatedTest = ATO.fromCommandLine();
@@ -167,7 +84,7 @@ code = await ATCDedicatedTest.start();
 
 if (code === 0) {
   try {
-    validateDedicatedFrameworkReport();
+    await validateDedicatedFrameworkReport(ATCDedicatedTest);
     console.log('Framework validation passed');
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);

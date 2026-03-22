@@ -1,0 +1,260 @@
+{
+  "coordinatorMode": "Dedicated",
+  "currentRunIndex": 3,
+  "effectiveCoordinatorModes": [
+    "PIE",
+    "Dedicated"
+  ],
+  "invocationIndex": 0,
+  "key": "ATC.COORDINATOR_DEDICATED.REPEAT_UNTIL_FAIL_TRACKING::0",
+  "maxRuns": 3,
+  "metadata": [
+    {
+      "name": "automationLabel",
+      "value": ""
+    },
+    {
+      "name": "repeatMode",
+      "value": "UntilFail"
+    },
+    {
+      "name": "repeatTotalRuns",
+      "value": "3"
+    }
+  ],
+  "parameters": [
+    {
+      "name": "Clients",
+      "value": "0"
+    }
+  ],
+  "phase": "Completed",
+  "repeatMode": "UntilFail",
+  "result": {
+    "durationSeconds": "<dynamic:durationSeconds>",
+    "message": "ATC test completed successfully",
+    "messageCount": 0,
+    "skipAllRemainingRuns": false,
+    "skipped": false,
+    "skipRunsRequested": 0,
+    "sourceFile": "<dynamic:sourceFile>",
+    "sourceFunction": "<dynamic:sourceFunction>",
+    "sourceLine": "<dynamic:sourceLine>",
+    "success": true
+  },
+  "runs": [
+    {
+      "executions": {
+        "Dedicated": {
+          "coordinatorMode": "PIE",
+          "currentVariant": 1,
+          "effectiveCoordinatorMode": "Dedicated",
+          "finishedAt": "<dynamic:finishedAt>",
+          "phase": "Completed",
+          "plans": {
+            "__Test_ATC.COORDINATOR_DEDICATED.REPEAT_UNTIL_FAIL_TRACKING": {
+              "planName": "__Test_ATC.COORDINATOR_DEDICATED.REPEAT_UNTIL_FAIL_TRACKING",
+              "status": "Passed",
+              "success": true,
+              "tasks": {
+                "LogRepeatUntilFailRun": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "Success",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "startTime": "<dynamic:startTime>",
+                      "status": "Passed",
+                      "success": true,
+                      "targetClientIndex": -1,
+                      "taskRole": "Server",
+                      "taskTarget": "Coordinator",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "LogRepeatUntilFailRun"
+                }
+              }
+            }
+          },
+          "result": {
+            "durationSeconds": "<dynamic:durationSeconds>",
+            "message": "ATC test completed successfully",
+            "messageCount": 0,
+            "skipped": false,
+            "sourceFile": "<dynamic:sourceFile>",
+            "sourceFunction": "<dynamic:sourceFunction>",
+            "sourceLine": "<dynamic:sourceLine>",
+            "success": true
+          },
+          "startedAt": "<dynamic:startedAt>",
+          "testId": "<dynamic:testId>",
+          "totalVariants": 1,
+          "travelSessionId": "<dynamic:travelSessionId>"
+        }
+      },
+      "meta": {
+        "currentVariant": 1,
+        "invocationIndex": 0,
+        "repeatMode": "UntilFail",
+        "totalRuns": 3,
+        "totalVariants": 1
+      },
+      "runIndex": 1,
+      "status": "Passed"
+    },
+    {
+      "executions": {
+        "Dedicated": {
+          "coordinatorMode": "PIE",
+          "currentVariant": 1,
+          "effectiveCoordinatorMode": "Dedicated",
+          "finishedAt": "<dynamic:finishedAt>",
+          "phase": "Completed",
+          "plans": {
+            "__Test_ATC.COORDINATOR_DEDICATED.REPEAT_UNTIL_FAIL_TRACKING": {
+              "planName": "__Test_ATC.COORDINATOR_DEDICATED.REPEAT_UNTIL_FAIL_TRACKING",
+              "status": "Passed",
+              "success": true,
+              "tasks": {
+                "LogRepeatUntilFailRun": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "Success",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "startTime": "<dynamic:startTime>",
+                      "status": "Passed",
+                      "success": true,
+                      "targetClientIndex": -1,
+                      "taskRole": "Server",
+                      "taskTarget": "Coordinator",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "LogRepeatUntilFailRun"
+                }
+              }
+            }
+          },
+          "result": {
+            "durationSeconds": "<dynamic:durationSeconds>",
+            "message": "ATC test completed successfully",
+            "messageCount": 0,
+            "skipped": false,
+            "sourceFile": "<dynamic:sourceFile>",
+            "sourceFunction": "<dynamic:sourceFunction>",
+            "sourceLine": "<dynamic:sourceLine>",
+            "success": true
+          },
+          "startedAt": "<dynamic:startedAt>",
+          "testId": "<dynamic:testId>",
+          "totalVariants": 1,
+          "travelSessionId": "<dynamic:travelSessionId>"
+        }
+      },
+      "meta": {
+        "currentVariant": 1,
+        "invocationIndex": 0,
+        "repeatMode": "UntilFail",
+        "totalRuns": 3,
+        "totalVariants": 1
+      },
+      "runIndex": 2,
+      "status": "Passed"
+    },
+    {
+      "executions": {
+        "Dedicated": {
+          "coordinatorMode": "PIE",
+          "currentVariant": 1,
+          "effectiveCoordinatorMode": "Dedicated",
+          "finishedAt": "<dynamic:finishedAt>",
+          "phase": "Completed",
+          "plans": {
+            "__Test_ATC.COORDINATOR_DEDICATED.REPEAT_UNTIL_FAIL_TRACKING": {
+              "planName": "__Test_ATC.COORDINATOR_DEDICATED.REPEAT_UNTIL_FAIL_TRACKING",
+              "status": "Passed",
+              "success": true,
+              "tasks": {
+                "LogRepeatUntilFailRun": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "Success",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "startTime": "<dynamic:startTime>",
+                      "status": "Passed",
+                      "success": true,
+                      "targetClientIndex": -1,
+                      "taskRole": "Server",
+                      "taskTarget": "Coordinator",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "LogRepeatUntilFailRun"
+                }
+              }
+            }
+          },
+          "result": {
+            "durationSeconds": "<dynamic:durationSeconds>",
+            "message": "ATC test completed successfully",
+            "messageCount": 0,
+            "skipped": false,
+            "sourceFile": "<dynamic:sourceFile>",
+            "sourceFunction": "<dynamic:sourceFunction>",
+            "sourceLine": "<dynamic:sourceLine>",
+            "success": true
+          },
+          "startedAt": "<dynamic:startedAt>",
+          "testId": "<dynamic:testId>",
+          "totalVariants": 1,
+          "travelSessionId": "<dynamic:travelSessionId>"
+        }
+      },
+      "meta": {
+        "completedRuns": 3,
+        "currentVariant": 1,
+        "executedRuns": 3,
+        "invocationIndex": 0,
+        "repeatMode": "UntilFail",
+        "skippedRuns": 0,
+        "stopReason": "MaxRunsReached",
+        "totalRuns": 3,
+        "totalVariants": 1
+      },
+      "runIndex": 3,
+      "status": "Passed"
+    }
+  ],
+  "testId": "<dynamic:testId>",
+  "testPath": "ATC.COORDINATOR_DEDICATED.REPEAT_UNTIL_FAIL_TRACKING"
+}

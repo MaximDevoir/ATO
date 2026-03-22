@@ -1,0 +1,537 @@
+{
+  "coordinatorMode": "Dedicated",
+  "currentRunIndex": 4,
+  "effectiveCoordinatorModes": [
+    "Unknown",
+    "Dedicated"
+  ],
+  "invocationIndex": 0,
+  "key": "ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL::0",
+  "maxRuns": 4,
+  "metadata": [
+    {
+      "name": "automationLabel",
+      "value": "[Clients=2]"
+    },
+    {
+      "name": "repeatMode",
+      "value": "Count"
+    },
+    {
+      "name": "repeatTotalRuns",
+      "value": "4"
+    }
+  ],
+  "parameters": [
+    {
+      "name": "Clients",
+      "value": "2"
+    }
+  ],
+  "phase": "Completed",
+  "repeatMode": "Count",
+  "result": {
+    "durationSeconds": "<dynamic:durationSeconds>",
+    "message": "ATC test completed successfully",
+    "messageCount": 0,
+    "skipAllRemainingRuns": false,
+    "skipped": false,
+    "skipRunsRequested": 0,
+    "sourceFile": "<dynamic:sourceFile>",
+    "sourceFunction": "<dynamic:sourceFunction>",
+    "sourceLine": "<dynamic:sourceLine>",
+    "success": true
+  },
+  "runs": [
+    {
+      "executions": {
+        "Dedicated": {
+          "coordinatorMode": "PIE",
+          "currentVariant": 1,
+          "effectiveCoordinatorMode": "Dedicated",
+          "finishedAt": "<dynamic:finishedAt>",
+          "phase": "Completed",
+          "plans": {
+            "__Test_ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL": {
+              "planName": "__Test_ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL",
+              "status": "Passed",
+              "success": true,
+              "tasks": {
+                "InitialLogFromDedicatedCoordinator": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "Success",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "startTime": "<dynamic:startTime>",
+                      "status": "Passed",
+                      "success": true,
+                      "targetClientIndex": -1,
+                      "taskRole": "Server",
+                      "taskTarget": "Coordinator",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "InitialLogFromDedicatedCoordinator"
+                },
+                "LogFromOne": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "Success",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceClientIndex": 1,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "status": "Passed",
+                      "success": true,
+                      "targetClientIndex": 1,
+                      "taskRole": "Client",
+                      "taskTarget": "SingleExternalClient",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "LogFromOne"
+                },
+                "LogFromZero": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "Success",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceClientIndex": 0,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "status": "Passed",
+                      "success": true,
+                      "targetClientIndex": 0,
+                      "taskRole": "Client",
+                      "taskTarget": "SingleExternalClient",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "LogFromZero"
+                }
+              }
+            }
+          },
+          "result": {
+            "durationSeconds": "<dynamic:durationSeconds>",
+            "message": "ATC test completed successfully",
+            "messageCount": 0,
+            "skipped": false,
+            "sourceFile": "<dynamic:sourceFile>",
+            "sourceFunction": "<dynamic:sourceFunction>",
+            "sourceLine": "<dynamic:sourceLine>",
+            "success": true
+          },
+          "startedAt": "<dynamic:startedAt>",
+          "testId": "<dynamic:testId>",
+          "totalVariants": 1,
+          "travelSessionId": "<dynamic:travelSessionId>"
+        }
+      },
+      "meta": {
+        "currentVariant": 1,
+        "invocationIndex": 0,
+        "repeatMode": "Count",
+        "totalRuns": 4,
+        "totalVariants": 1
+      },
+      "runIndex": 1,
+      "status": "Passed"
+    },
+    {
+      "executions": {
+        "Dedicated": {
+          "coordinatorMode": "PIE",
+          "currentVariant": 1,
+          "effectiveCoordinatorMode": "Dedicated",
+          "finishedAt": "<dynamic:finishedAt>",
+          "phase": "Completed",
+          "plans": {
+            "__Test_ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL": {
+              "planName": "__Test_ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL",
+              "status": "Passed",
+              "success": true,
+              "tasks": {
+                "InitialLogFromDedicatedCoordinator": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "Success",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "startTime": "<dynamic:startTime>",
+                      "status": "Passed",
+                      "success": true,
+                      "targetClientIndex": -1,
+                      "taskRole": "Server",
+                      "taskTarget": "Coordinator",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "InitialLogFromDedicatedCoordinator"
+                },
+                "LogFromOne": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "Success",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceClientIndex": 1,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "status": "Passed",
+                      "success": true,
+                      "targetClientIndex": 1,
+                      "taskRole": "Client",
+                      "taskTarget": "SingleExternalClient",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "LogFromOne"
+                },
+                "LogFromZero": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "Success",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceClientIndex": 0,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "status": "Passed",
+                      "success": true,
+                      "targetClientIndex": 0,
+                      "taskRole": "Client",
+                      "taskTarget": "SingleExternalClient",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "LogFromZero"
+                }
+              }
+            }
+          },
+          "result": {
+            "durationSeconds": "<dynamic:durationSeconds>",
+            "message": "ATC test completed successfully",
+            "messageCount": 0,
+            "skipped": false,
+            "sourceFile": "<dynamic:sourceFile>",
+            "sourceFunction": "<dynamic:sourceFunction>",
+            "sourceLine": "<dynamic:sourceLine>",
+            "success": true
+          },
+          "startedAt": "<dynamic:startedAt>",
+          "testId": "<dynamic:testId>",
+          "totalVariants": 1,
+          "travelSessionId": "<dynamic:travelSessionId>"
+        }
+      },
+      "meta": {
+        "currentVariant": 1,
+        "invocationIndex": 0,
+        "repeatMode": "Count",
+        "totalRuns": 4,
+        "totalVariants": 1
+      },
+      "runIndex": 2,
+      "status": "Passed"
+    },
+    {
+      "executions": {
+        "Dedicated": {
+          "coordinatorMode": "PIE",
+          "currentVariant": 1,
+          "effectiveCoordinatorMode": "Dedicated",
+          "finishedAt": "<dynamic:finishedAt>",
+          "phase": "Completed",
+          "plans": {
+            "__Test_ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL": {
+              "planName": "__Test_ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL",
+              "status": "Passed",
+              "success": true,
+              "tasks": {
+                "InitialLogFromDedicatedCoordinator": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "Success",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "startTime": "<dynamic:startTime>",
+                      "status": "Passed",
+                      "success": true,
+                      "targetClientIndex": -1,
+                      "taskRole": "Server",
+                      "taskTarget": "Coordinator",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "InitialLogFromDedicatedCoordinator"
+                },
+                "LogFromOne": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "Success",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceClientIndex": 1,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "status": "Passed",
+                      "success": true,
+                      "targetClientIndex": 1,
+                      "taskRole": "Client",
+                      "taskTarget": "SingleExternalClient",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "LogFromOne"
+                },
+                "LogFromZero": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "Success",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceClientIndex": 0,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "status": "Passed",
+                      "success": true,
+                      "targetClientIndex": 0,
+                      "taskRole": "Client",
+                      "taskTarget": "SingleExternalClient",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "LogFromZero"
+                }
+              }
+            }
+          },
+          "result": {
+            "durationSeconds": "<dynamic:durationSeconds>",
+            "message": "ATC test completed successfully",
+            "messageCount": 0,
+            "skipped": false,
+            "sourceFile": "<dynamic:sourceFile>",
+            "sourceFunction": "<dynamic:sourceFunction>",
+            "sourceLine": "<dynamic:sourceLine>",
+            "success": true
+          },
+          "startedAt": "<dynamic:startedAt>",
+          "testId": "<dynamic:testId>",
+          "totalVariants": 1,
+          "travelSessionId": "<dynamic:travelSessionId>"
+        }
+      },
+      "meta": {
+        "currentVariant": 1,
+        "invocationIndex": 0,
+        "repeatMode": "Count",
+        "totalRuns": 4,
+        "totalVariants": 1
+      },
+      "runIndex": 3,
+      "status": "Passed"
+    },
+    {
+      "executions": {
+        "Dedicated": {
+          "coordinatorMode": "PIE",
+          "currentVariant": 1,
+          "effectiveCoordinatorMode": "Dedicated",
+          "finishedAt": "<dynamic:finishedAt>",
+          "phase": "Completed",
+          "plans": {
+            "__Test_ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL": {
+              "planName": "__Test_ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL",
+              "status": "Passed",
+              "success": true,
+              "tasks": {
+                "InitialLogFromDedicatedCoordinator": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "Success",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "startTime": "<dynamic:startTime>",
+                      "status": "Passed",
+                      "success": true,
+                      "targetClientIndex": -1,
+                      "taskRole": "Server",
+                      "taskTarget": "Coordinator",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "InitialLogFromDedicatedCoordinator"
+                },
+                "LogFromOne": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "Success",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceClientIndex": 1,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "status": "Passed",
+                      "success": true,
+                      "targetClientIndex": 1,
+                      "taskRole": "Client",
+                      "taskTarget": "SingleExternalClient",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "LogFromOne"
+                },
+                "LogFromZero": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "Success",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": false,
+                      "sourceClientIndex": 0,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "status": "Passed",
+                      "success": true,
+                      "targetClientIndex": 0,
+                      "taskRole": "Client",
+                      "taskTarget": "SingleExternalClient",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "LogFromZero"
+                }
+              }
+            }
+          },
+          "result": {
+            "durationSeconds": "<dynamic:durationSeconds>",
+            "message": "ATC test completed successfully",
+            "messageCount": 0,
+            "skipped": false,
+            "sourceFile": "<dynamic:sourceFile>",
+            "sourceFunction": "<dynamic:sourceFunction>",
+            "sourceLine": "<dynamic:sourceLine>",
+            "success": true
+          },
+          "startedAt": "<dynamic:startedAt>",
+          "testId": "<dynamic:testId>",
+          "totalVariants": 1,
+          "travelSessionId": "<dynamic:travelSessionId>"
+        }
+      },
+      "meta": {
+        "completedRuns": 4,
+        "currentVariant": 1,
+        "executedRuns": 4,
+        "invocationIndex": 0,
+        "repeatMode": "Count",
+        "skippedRuns": 0,
+        "stopReason": "MaxRunsReached",
+        "totalRuns": 4,
+        "totalVariants": 1
+      },
+      "runIndex": 4,
+      "status": "Passed"
+    }
+  ],
+  "testId": "<dynamic:testId>",
+  "testPath": "ATC.COORDINATOR_DEDICATED.MSG_FROM_ALL"
+}
