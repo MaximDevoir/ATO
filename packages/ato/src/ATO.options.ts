@@ -3,6 +3,8 @@ import type { UnrealLagProfileName } from '@maximdevoir/unreal-lag';
 // See https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-command-line-arguments-reference for list of some arguments.
 export type ProcessArgs = string[];
 
+export type ATOReporterMode = 'default' | 'basic';
+
 export enum CoordinatorMode {
   DedicatedServer = 'DedicatedServer',
   ListenServer = 'ListenServer',
@@ -92,6 +94,7 @@ export interface E2ERuntimeOptions {
   clientExe?: string;
   dryRun?: boolean;
   updateSnapshots?: boolean;
+  reporter?: ATOReporterMode;
 }
 
 export interface E2ECommandLineContext {

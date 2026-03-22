@@ -132,6 +132,8 @@ export type ATISession = {
   testsByEffectiveCoordinatorMode: Map<string, Map<string, ATITest>>;
 };
 
+export type ATISimpleReporterListener = (event: ATCEvent, session: ATISession | undefined) => void;
+
 type ReporterEvent = ATCEvent & Record<string, unknown>;
 
 type ExecutionLocator = {
@@ -261,58 +263,63 @@ export class ATISimpleReporter {
   private readonly executionIndex = new Map<string, ExecutionLocator>();
   private readonly currentRunIndexByTestKey = new Map<string, number>();
   private readonly matrixStateByTestPath = new Map<string, MatrixState>();
+  private readonly listeners = new Set<ATISimpleReporterListener>();
 
   addEvent(event: ATCEvent) {
     const reporterEvent = event as ReporterEvent;
 
-    switch (event.type) {
-      case 'SessionStarted':
-        this.handleSessionStarted(reporterEvent);
-        return;
-      case 'SessionFinished':
-        this.handleSessionFinished(reporterEvent);
-        return;
-      case 'CoordinatorMatrix':
-        this.handleCoordinatorMatrix(reporterEvent);
-        return;
-      case 'TestRepeat':
-        this.handleTestRepeat(reporterEvent);
-        return;
-      case 'TestStarted':
-        this.handleTestStarted(reporterEvent);
-        return;
-      case 'TestPhaseChanged':
-        this.handleTestPhaseChanged(reporterEvent);
-        return;
-      case 'TestFinished':
-        this.handleTestFinished(reporterEvent);
-        return;
-      case 'PlanStarted':
-        this.handlePlanStarted(reporterEvent);
-        return;
-      case 'PlanFinished':
-        this.handlePlanFinished(reporterEvent);
-        return;
-      case 'TaskDispatched':
-        this.handleTaskDispatched(reporterEvent);
-        return;
-      case 'TaskStarted':
-        this.handleTaskStarted(reporterEvent);
-        return;
-      case 'TaskResult':
-        this.handleTaskResult(reporterEvent);
-        return;
-      case 'TaskRetry':
-        this.handleTaskRetry(reporterEvent);
-        return;
-      case 'TaskTimeout':
-        this.handleTaskTimeout(reporterEvent);
-        return;
-      case 'Message':
-        this.handleMessage(reporterEvent);
-        return;
-      default:
-        this.observeSessionMetadata(reporterEvent);
+    try {
+      switch (event.type) {
+        case 'SessionStarted':
+          this.handleSessionStarted(reporterEvent);
+          return;
+        case 'SessionFinished':
+          this.handleSessionFinished(reporterEvent);
+          return;
+        case 'CoordinatorMatrix':
+          this.handleCoordinatorMatrix(reporterEvent);
+          return;
+        case 'TestRepeat':
+          this.handleTestRepeat(reporterEvent);
+          return;
+        case 'TestStarted':
+          this.handleTestStarted(reporterEvent);
+          return;
+        case 'TestPhaseChanged':
+          this.handleTestPhaseChanged(reporterEvent);
+          return;
+        case 'TestFinished':
+          this.handleTestFinished(reporterEvent);
+          return;
+        case 'PlanStarted':
+          this.handlePlanStarted(reporterEvent);
+          return;
+        case 'PlanFinished':
+          this.handlePlanFinished(reporterEvent);
+          return;
+        case 'TaskDispatched':
+          this.handleTaskDispatched(reporterEvent);
+          return;
+        case 'TaskStarted':
+          this.handleTaskStarted(reporterEvent);
+          return;
+        case 'TaskResult':
+          this.handleTaskResult(reporterEvent);
+          return;
+        case 'TaskRetry':
+          this.handleTaskRetry(reporterEvent);
+          return;
+        case 'TaskTimeout':
+          this.handleTaskTimeout(reporterEvent);
+          return;
+        case 'Message':
+          this.handleMessage(reporterEvent);
+          return;
+        default:
+          this.observeSessionMetadata(reporterEvent);
+      }
+    } finally {
+      this.notifyListeners(event);
     }
   }
 
@@ -349,6 +356,19 @@ export class ATISimpleReporter {
     this.executionIndex.clear();
     this.currentRunIndexByTestKey.clear();
     this.matrixStateByTestPath.clear();
+  }
+
+  subscribe(listener: ATISimpleReporterListener) {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  private notifyListeners(event: ATCEvent) {
+    for (const listener of this.listeners) {
+      listener(event, this.session);
+    }
   }
 
   private handleSessionStarted(event: ReporterEvent) {

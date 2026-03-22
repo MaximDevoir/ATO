@@ -190,11 +190,12 @@ exitCode = await ATCListenServerTest.start();
 if (exitCode === 0) {
   try {
     validateListenFrameworkReport();
-    console.log('Framework validation passed');
+    ATCListenServerTest.output.log('Framework validation passed');
   } catch (error) {
-    console.error(error instanceof Error ? error.message : error);
+    ATCListenServerTest.output.error(error instanceof Error ? error.message : error);
     exitCode = 1;
   }
 }
 
+await ATCListenServerTest.closeOutput();
 process.exit(exitCode);

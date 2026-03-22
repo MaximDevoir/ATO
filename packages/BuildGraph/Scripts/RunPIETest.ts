@@ -116,11 +116,12 @@ code = await ATCPIETest.start();
 if (code === 0) {
   try {
     await validatePIEFrameworkReport(ATCPIETest);
-    console.log('Framework validation passed');
+    ATCPIETest.output.log('Framework validation passed');
   } catch (error) {
-    console.error(error instanceof Error ? error.message : error);
+    ATCPIETest.output.error(error instanceof Error ? error.message : error);
     code = 1;
   }
 }
 
+await ATCPIETest.closeOutput();
 process.exit(code);

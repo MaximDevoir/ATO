@@ -78,7 +78,17 @@
           Requires="CookGame;CompileGame">
       <Spawn Exe="node"
              WorkingDir="$(ProjectDir)"
-             Arguments="--import tsx BuildGraph/Scripts/RunStandaloneTest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
+             Arguments="--import tsx BuildGraph/Scripts/RunStandaloneTest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot; --reporter=basic"
+             LogOutput="true"
+             ErrorLevel="1"/>
+    </Node>
+
+    <!-- ================= RUN: STANDALONE UI ============== -->
+    <Node Name="RunStandaloneTestUI"
+          Requires="CookGame;CompileGame">
+      <Spawn Exe="node"
+             WorkingDir="$(ProjectDir)"
+             Arguments="--import tsx BuildGraph/Scripts/RunStandaloneTest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot; --reporter=basic"
              LogOutput="true"
              ErrorLevel="1"/>
     </Node>
@@ -88,7 +98,7 @@
           Requires="CookGame;CompileGameWithExceptions">
       <Spawn Exe="node"
              WorkingDir="$(ProjectDir)"
-             Arguments="--import tsx BuildGraph/Scripts/RunStandaloneWithExceptionsTest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
+             Arguments="--import tsx BuildGraph/Scripts/RunStandaloneWithExceptionsTest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot; --reporter=basic"
              LogOutput="true"
              ErrorLevel="1"/>
     </Node>
@@ -98,7 +108,7 @@
           Requires="CookGame;CompileGame">
       <Spawn Exe="node"
              WorkingDir="$(ProjectDir)"
-             Arguments="--import tsx BuildGraph/Scripts/RunStandaloneWithAssertions.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
+             Arguments="--import tsx BuildGraph/Scripts/RunStandaloneWithAssertions.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot; --reporter=basic"
              LogOutput="true"
              ErrorLevel="1"/>
     </Node>
@@ -108,7 +118,7 @@
           Requires="CookGame;CompileGame">
       <Spawn Exe="node"
              WorkingDir="$(ProjectDir)"
-             Arguments="--import tsx BuildGraph/Scripts/RunListenServerTest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
+             Arguments="--import tsx BuildGraph/Scripts/RunListenServerTest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot; --reporter=basic"
              LogOutput="true"
              ErrorLevel="1"/>
     </Node>
@@ -118,7 +128,7 @@
           Requires="CookGame;CookServer;CompileGame;CompileServer">
       <Spawn Exe="node"
              WorkingDir="$(ProjectDir)"
-             Arguments="--import tsx BuildGraph/Scripts/RunDedicated.tests.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
+             Arguments="--import tsx BuildGraph/Scripts/RunDedicated.tests.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot; --reporter=basic"
              LogOutput="true"
              ErrorLevel="1"/>
     </Node>
@@ -128,7 +138,7 @@
           Requires="CompileEditor">
       <Spawn Exe="node"
              WorkingDir="$(ProjectDir)"
-             Arguments="--import tsx BuildGraph/Scripts/RunPIETest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
+             Arguments="--import tsx BuildGraph/Scripts/RunPIETest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot; --reporter=basic"
              LogOutput="true"
              ErrorLevel="1"/>
     </Node>
@@ -138,7 +148,9 @@
 
   <Aggregate Name="StandaloneWithExceptions" Requires="RunStandaloneTestWithExceptions"/>
   <Aggregate Name="StandaloneAssertions" Requires="RunStandaloneAssertionsTest"/>
+  <Aggregate Name="StandaloneUIPrepare" Requires="CookGame;CompileGame"/>
   <Aggregate Name="Standalone" Requires="RunStandaloneTest"/>
+  <Aggregate Name="StandaloneUI" Requires="RunStandaloneTestUI"/>
   <Aggregate Name="Dedicated" Requires="RunDedicatedTests"/>
   <Aggregate Name="Listen" Requires="RunListenTests"/>
   <Aggregate Name="PIE" Requires="RunPIETests"/>

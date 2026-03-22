@@ -4,6 +4,7 @@ const unrealLogPrefixPattern = /^\[(\d{4})\.(\d{2})\.(\d{2})-(\d{2})\.(\d{2})\.(
 export interface SpawnProcessOptions {
   onStdoutLine?: (line: string) => void;
   onStderrLine?: (line: string) => void;
+  emitLine?: (line: string, stream: 'stdout' | 'stderr') => void;
 }
 function formatTwelveHourTime(hours24: number, minutes: number, seconds: number) {
   const suffix = hours24 >= 12 ? 'PM' : 'AM';
@@ -24,7 +25,13 @@ export function simplifyUnrealLogLine(line: string) {
   }
   return `[${formatTwelveHourTime(hours24, minutes, seconds)}] ${rest}`;
 }
-export function prefixStream(prefix: string, stream: NodeJS.ReadableStream | null, onLine?: (line: string) => void) {
+export function prefixStream(
+  prefix: string,
+  stream: NodeJS.ReadableStream | null,
+  onLine?: (line: string) => void,
+  emitLine?: (line: string, stream: 'stdout' | 'stderr') => void,
+  streamKind: 'stdout' | 'stderr' = 'stdout',
+) {
   if (!stream) return;
   let buf = '';
   stream.on('data', (chunk: Buffer | string) => {
@@ -36,7 +43,7 @@ export function prefixStream(prefix: string, stream: NodeJS.ReadableStream | nul
       }
       const line = simplifyUnrealLogLine(buf.slice(0, idx).replace(/\r$/, ''));
       onLine?.(line);
-      console.log(`[${prefix}] ${line}`);
+      emitLine?.(`[${prefix}] ${line}`, streamKind);
       buf = buf.slice(idx + 1);
     }
   });
@@ -44,7 +51,7 @@ export function prefixStream(prefix: string, stream: NodeJS.ReadableStream | nul
     if (buf.length) {
       const line = simplifyUnrealLogLine(buf.replace(/\r$/, ''));
       onLine?.(line);
-      console.log(`[${prefix}] ${line}`);
+      emitLine?.(`[${prefix}] ${line}`, streamKind);
       buf = '';
     }
   });
@@ -101,7 +108,7 @@ export async function waitForUdpPort(pid: number, port: number, timeoutSeconds: 
 }
 export function spawnProcess(exe: string, args: string[], prefix: string, options: SpawnProcessOptions = {}) {
   const p = spawn(exe, args, { windowsHide: true, detached: false, stdio: ['ignore', 'pipe', 'pipe'] });
-  prefixStream(prefix, p.stdout, options.onStdoutLine);
-  prefixStream(`${prefix}-ERR`, p.stderr, options.onStderrLine);
+  prefixStream(prefix, p.stdout, options.onStdoutLine, options.emitLine, 'stdout');
+  prefixStream(`${prefix}-ERR`, p.stderr, options.onStderrLine, options.emitLine, 'stderr');
   return p;
 }

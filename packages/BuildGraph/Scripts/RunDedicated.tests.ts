@@ -85,11 +85,12 @@ code = await ATCDedicatedTest.start();
 if (code === 0) {
   try {
     await validateDedicatedFrameworkReport(ATCDedicatedTest);
-    console.log('Framework validation passed');
+    ATCDedicatedTest.output.log('Framework validation passed');
   } catch (error) {
-    console.error(error instanceof Error ? error.message : error);
+    ATCDedicatedTest.output.error(error instanceof Error ? error.message : error);
     code = 1;
   }
 }
 
+await ATCDedicatedTest.closeOutput();
 process.exit(code);

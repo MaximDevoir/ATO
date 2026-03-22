@@ -113,11 +113,12 @@ code = await ATCStandaloneWithExceptionsTest.start();
 
 try {
   validateStandaloneWithExceptionsFrameworkReport();
-  console.log('Framework validation passed');
+  ATCStandaloneWithExceptionsTest.output.log('Framework validation passed');
   code = 0;
 } catch (error) {
-  console.error(error instanceof Error ? error.message : error);
+  ATCStandaloneWithExceptionsTest.output.error(error instanceof Error ? error.message : error);
   code = 1;
 }
 
+await ATCStandaloneWithExceptionsTest.closeOutput();
 process.exit(code);

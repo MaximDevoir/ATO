@@ -192,12 +192,13 @@ await ATCStandaloneAssertionsTest.start();
 const code = await (async () => {
   try {
     await validateStandaloneAssertionsFrameworkReport(ATCStandaloneAssertionsTest);
-    console.log('Framework validation passed');
+    ATCStandaloneAssertionsTest.output.log('Framework validation passed');
     return 0;
   } catch (error) {
-    console.error(error instanceof Error ? error.message : error);
+    ATCStandaloneAssertionsTest.output.error(error instanceof Error ? error.message : error);
     return 1;
   }
 })();
 
+await ATCStandaloneAssertionsTest.closeOutput();
 process.exit(code);

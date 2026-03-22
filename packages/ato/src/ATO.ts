@@ -16,6 +16,7 @@ import type {
   ATINDJSONConsumerOptions,
   ATIRuntimeOptions,
   ATIServiceOptions,
+  ATOReporterMode,
   ClientOptions,
   E2ECommandLineContext,
   E2ECommandLineOptions,
@@ -25,6 +26,7 @@ import type {
   UnrealLagProxyOptions,
 } from './ATO.options';
 import { CoordinatorMode, RuntimePresets } from './ATO.options';
+import { createATORunOutput } from './ATORunOutput';
 import { FrameworkValidationReporter, formatFrameworkValidationSummaryLines } from './FrameworkValidationReporter';
 
 export * from './ATCAutomationNames';
@@ -115,6 +117,7 @@ interface ParsedCommandLineArguments {
   clientExe?: string;
   dryRun: boolean;
   updateSnapshots: boolean;
+  reporter: ATOReporterMode;
 }
 
 export interface ATCClientRequestMetadata {
@@ -168,7 +171,12 @@ interface ProcessOutcome {
   automation: AutomationObservationState;
 }
 
-function promiseProcessExitOrTimeout(processHandle: ChildProcess, timeoutSeconds: number, onTimeout: () => void) {
+function promiseProcessExitOrTimeout(
+  processHandle: ChildProcess,
+  timeoutSeconds: number,
+  onTimeout: () => void,
+  onProcessError: (error: Error) => void = (error) => console.error('Process error', error),
+) {
   return new Promise<ProcessExitResult>((resolve) => {
     let settled = false;
     const timer = setTimeout(() => {
@@ -191,7 +199,7 @@ function promiseProcessExitOrTimeout(processHandle: ChildProcess, timeoutSeconds
       if (settled) return;
       settled = true;
       clearTimeout(timer);
-      console.error('Process error', error);
+      onProcessError(error);
       resolve(-1);
     });
   });
@@ -622,30 +630,30 @@ function formatUnsuccessfulAutomationTestLine(label: string, test: AutomationCom
   return `${formatRuntimeIdentifier(label)} | Result={${test.result}} Name={${test.name}} Path={${test.path}}`;
 }
 
-function printOrchestrationSummary(outcomes: ProcessOutcome[]) {
+function printOrchestrationSummary(outcomes: ProcessOutcome[], writeLine: (line: string) => void) {
   if (outcomes.length === 0) {
     return;
   }
-  console.log('Orchestration Complete');
+  writeLine('Orchestration Complete');
 
   const automationOutcomes = outcomes.filter((outcome) => outcome.automation.expectAutomation);
   if (automationOutcomes.length > 0) {
-    console.log('Test Summary');
+    writeLine('Test Summary');
     for (const outcome of automationOutcomes) {
       const summaryLine = formatAutomationSummaryLine(outcome.label, outcome.automation);
       if (summaryLine) {
-        console.log(summaryLine);
+        writeLine(summaryLine);
       }
       for (const test of outcome.automation.unsuccessfulTests) {
-        console.log(formatUnsuccessfulAutomationTestLine(outcome.label, test));
+        writeLine(formatUnsuccessfulAutomationTestLine(outcome.label, test));
       }
     }
-    console.log('');
+    writeLine('');
   }
 
-  console.log('Exit Codes');
+  writeLine('Exit Codes');
   for (const outcome of outcomes) {
-    console.log(formatProcessExitLine(outcome));
+    writeLine(formatProcessExitLine(outcome));
   }
 }
 
@@ -1333,6 +1341,11 @@ export class ATO {
         default: false,
         description: 'Update file-backed ATO/ATI snapshots instead of comparing against the checked-in value',
       })
+      .option('reporter', {
+        choices: ['default', 'basic'] as const,
+        default: 'default',
+        description: 'Terminal reporter mode. Use basic for CI-style line output or default for the Ink terminal UI.',
+      })
       .help()
       .parseSync() as unknown as ParsedCommandLineArguments;
 
@@ -1351,6 +1364,7 @@ export class ATO {
         clientExe: argv.clientExe ?? options.clientExe,
         dryRun: argv.dryRun ?? options.dryRun,
         updateSnapshots: argv.updateSnapshots ?? options.updateSnapshots,
+        reporter: argv.reporter ?? options.reporter,
       },
     });
   }
@@ -1362,6 +1376,7 @@ export class ATO {
 
   private runtimeOptions: E2ERuntimeOptions;
   private atiOptions: ATIRuntimeOptions;
+  private currentOutput?: Awaited<ReturnType<typeof createATORunOutput>>;
   public readonly commandLineContext?: E2ECommandLineContext;
 
   constructor(init: ATOInit = {}) {
@@ -1382,6 +1397,22 @@ export class ATO {
     return this.runtimeOptions.updateSnapshots === true;
   }
 
+  get isDryRun() {
+    return this.runtimeOptions.dryRun === true;
+  }
+
+  get reporterMode(): ATOReporterMode {
+    return this.runtimeOptions.reporter ?? 'default';
+  }
+
+  get output() {
+    return {
+      log: (...args: unknown[]) => this.log(...args),
+      warn: (...args: unknown[]) => this.warn(...args),
+      error: (...args: unknown[]) => this.error(...args),
+    };
+  }
+
   configureRuntime(opts: E2ERuntimeOptions) {
     this.runtimeOptions = {
       ...this.runtimeOptions,
@@ -1400,6 +1431,73 @@ export class ATO {
     return this;
   }
 
+  async closeOutput() {
+    if (!this.currentOutput) {
+      return;
+    }
+
+    await this.currentOutput.close();
+    this.currentOutput = undefined;
+  }
+
+  private async ensureOutput(label: string) {
+    if (!this.currentOutput) {
+      this.currentOutput = await createATORunOutput(path.dirname(this.projectPath), label);
+      this.log(`[ATO] Saving combined console log to ${this.currentOutput.filePath}`);
+    }
+
+    return this.currentOutput;
+  }
+
+  private emitLine(line: string, options: { level?: 'log' | 'warn' | 'error'; echo?: boolean } = {}) {
+    if (this.currentOutput) {
+      this.currentOutput.emitLine(line, options);
+      return;
+    }
+
+    if (options.echo === false) {
+      return;
+    }
+
+    switch (options.level ?? 'log') {
+      case 'error':
+        console.error(line);
+        return;
+      case 'warn':
+        console.warn(line);
+        return;
+      default:
+        console.log(line);
+    }
+  }
+
+  private log(...args: unknown[]) {
+    if (this.currentOutput) {
+      this.currentOutput.log(...args);
+      return;
+    }
+
+    console.log(...args);
+  }
+
+  private warn(...args: unknown[]) {
+    if (this.currentOutput) {
+      this.currentOutput.warn(...args);
+      return;
+    }
+
+    console.warn(...args);
+  }
+
+  private error(...args: unknown[]) {
+    if (this.currentOutput) {
+      this.currentOutput.error(...args);
+      return;
+    }
+
+    console.error(...args);
+  }
+
   preview() {
     if (this.coordinators.length === 0) {
       return [];
@@ -1410,7 +1508,7 @@ export class ATO {
 
   async start(): Promise<number> {
     if (this.coordinators.length === 0) {
-      console.error('No coordinators configured');
+      this.error('No coordinators configured');
       return 2;
     }
 
@@ -1418,12 +1516,14 @@ export class ATO {
     try {
       plans = this.resolveLaunchPlans();
     } catch (error) {
-      console.error(error instanceof Error ? error.message : error);
+      this.error(error instanceof Error ? error.message : error);
       return 8;
     }
 
     let finalExitCode = 0;
     for (const plan of plans) {
+      await this.ensureOutput(resolveCoordinatorProcessLabel(plan.atcCoordinatorMode));
+
       if (plan.dryRun) {
         this.printDryRunPreview(plan.preview, plan.atcCoordinatorMode);
         continue;
@@ -1717,19 +1817,19 @@ export class ATO {
   private printDryRunPreview(preview: ResolvedPreview, atcCoordinatorMode: CoordinatorMode) {
     const coordinatorLabel = resolveCoordinatorProcessLabel(atcCoordinatorMode);
     if (preview.unrealLag) {
-      console.log('[DRYRUN] UnrealLag ->', JSON.stringify(preview.unrealLag));
+      this.log('[DRYRUN] UnrealLag ->', JSON.stringify(preview.unrealLag));
     }
-    console.log(`[DRYRUN] ${coordinatorLabel} -> ${preview.server.command}`);
-    console.log(`[DRYRUN-ARGS] ${coordinatorLabel} ARGS:`, JSON.stringify(preview.server.args));
+    this.log(`[DRYRUN] ${coordinatorLabel} -> ${preview.server.command}`);
+    this.log(`[DRYRUN-ARGS] ${coordinatorLabel} ARGS:`, JSON.stringify(preview.server.args));
     if (preview.clientTemplate) {
-      console.log(
+      this.log(
         `[DRYRUN] Client Template -> ${preview.clientTemplate.command} (max=${String(preview.maxExternalClients ?? 0)})`,
       );
-      console.log('[DRYRUN-ARGS] Client Template ARGS:', JSON.stringify(preview.clientTemplate.args));
+      this.log('[DRYRUN-ARGS] Client Template ARGS:', JSON.stringify(preview.clientTemplate.args));
     }
     preview.clients.forEach((client, index) => {
-      console.log(`[DRYRUN] Client ${index + 1} -> ${client.command}`);
-      console.log(`[DRYRUN-ARGS] Client ${index + 1} ARGS:`, JSON.stringify(client.args));
+      this.log(`[DRYRUN] Client ${index + 1} -> ${client.command}`);
+      this.log(`[DRYRUN-ARGS] Client ${index + 1} ARGS:`, JSON.stringify(client.args));
     });
   }
 
@@ -1763,7 +1863,7 @@ export class ATO {
         validateSchema: service.validateSchema ?? true,
         maxEventSizeBytes: service.maxEventSizeBytes ?? 1024 * 1024,
         ndjson,
-        terminal: service.terminal ?? false,
+        terminal: service.terminal ?? this.reporterMode === 'default',
       } satisfies ResolvedATIServiceOptions;
     });
   }
@@ -1772,7 +1872,7 @@ export class ATO {
     const startedServices: StartedATIService[] = [];
     for (const serviceOptions of this.resolveATIServiceOptions(plan)) {
       if (serviceOptions.ndjson === false && !serviceOptions.terminal) {
-        console.warn(`[ATI] ${serviceOptions.label} has no consumers configured; skipping managed ATI service`);
+        this.warn(`[ATI] ${serviceOptions.label} has no consumers configured; skipping managed ATI service`);
         continue;
       }
 
@@ -1801,12 +1901,20 @@ export class ATO {
         }
 
         if (serviceOptions.terminal) {
-          service.addConsumer(new TerminalConsumer());
+          service.addConsumer(
+            new TerminalConsumer({
+              mode: this.reporterMode,
+              echoToConsole: this.reporterMode === 'basic',
+              writeLog: (line) => this.log(line),
+              writeWarn: (line) => this.warn(line),
+              writeError: (line) => this.error(line),
+            }),
+          );
         }
 
         await service.start();
         const endpoint = service.getEndpoint();
-        console.log(`[ATI] ${serviceOptions.label} listening on ${endpoint.host}:${endpoint.port}`);
+        this.log(`[ATI] ${serviceOptions.label} listening on ${endpoint.host}:${endpoint.port}`);
         startedServices.push({
           label: serviceOptions.label,
           service,
@@ -1817,7 +1925,7 @@ export class ATO {
           },
         });
       } catch (error) {
-        console.warn(
+        this.warn(
           `[ATI] Failed to start managed ATI service '${serviceOptions.label}': ${error instanceof Error ? error.message : String(error)}`,
         );
       }
@@ -1831,7 +1939,7 @@ export class ATO {
       try {
         await startedService.service.stop();
       } catch (error) {
-        console.warn(
+        this.warn(
           `[ATI] Failed to stop managed ATI service '${startedService.label}': ${error instanceof Error ? error.message : String(error)}`,
         );
       }
@@ -1840,12 +1948,12 @@ export class ATO {
 
   private validateExecutables(plan: ResolvedLaunchPlan) {
     if (!checkExistsSync(plan.server.exe)) {
-      console.error(`Server executable not found: ${plan.server.exe}`);
+      this.error(`Server executable not found: ${plan.server.exe}`);
       return false;
     }
 
     if (plan.clientTemplate && !checkExistsSync(plan.clientTemplate.exe)) {
-      console.error(`Client executable not found: ${plan.clientTemplate.exe}`);
+      this.error(`Client executable not found: ${plan.clientTemplate.exe}`);
       return false;
     }
 
@@ -1874,13 +1982,22 @@ export class ATO {
     const process = spawnProcess(exe, args, label, {
       onStdoutLine: observeLine,
       onStderrLine: observeLine,
+      emitLine: (line, streamKind) => {
+        const level = streamKind === 'stderr' ? 'error' : 'log';
+        this.emitLine(line, { level, echo: this.reporterMode === 'basic' });
+      },
     });
-    const exitPromise = promiseProcessExitOrTimeout(process, timeoutSeconds, () => {
-      console.error(`${label} exceeded maxLifetime (${timeoutSeconds}s); killing process`);
-      try {
-        if (process && !process.killed) process.kill();
-      } catch {}
-    });
+    const exitPromise = promiseProcessExitOrTimeout(
+      process,
+      timeoutSeconds,
+      () => {
+        this.error(`${label} exceeded maxLifetime (${timeoutSeconds}s); killing process`);
+        try {
+          if (process && !process.killed) process.kill();
+        } catch {}
+      },
+      (error) => this.error('Process error', error),
+    );
 
     return {
       label,
@@ -1918,8 +2035,8 @@ export class ATO {
         ),
         buildATIReporterArgs(startedATI.map((startedService) => startedService.endpoint)),
       );
-      console.log(`[SPAWN] ${coordinatorLabel} -> ${formatCommand(plan.server.exe, serverArgs)}`);
-      console.log(`[SPAWN-ARGS] ${coordinatorLabel} ARGS:`, JSON.stringify(serverArgs));
+      this.log(`[SPAWN] ${coordinatorLabel} -> ${formatCommand(plan.server.exe, serverArgs)}`);
+      this.log(`[SPAWN-ARGS] ${coordinatorLabel} ARGS:`, JSON.stringify(serverArgs));
       serverMonitor = this.createMonitoredProcess(
         plan.server.exe,
         serverArgs,
@@ -1931,7 +2048,7 @@ export class ATO {
 
       const serverPid = this.serverProc.pid ?? -1;
       if (serverPid <= 0) {
-        console.error('Failed to obtain server PID');
+        this.error('Failed to obtain server PID');
         outcomes.push({
           label: coordinatorLabel,
           rawExitResult: -1,
@@ -2051,9 +2168,9 @@ export class ATO {
       } catch {}
       await this.stopATIForPlan(startedATI);
       await this.stopUnrealLag();
-      printOrchestrationSummary(outcomes);
+      printOrchestrationSummary(outcomes, (line) => this.log(line));
       for (const line of formatFrameworkValidationSummaryLines(ATO.FrameworkValidationReporter.getReport())) {
-        console.log(line);
+        this.log(line);
       }
     }
   }
@@ -2090,7 +2207,7 @@ export class ATO {
     }
 
     const proxyClientHost = `${this.unrealLagBindInfo.address}:${this.unrealLagBindInfo.port}`;
-    console.log(
+    this.log(
       `[SPAWN] UNREALLAG -> proxy listening on ${proxyClientHost} (server profile=${serverProfileName}, client profile=${clientProfileName})`,
     );
     return proxyClientHost;
@@ -2109,10 +2226,10 @@ export class ATO {
     const serverBindPromise = (async () => {
       try {
         await waitForUdpPort(serverPid, port, timeoutSeconds);
-        console.log('Server bound UDP port', port);
+        this.log('Server bound UDP port', port);
         return 'bound' as const;
       } catch (error) {
-        console.error('Server failed to bind UDP port', error);
+        this.error('Server failed to bind UDP port', error);
         return 'bind-failed' as const;
       }
     })();
@@ -2122,9 +2239,9 @@ export class ATO {
 
   private async handleServerStartupFailure(status: number | 'timeout' | 'bind-failed') {
     if (status === 'bind-failed' || status === 'timeout') {
-      console.error('Server failed to come up in time or exceeded lifetime');
+      this.error('Server failed to come up in time or exceeded lifetime');
     } else {
-      console.error('Server exited before binding the expected UDP port', status);
+      this.error('Server exited before binding the expected UDP port', status);
     }
     try {
       if (this.serverProc && !this.serverProc.killed) this.serverProc.kill();
@@ -2145,8 +2262,8 @@ export class ATO {
       const client = resolveClientLaunchOptions(clientTemplate, clientIndex);
       const args = buildClientArgs(client, proxyClientHost, atcCoordinatorMode);
       const prefix = `CLIENT ${client.clientIndex}`;
-      console.log(`[SPAWN] ${prefix} -> ${formatCommand(client.exe, args)}`);
-      console.log(`[SPAWN-ARGS] ${prefix} ARGS:`, JSON.stringify(args));
+      this.log(`[SPAWN] ${prefix} -> ${formatCommand(client.exe, args)}`);
+      this.log(`[SPAWN-ARGS] ${prefix} ARGS:`, JSON.stringify(args));
       clientMonitors.push(
         this.createMonitoredProcess(
           client.exe,
@@ -2173,7 +2290,7 @@ export class ATO {
     while (Date.now() < deadline) {
       const requestedRemoteClients = serverMonitor.atc.requestedRemoteClients;
       if (requestedRemoteClients > 0 && !clientTemplate) {
-        console.error(
+        this.error(
           `[ATO] ATC requested ${requestedRemoteClients} remote client(s), but this coordinator mode does not provide external clients`,
         );
         try {
@@ -2186,7 +2303,7 @@ export class ATO {
       }
 
       if (maxExternalClients !== undefined && requestedRemoteClients > maxExternalClients) {
-        console.error(
+        this.error(
           `[ATO] ATC requested ${requestedRemoteClients} remote client(s), but the configured maximum is ${maxExternalClients}`,
         );
         try {
@@ -2222,7 +2339,7 @@ export class ATO {
       }
     }
 
-    console.error(`[ATO] Timed out waiting for ${serverMonitor.label} automation to reach a terminal state`);
+    this.error(`[ATO] Timed out waiting for ${serverMonitor.label} automation to reach a terminal state`);
     try {
       if (!serverMonitor.process.killed) {
         serverMonitor.process.kill();
@@ -2262,7 +2379,7 @@ export class ATO {
       if (completion.kind === 'server') {
         const pendingClients = clientMonitors.filter((monitor) => !monitor.process.killed);
         if (pendingClients.length > 0) {
-          console.error(
+          this.error(
             `${serverMonitor.label} exited before all clients completed (${completion.serverExit}); terminating remaining clients`,
           );
         }
