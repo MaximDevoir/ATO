@@ -58,9 +58,6 @@ importers:
 
   packages/buildgraph:
     dependencies:
-      '@maximdevoir/ati':
-        specifier: workspace:^
-        version: link:../ati
       '@maximdevoir/ato':
         specifier: workspace:^
         version: link:../ato

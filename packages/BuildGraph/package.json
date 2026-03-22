@@ -1,9 +1,8 @@
 {
   "name": "buildgraph",
-  "private": "true",
+  "private": true,
   "type": "module",
   "dependencies": {
-    "@maximdevoir/ati": "workspace:^",
     "@maximdevoir/ato": "workspace:^"
   }
 }
