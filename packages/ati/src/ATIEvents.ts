@@ -88,6 +88,9 @@ export type ATCTestFinishedEvent = ATCEventBase & {
   skipped: boolean;
   durationSeconds: number;
   message: string;
+  sourceFile?: string;
+  sourceLine?: number;
+  sourceFunction?: string;
   skipRunsRequested?: number;
   skipAllRemainingRuns?: boolean;
   messageCount?: number;
@@ -150,6 +153,9 @@ export type ATCTaskResultEvent = ATCEventBase & {
   testSkipRequested?: boolean;
   messageCount?: number;
   message?: string;
+  sourceFile?: string;
+  sourceLine?: number;
+  sourceFunction?: string;
 };
 
 export type ATCTaskRetryEvent = ATCEventBase & {
@@ -165,6 +171,9 @@ export type ATCTaskRetryEvent = ATCEventBase & {
   maxRetries?: number;
   delaySeconds?: number;
   message?: string;
+  sourceFile?: string;
+  sourceLine?: number;
+  sourceFunction?: string;
 };
 
 export type ATCTaskTimeoutEvent = ATCEventBase & {
@@ -174,6 +183,9 @@ export type ATCTaskTimeoutEvent = ATCEventBase & {
   taskName: string;
   timeoutType?: string;
   message?: string;
+  sourceFile?: string;
+  sourceLine?: number;
+  sourceFunction?: string;
   timeoutSeconds?: number;
 };
 

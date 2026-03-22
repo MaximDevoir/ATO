@@ -306,6 +306,163 @@ describe('ATISimpleReporter', () => {
     expect(task?.attempts[1]?.message).toBe('Success');
   });
 
+  it('keeps summary source metadata separate from skip message text', () => {
+    const reporter = new ATISimpleReporter();
+
+    addEvents(reporter, [
+      {
+        version: 1,
+        sessionId: 'session-skip',
+        sequence: 0,
+        timestamp: 0,
+        type: 'SessionStarted',
+        coordinatorMode: 'Standalone',
+      },
+      {
+        version: 1,
+        sessionId: 'session-skip',
+        sequence: 1,
+        timestamp: 1,
+        type: 'TestRepeat',
+        testId: 'ATC.SkipSample|Invocation=0|Run=1',
+        testPath: 'ATC.SkipSample',
+        coordinatorMode: 'Standalone',
+        effectiveCoordinatorMode: 'Standalone',
+        invocationIndex: 0,
+        state: 'RunStart',
+        currentRun: 1,
+        totalRuns: 1,
+        repeatMode: 'None',
+      },
+      {
+        version: 1,
+        sessionId: 'session-skip',
+        sequence: 2,
+        timestamp: 2,
+        type: 'TestStarted',
+        testId: 'travel-skip',
+        testPath: 'ATC.SkipSample',
+        travelSessionId: 'travel-skip',
+        coordinatorMode: 'Standalone',
+        effectiveCoordinatorMode: 'Standalone',
+        invocationIndex: 0,
+        requiredClients: 0,
+      },
+      {
+        version: 1,
+        sessionId: 'session-skip',
+        sequence: 3,
+        timestamp: 3,
+        type: 'PlanStarted',
+        testId: 'travel-skip',
+        testPath: 'ATC.SkipSample',
+        travelSessionId: 'travel-skip',
+        coordinatorMode: 'Standalone',
+        effectiveCoordinatorMode: 'Standalone',
+        planName: 'PlanSkip',
+      },
+      {
+        version: 1,
+        sessionId: 'session-skip',
+        sequence: 4,
+        timestamp: 4,
+        type: 'TaskStarted',
+        testId: 'travel-skip',
+        testPath: 'ATC.SkipSample',
+        travelSessionId: 'travel-skip',
+        coordinatorMode: 'Standalone',
+        effectiveCoordinatorMode: 'Standalone',
+        planName: 'PlanSkip',
+        taskName: 'TaskSkip',
+        attempt: 1,
+      },
+      {
+        version: 1,
+        sessionId: 'session-skip',
+        sequence: 5,
+        timestamp: 5,
+        type: 'Message',
+        testId: 'travel-skip',
+        testPath: 'ATC.SkipSample',
+        travelSessionId: 'travel-skip',
+        coordinatorMode: 'Standalone',
+        effectiveCoordinatorMode: 'Standalone',
+        planName: 'PlanSkip',
+        taskName: 'TaskSkip',
+        kind: 'Skip',
+        message: 'Skip current run',
+        sourceFile: 'Source/ATC/ATCSkip.test.cpp',
+        sourceLine: 70,
+        sourceFunction: 'SkipManyController_UserCode',
+      },
+      {
+        version: 1,
+        sessionId: 'session-skip',
+        sequence: 6,
+        timestamp: 6,
+        type: 'TaskResult',
+        testId: 'travel-skip',
+        testPath: 'ATC.SkipSample',
+        travelSessionId: 'travel-skip',
+        coordinatorMode: 'Standalone',
+        effectiveCoordinatorMode: 'Standalone',
+        planName: 'PlanSkip',
+        taskName: 'TaskSkip',
+        attempt: 1,
+        success: true,
+        skipped: true,
+        durationSeconds: 0.1,
+        message: 'Skip current run',
+        sourceFile: 'Source/ATC/ATCSkip.test.cpp',
+        sourceLine: 70,
+        sourceFunction: 'SkipManyController_UserCode',
+      },
+      {
+        version: 1,
+        sessionId: 'session-skip',
+        sequence: 7,
+        timestamp: 7,
+        type: 'TestFinished',
+        testId: 'travel-skip',
+        testPath: 'ATC.SkipSample',
+        travelSessionId: 'travel-skip',
+        coordinatorMode: 'Standalone',
+        effectiveCoordinatorMode: 'Standalone',
+        success: true,
+        skipped: true,
+        durationSeconds: 0.2,
+        message: 'Skip current run',
+        sourceFile: 'Source/ATC/ATCSkip.test.cpp',
+        sourceLine: 70,
+        sourceFunction: 'SkipManyController_UserCode',
+        messageCount: 1,
+      },
+    ]);
+
+    const test = reporter.getSession()?.tests.get('ATC.SkipSample::0');
+    const attempt = test?.runs[0]?.executions.get('Standalone')?.plans.get('PlanSkip')?.tasks.get('TaskSkip')
+      ?.attempts[0];
+
+    expect(attempt?.assertionWarnings).toEqual([
+      {
+        message: 'Skip current run',
+        file: 'Source/ATC/ATCSkip.test.cpp',
+        line: 70,
+        sourceFunction: 'SkipManyController_UserCode',
+      },
+    ]);
+    expect(attempt?.message).toBe('Skip current run');
+    expect(attempt?.sourceFile).toBe('Source/ATC/ATCSkip.test.cpp');
+    expect(attempt?.sourceLine).toBe(70);
+    expect(attempt?.sourceFunction).toBe('SkipManyController_UserCode');
+    expect(test?.result).toMatchObject({
+      message: 'Skip current run',
+      sourceFile: 'Source/ATC/ATCSkip.test.cpp',
+      sourceLine: 70,
+      sourceFunction: 'SkipManyController_UserCode',
+    });
+  });
+
   it('tracks PIE matrix executions under a single logical run while indexing effective coordinator modes', () => {
     const reporter = new ATISimpleReporter();
 

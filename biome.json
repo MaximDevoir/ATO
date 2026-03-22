@@ -17,5 +17,8 @@
       "semicolons": "always",
       "trailingCommas": "all"
     }
+  },
+  "files": {
+    "includes": ["**", "!!**/__snapshots__"]
   }
 }

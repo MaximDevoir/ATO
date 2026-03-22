@@ -28,9 +28,19 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value) && !(value instanceof Map);
 }
 
-function sanitizeDynamicValue(key: string, value: unknown) {
+function shouldSanitizeSourceLocationKey(owner: Record<string, unknown>, key: string) {
+  if (!('message' in owner)) {
+    return false;
+  }
+
+  return key === 'file' || key === 'line' || key === 'sourceFile' || key === 'sourceLine' || key === 'sourceFunction';
+}
+
+function sanitizeDynamicValue(key: string, value: unknown, owner?: Record<string, unknown>) {
   if (!dynamicSnapshotKeys.has(key)) {
-    return value;
+    if (!owner || !shouldSanitizeSourceLocationKey(owner, key)) {
+      return value;
+    }
   }
 
   return `<dynamic:${key}>`;
@@ -56,7 +66,9 @@ export function normalizeSnapshotValue(value: unknown): unknown {
     return Object.fromEntries(
       Object.entries(value)
         .sort(([left], [right]) => left.localeCompare(right))
-        .map(([key, nestedValue]) => [key, normalizeSnapshotValue(sanitizeDynamicValue(key, nestedValue))] as const)
+        .map(
+          ([key, nestedValue]) => [key, normalizeSnapshotValue(sanitizeDynamicValue(key, nestedValue, value))] as const,
+        )
         .filter(([, nestedValue]) => nestedValue !== undefined),
     );
   }

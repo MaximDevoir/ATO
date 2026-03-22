@@ -187,12 +187,13 @@ async function validateStandaloneFrameworkReport(ato: ATO) {
     .getTestByPath('ATC.ATC_SKIP_TESTS.TASK_SKIP_ONLY_SKIPS_CURRENT_TASK.')
     .expectResult('Success');
   skipTask.expectNextLog({ type: 'Coordinator', coordinator: 'STANDALONE', logContains: 'SkipTask.Before' });
-  skipTask.expectNextEvent({
-    category: 'ATC_EVENT_MESSAGE',
-    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
-    fields: { kind: 'Skip', task: 'SkipOnlyCurrentTask' },
-    fieldContains: { message: 'SkipTask.Message' },
-  });
+  await validation
+    .getBySimpleReporterPath([
+      'testsByEffectiveCoordinatorMode',
+      'Standalone',
+      'ATC.ATC_SKIP_TESTS.TASK_SKIP_ONLY_SKIPS_CURRENT_TASK::0',
+    ])
+    .toMatchFileSnapshot('./__snapshots__/RunStandaloneTest.skipTask.snapshot.json');
   skipTask.expectNextLog({ type: 'Coordinator', coordinator: 'STANDALONE', logContains: 'SkipTask.NextTaskRan' });
   if (skipTask.logs.some((entry) => entry.line.includes('SkipTask.After'))) {
     throw new Error('ATC_SKIP_TASK unexpectedly continued executing the current task body');

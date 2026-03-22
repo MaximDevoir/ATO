@@ -13,6 +13,9 @@ export type ATITaskAttemptStatus = 'Queued' | 'Running' | 'Retrying' | 'Passed' 
 export type ATITaskAttempt = {
   attempt: number;
   sourceClientIndex?: number;
+  sourceFile?: string;
+  sourceLine?: number;
+  sourceFunction?: string;
   status?: ATITaskAttemptStatus;
   startTime?: number;
   endTime?: number;
@@ -61,6 +64,9 @@ export type ATITestExecution = {
     success: boolean;
     skipped: boolean;
     message: string;
+    sourceFile?: string;
+    sourceLine?: number;
+    sourceFunction?: string;
     durationSeconds?: number;
     messageCount?: number;
   };
@@ -100,6 +106,9 @@ export type ATITest = {
     success: boolean;
     skipped: boolean;
     message: string;
+    sourceFile?: string;
+    sourceLine?: number;
+    sourceFunction?: string;
     durationSeconds?: number;
     skipRunsRequested?: number;
     skipAllRemainingRuns?: boolean;
@@ -486,6 +495,9 @@ export class ATISimpleReporter {
       success: getBooleanField(event, 'success') ?? false,
       skipped: getBooleanField(event, 'skipped') ?? false,
       message: getStringField(event, 'message') ?? '',
+      sourceFile: getStringField(event, 'sourceFile'),
+      sourceLine: getNumberField(event, 'sourceLine'),
+      sourceFunction: getStringField(event, 'sourceFunction'),
       durationSeconds: getNumberField(event, 'durationSeconds'),
       skipRunsRequested: getNumberField(event, 'skipRunsRequested'),
       skipAllRemainingRuns: getBooleanField(event, 'skipAllRemainingRuns'),
@@ -501,6 +513,9 @@ export class ATISimpleReporter {
       success: test.result.success,
       skipped: test.result.skipped,
       message: test.result.message,
+      sourceFile: test.result.sourceFile,
+      sourceLine: test.result.sourceLine,
+      sourceFunction: test.result.sourceFunction,
       durationSeconds: test.result.durationSeconds,
       messageCount: test.result.messageCount,
     };
@@ -581,6 +596,9 @@ export class ATISimpleReporter {
     attempt.endTime = event.timestamp;
     attempt.durationSeconds = getNumberField(event, 'durationSeconds') ?? attempt.durationSeconds;
     attempt.message = getStringField(event, 'message') ?? attempt.message;
+    attempt.sourceFile = getStringField(event, 'sourceFile') ?? attempt.sourceFile;
+    attempt.sourceLine = getNumberField(event, 'sourceLine') ?? attempt.sourceLine;
+    attempt.sourceFunction = getStringField(event, 'sourceFunction') ?? attempt.sourceFunction;
     attempt.success = getBooleanField(event, 'success');
     attempt.skipped = getBooleanField(event, 'skipped');
     attempt.maxRetries = getNumberField(event, 'maxRetries') ?? attempt.maxRetries;
@@ -598,6 +616,9 @@ export class ATISimpleReporter {
     );
     attempt.status = 'Retrying';
     attempt.message = getStringField(event, 'message') ?? attempt.message;
+    attempt.sourceFile = getStringField(event, 'sourceFile') ?? attempt.sourceFile;
+    attempt.sourceLine = getNumberField(event, 'sourceLine') ?? attempt.sourceLine;
+    attempt.sourceFunction = getStringField(event, 'sourceFunction') ?? attempt.sourceFunction;
     attempt.maxRetries = getNumberField(event, 'maxRetries') ?? attempt.maxRetries;
     attempt.retriesRemaining = getNumberField(event, 'retriesRemaining') ?? attempt.retriesRemaining;
     attempt.retryDelaySeconds = getNumberField(event, 'delaySeconds') ?? attempt.retryDelaySeconds;
@@ -612,6 +633,9 @@ export class ATISimpleReporter {
     attempt.timedOut = true;
     attempt.timeoutSeconds = getNumberField(event, 'timeoutSeconds') ?? attempt.timeoutSeconds;
     attempt.message = getStringField(event, 'message') ?? attempt.message;
+    attempt.sourceFile = getStringField(event, 'sourceFile') ?? attempt.sourceFile;
+    attempt.sourceLine = getNumberField(event, 'sourceLine') ?? attempt.sourceLine;
+    attempt.sourceFunction = getStringField(event, 'sourceFunction') ?? attempt.sourceFunction;
     this.observeSessionMetadata(event);
   }
 
@@ -647,7 +671,7 @@ export class ATISimpleReporter {
     const kind = getStringField(event, 'kind');
     if (kind === 'FatalError' || kind === 'NonFatalError') {
       attempt.assertionErrors.push(assertion);
-    } else if (kind === 'Warning') {
+    } else if (kind === 'Warning' || kind === 'Skip') {
       attempt.assertionWarnings.push(assertion);
     }
 
