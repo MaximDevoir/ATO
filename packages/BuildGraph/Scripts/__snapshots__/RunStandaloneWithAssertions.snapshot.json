@@ -1,0 +1,3341 @@
+{
+  "ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected actor Actor to exist, but it was null",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectActorExistsNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected actor Actor to exist, but it was null\" plan=\"__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE\" task=\"ExpectActorExistsNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected actor Actor to exist, but it was null",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectActorExistsNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE\" task=\"ExpectActorExistsNegative\" status=\"Fail\" message=\"Expected actor Actor to exist, but it was null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected actor Actor to exist, but it was null",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertActorExistsNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected actor Actor to exist, but it was null\" plan=\"__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE\" task=\"AssertActorExistsNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected actor Actor to exist, but it was null",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertActorExistsNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE\" task=\"AssertActorExistsNegative\" status=\"Fail\" message=\"Expected actor Actor to exist, but it was null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertActorExistsNegative,ExpectActorExistsNegative",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE\" success=false failedTasks=\"AssertActorExistsNegative,ExpectActorExistsNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected actor Actor to exist, but it was null",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertActorExistsNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected actor Actor to exist, but it was null\" plan=\"__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE\" task=\"AssertActorExistsNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected actor Actor to exist, but it was null",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertActorExistsNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE\" task=\"AssertActorExistsNegative\" status=\"Fail\" message=\"Expected actor Actor to exist, but it was null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected actor Actor to exist, but it was null\" plan=\"__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE\" task=\"ExpectActorExistsNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE\" task=\"ExpectActorExistsNegative\" status=\"Fail\" message=\"Expected actor Actor to exist, but it was null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected actor Actor to exist, but it was null\" plan=\"__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE\" task=\"AssertActorExistsNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE\" task=\"AssertActorExistsNegative\" status=\"Fail\" message=\"Expected actor Actor to exist, but it was null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE\" success=false failedTasks=\"AssertActorExistsNegative,ExpectActorExistsNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected actor Actor to exist, but it was null\" plan=\"__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE\" task=\"AssertActorExistsNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ACTOR_EXISTS_NEGATIVE\" task=\"AssertActorExistsNegative\" status=\"Fail\" message=\"Expected actor Actor to exist, but it was null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.ACTOR_EXISTS_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_EXISTS_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.ACTOR_EXISTS_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.ACTOR_EXISTS_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected actor Fixture.Actor to not have tag AssertionActorTag",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectActorNotTagNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected actor Fixture.Actor to not have tag AssertionActorTag\" plan=\"__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE\" task=\"ExpectActorNotTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected actor Fixture.Actor to not have tag AssertionActorTag",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectActorNotTagNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE\" task=\"ExpectActorNotTagNegative\" status=\"Fail\" message=\"Expected actor Fixture.Actor to not have tag AssertionActorTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected actor Fixture.Actor to not have tag AssertionActorTag",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertActorNotTagNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected actor Fixture.Actor to not have tag AssertionActorTag\" plan=\"__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE\" task=\"AssertActorNotTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected actor Fixture.Actor to not have tag AssertionActorTag",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertActorNotTagNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE\" task=\"AssertActorNotTagNegative\" status=\"Fail\" message=\"Expected actor Fixture.Actor to not have tag AssertionActorTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertActorNotTagNegative,ExpectActorNotTagNegative",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE\" success=false failedTasks=\"AssertActorNotTagNegative,ExpectActorNotTagNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected actor Fixture.Actor to not have tag AssertionActorTag",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertActorNotTagNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected actor Fixture.Actor to not have tag AssertionActorTag\" plan=\"__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE\" task=\"AssertActorNotTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected actor Fixture.Actor to not have tag AssertionActorTag",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertActorNotTagNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE\" task=\"AssertActorNotTagNegative\" status=\"Fail\" message=\"Expected actor Fixture.Actor to not have tag AssertionActorTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected actor Fixture.Actor to not have tag AssertionActorTag\" plan=\"__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE\" task=\"ExpectActorNotTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE\" task=\"ExpectActorNotTagNegative\" status=\"Fail\" message=\"Expected actor Fixture.Actor to not have tag AssertionActorTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected actor Fixture.Actor to not have tag AssertionActorTag\" plan=\"__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE\" task=\"AssertActorNotTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE\" task=\"AssertActorNotTagNegative\" status=\"Fail\" message=\"Expected actor Fixture.Actor to not have tag AssertionActorTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE\" success=false failedTasks=\"AssertActorNotTagNegative,ExpectActorNotTagNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected actor Fixture.Actor to not have tag AssertionActorTag\" plan=\"__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE\" task=\"AssertActorNotTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_NEGATIVE\" task=\"AssertActorNotTagNegative\" status=\"Fail\" message=\"Expected actor Fixture.Actor to not have tag AssertionActorTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.ACTOR_NOT_TAG_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.ACTOR_NOT_TAG_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected actor Fixture.Actor to have tag AssertionActorTag",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectActorTagNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected actor Fixture.Actor to have tag AssertionActorTag\" plan=\"__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE\" task=\"ExpectActorTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected actor Fixture.Actor to have tag AssertionActorTag",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectActorTagNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE\" task=\"ExpectActorTagNegative\" status=\"Fail\" message=\"Expected actor Fixture.Actor to have tag AssertionActorTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected actor Fixture.Actor to have tag AssertionActorTag",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertActorTagNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected actor Fixture.Actor to have tag AssertionActorTag\" plan=\"__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE\" task=\"AssertActorTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected actor Fixture.Actor to have tag AssertionActorTag",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertActorTagNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE\" task=\"AssertActorTagNegative\" status=\"Fail\" message=\"Expected actor Fixture.Actor to have tag AssertionActorTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertActorTagNegative,ExpectActorTagNegative",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE\" success=false failedTasks=\"AssertActorTagNegative,ExpectActorTagNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected actor Fixture.Actor to have tag AssertionActorTag",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertActorTagNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected actor Fixture.Actor to have tag AssertionActorTag\" plan=\"__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE\" task=\"AssertActorTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected actor Fixture.Actor to have tag AssertionActorTag",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertActorTagNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE\" task=\"AssertActorTagNegative\" status=\"Fail\" message=\"Expected actor Fixture.Actor to have tag AssertionActorTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected actor Fixture.Actor to have tag AssertionActorTag\" plan=\"__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE\" task=\"ExpectActorTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE\" task=\"ExpectActorTagNegative\" status=\"Fail\" message=\"Expected actor Fixture.Actor to have tag AssertionActorTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected actor Fixture.Actor to have tag AssertionActorTag\" plan=\"__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE\" task=\"AssertActorTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE\" task=\"AssertActorTagNegative\" status=\"Fail\" message=\"Expected actor Fixture.Actor to have tag AssertionActorTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE\" success=false failedTasks=\"AssertActorTagNegative,ExpectActorTagNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected actor Fixture.Actor to have tag AssertionActorTag\" plan=\"__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE\" task=\"AssertActorTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ACTOR_TAG_NEGATIVE\" task=\"AssertActorTagNegative\" status=\"Fail\" message=\"Expected actor Fixture.Actor to have tag AssertionActorTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.ACTOR_TAG_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.ACTOR_TAG_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.ACTOR_TAG_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.ACTOR_TAG_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.ANY_THROW_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected DoNothing() to throw an exception, but it did not throw",
+          "plan": "__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectAnyThrowNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected DoNothing() to throw an exception, but it did not throw\" plan=\"__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE\" task=\"ExpectAnyThrowNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected DoNothing() to throw an exception, but it did not throw",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectAnyThrowNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE\" task=\"ExpectAnyThrowNegative\" status=\"Fail\" message=\"Expected DoNothing() to throw an exception, but it did not throw\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected DoNothing() to throw an exception, but it did not throw",
+          "plan": "__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertAnyThrowNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected DoNothing() to throw an exception, but it did not throw\" plan=\"__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE\" task=\"AssertAnyThrowNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected DoNothing() to throw an exception, but it did not throw",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertAnyThrowNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE\" task=\"AssertAnyThrowNegative\" status=\"Fail\" message=\"Expected DoNothing() to throw an exception, but it did not throw\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertAnyThrowNegative,ExpectAnyThrowNegative",
+          "plan": "__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE\" success=false failedTasks=\"AssertAnyThrowNegative,ExpectAnyThrowNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected DoNothing() to throw an exception, but it did not throw",
+          "plan": "__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertAnyThrowNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected DoNothing() to throw an exception, but it did not throw\" plan=\"__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE\" task=\"AssertAnyThrowNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected DoNothing() to throw an exception, but it did not throw",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertAnyThrowNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE\" task=\"AssertAnyThrowNegative\" status=\"Fail\" message=\"Expected DoNothing() to throw an exception, but it did not throw\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected DoNothing() to throw an exception, but it did not throw\" plan=\"__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE\" task=\"ExpectAnyThrowNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE\" task=\"ExpectAnyThrowNegative\" status=\"Fail\" message=\"Expected DoNothing() to throw an exception, but it did not throw\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected DoNothing() to throw an exception, but it did not throw\" plan=\"__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE\" task=\"AssertAnyThrowNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE\" task=\"AssertAnyThrowNegative\" status=\"Fail\" message=\"Expected DoNothing() to throw an exception, but it did not throw\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE\" success=false failedTasks=\"AssertAnyThrowNegative,ExpectAnyThrowNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected DoNothing() to throw an exception, but it did not throw\" plan=\"__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE\" task=\"AssertAnyThrowNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.ANY_THROW_NEGATIVE\" task=\"AssertAnyThrowNegative\" status=\"Fail\" message=\"Expected DoNothing() to throw an exception, but it did not throw\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.ANY_THROW_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.ANY_THROW_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.ANY_THROW_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.ANY_THROW_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected component Component to exist, but it was null",
+          "plan": "__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectComponentExistsNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected component Component to exist, but it was null\" plan=\"__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE\" task=\"ExpectComponentExistsNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected component Component to exist, but it was null",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectComponentExistsNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE\" task=\"ExpectComponentExistsNegative\" status=\"Fail\" message=\"Expected component Component to exist, but it was null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected component Component to exist, but it was null",
+          "plan": "__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertComponentExistsNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected component Component to exist, but it was null\" plan=\"__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE\" task=\"AssertComponentExistsNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected component Component to exist, but it was null",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertComponentExistsNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE\" task=\"AssertComponentExistsNegative\" status=\"Fail\" message=\"Expected component Component to exist, but it was null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertComponentExistsNegative,ExpectComponentExistsNegative",
+          "plan": "__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE\" success=false failedTasks=\"AssertComponentExistsNegative,ExpectComponentExistsNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected component Component to exist, but it was null",
+          "plan": "__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertComponentExistsNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected component Component to exist, but it was null\" plan=\"__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE\" task=\"AssertComponentExistsNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected component Component to exist, but it was null",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertComponentExistsNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE\" task=\"AssertComponentExistsNegative\" status=\"Fail\" message=\"Expected component Component to exist, but it was null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected component Component to exist, but it was null\" plan=\"__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE\" task=\"ExpectComponentExistsNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE\" task=\"ExpectComponentExistsNegative\" status=\"Fail\" message=\"Expected component Component to exist, but it was null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected component Component to exist, but it was null\" plan=\"__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE\" task=\"AssertComponentExistsNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE\" task=\"AssertComponentExistsNegative\" status=\"Fail\" message=\"Expected component Component to exist, but it was null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE\" success=false failedTasks=\"AssertComponentExistsNegative,ExpectComponentExistsNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected component Component to exist, but it was null\" plan=\"__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE\" task=\"AssertComponentExistsNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_NEGATIVE\" task=\"AssertComponentExistsNegative\" status=\"Fail\" message=\"Expected component Component to exist, but it was null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.COMPONENT_EXISTS_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.COMPONENT_EXISTS_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.EQUAL_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected 7 to equal 8, but 7 was 7 and 8 was 8",
+          "plan": "__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectEqualNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected 7 to equal 8, but 7 was 7 and 8 was 8\" plan=\"__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE\" task=\"ExpectEqualNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 7 to equal 8, but 7 was 7 and 8 was 8",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectEqualNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE\" task=\"ExpectEqualNegative\" status=\"Fail\" message=\"Expected 7 to equal 8, but 7 was 7 and 8 was 8\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected 7 to equal 8, but 7 was 7 and 8 was 8",
+          "plan": "__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertEqualNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 7 to equal 8, but 7 was 7 and 8 was 8\" plan=\"__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE\" task=\"AssertEqualNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 7 to equal 8, but 7 was 7 and 8 was 8",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertEqualNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE\" task=\"AssertEqualNegative\" status=\"Fail\" message=\"Expected 7 to equal 8, but 7 was 7 and 8 was 8\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertEqualNegative,ExpectEqualNegative",
+          "plan": "__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE\" success=false failedTasks=\"AssertEqualNegative,ExpectEqualNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected 7 to equal 8, but 7 was 7 and 8 was 8",
+          "plan": "__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertEqualNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 7 to equal 8, but 7 was 7 and 8 was 8\" plan=\"__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE\" task=\"AssertEqualNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 7 to equal 8, but 7 was 7 and 8 was 8",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertEqualNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE\" task=\"AssertEqualNegative\" status=\"Fail\" message=\"Expected 7 to equal 8, but 7 was 7 and 8 was 8\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected 7 to equal 8, but 7 was 7 and 8 was 8\" plan=\"__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE\" task=\"ExpectEqualNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE\" task=\"ExpectEqualNegative\" status=\"Fail\" message=\"Expected 7 to equal 8, but 7 was 7 and 8 was 8\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 7 to equal 8, but 7 was 7 and 8 was 8\" plan=\"__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE\" task=\"AssertEqualNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE\" task=\"AssertEqualNegative\" status=\"Fail\" message=\"Expected 7 to equal 8, but 7 was 7 and 8 was 8\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE\" success=false failedTasks=\"AssertEqualNegative,ExpectEqualNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 7 to equal 8, but 7 was 7 and 8 was 8\" plan=\"__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE\" task=\"AssertEqualNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.EQUAL_NEGATIVE\" task=\"AssertEqualNegative\" status=\"Fail\" message=\"Expected 7 to equal 8, but 7 was 7 and 8 was 8\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.EQUAL_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.EQUAL_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.EQUAL_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.EQUAL_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.FALSE_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected true to be false, but it was true",
+          "plan": "__Test_ATC.ASSERTIONS.FALSE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectFalseNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected true to be false, but it was true\" plan=\"__Test_ATC.ASSERTIONS.FALSE_NEGATIVE\" task=\"ExpectFalseNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected true to be false, but it was true",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.FALSE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectFalseNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.FALSE_NEGATIVE\" task=\"ExpectFalseNegative\" status=\"Fail\" message=\"Expected true to be false, but it was true\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected true to be false, but it was true",
+          "plan": "__Test_ATC.ASSERTIONS.FALSE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertFalseNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected true to be false, but it was true\" plan=\"__Test_ATC.ASSERTIONS.FALSE_NEGATIVE\" task=\"AssertFalseNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected true to be false, but it was true",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.FALSE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertFalseNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.FALSE_NEGATIVE\" task=\"AssertFalseNegative\" status=\"Fail\" message=\"Expected true to be false, but it was true\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertFalseNegative,ExpectFalseNegative",
+          "plan": "__Test_ATC.ASSERTIONS.FALSE_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.FALSE_NEGATIVE\" success=false failedTasks=\"AssertFalseNegative,ExpectFalseNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected true to be false, but it was true",
+          "plan": "__Test_ATC.ASSERTIONS.FALSE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertFalseNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected true to be false, but it was true\" plan=\"__Test_ATC.ASSERTIONS.FALSE_NEGATIVE\" task=\"AssertFalseNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected true to be false, but it was true",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.FALSE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertFalseNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.FALSE_NEGATIVE\" task=\"AssertFalseNegative\" status=\"Fail\" message=\"Expected true to be false, but it was true\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected true to be false, but it was true\" plan=\"__Test_ATC.ASSERTIONS.FALSE_NEGATIVE\" task=\"ExpectFalseNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.FALSE_NEGATIVE\" task=\"ExpectFalseNegative\" status=\"Fail\" message=\"Expected true to be false, but it was true\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected true to be false, but it was true\" plan=\"__Test_ATC.ASSERTIONS.FALSE_NEGATIVE\" task=\"AssertFalseNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.FALSE_NEGATIVE\" task=\"AssertFalseNegative\" status=\"Fail\" message=\"Expected true to be false, but it was true\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.FALSE_NEGATIVE\" success=false failedTasks=\"AssertFalseNegative,ExpectFalseNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected true to be false, but it was true\" plan=\"__Test_ATC.ASSERTIONS.FALSE_NEGATIVE\" task=\"AssertFalseNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.FALSE_NEGATIVE\" task=\"AssertFalseNegative\" status=\"Fail\" message=\"Expected true to be false, but it was true\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.FALSE_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.FALSE_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.FALSE_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.FALSE_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.GE_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected 3 >= 5, but 3 was 3 and 5 was 5",
+          "plan": "__Test_ATC.ASSERTIONS.GE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectGeNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected 3 >= 5, but 3 was 3 and 5 was 5\" plan=\"__Test_ATC.ASSERTIONS.GE_NEGATIVE\" task=\"ExpectGeNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 3 >= 5, but 3 was 3 and 5 was 5",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.GE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectGeNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.GE_NEGATIVE\" task=\"ExpectGeNegative\" status=\"Fail\" message=\"Expected 3 >= 5, but 3 was 3 and 5 was 5\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected 3 >= 5, but 3 was 3 and 5 was 5",
+          "plan": "__Test_ATC.ASSERTIONS.GE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertGeNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 3 >= 5, but 3 was 3 and 5 was 5\" plan=\"__Test_ATC.ASSERTIONS.GE_NEGATIVE\" task=\"AssertGeNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 3 >= 5, but 3 was 3 and 5 was 5",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.GE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertGeNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.GE_NEGATIVE\" task=\"AssertGeNegative\" status=\"Fail\" message=\"Expected 3 >= 5, but 3 was 3 and 5 was 5\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertGeNegative,ExpectGeNegative",
+          "plan": "__Test_ATC.ASSERTIONS.GE_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.GE_NEGATIVE\" success=false failedTasks=\"AssertGeNegative,ExpectGeNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected 3 >= 5, but 3 was 3 and 5 was 5",
+          "plan": "__Test_ATC.ASSERTIONS.GE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertGeNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 3 >= 5, but 3 was 3 and 5 was 5\" plan=\"__Test_ATC.ASSERTIONS.GE_NEGATIVE\" task=\"AssertGeNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 3 >= 5, but 3 was 3 and 5 was 5",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.GE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertGeNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.GE_NEGATIVE\" task=\"AssertGeNegative\" status=\"Fail\" message=\"Expected 3 >= 5, but 3 was 3 and 5 was 5\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected 3 >= 5, but 3 was 3 and 5 was 5\" plan=\"__Test_ATC.ASSERTIONS.GE_NEGATIVE\" task=\"ExpectGeNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.GE_NEGATIVE\" task=\"ExpectGeNegative\" status=\"Fail\" message=\"Expected 3 >= 5, but 3 was 3 and 5 was 5\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 3 >= 5, but 3 was 3 and 5 was 5\" plan=\"__Test_ATC.ASSERTIONS.GE_NEGATIVE\" task=\"AssertGeNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.GE_NEGATIVE\" task=\"AssertGeNegative\" status=\"Fail\" message=\"Expected 3 >= 5, but 3 was 3 and 5 was 5\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.GE_NEGATIVE\" success=false failedTasks=\"AssertGeNegative,ExpectGeNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 3 >= 5, but 3 was 3 and 5 was 5\" plan=\"__Test_ATC.ASSERTIONS.GE_NEGATIVE\" task=\"AssertGeNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.GE_NEGATIVE\" task=\"AssertGeNegative\" status=\"Fail\" message=\"Expected 3 >= 5, but 3 was 3 and 5 was 5\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.GE_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.GE_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.GE_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.GE_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.GT_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected 3 > 5, but 3 was 3 and 5 was 5",
+          "plan": "__Test_ATC.ASSERTIONS.GT_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectGtNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected 3 > 5, but 3 was 3 and 5 was 5\" plan=\"__Test_ATC.ASSERTIONS.GT_NEGATIVE\" task=\"ExpectGtNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 3 > 5, but 3 was 3 and 5 was 5",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.GT_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectGtNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.GT_NEGATIVE\" task=\"ExpectGtNegative\" status=\"Fail\" message=\"Expected 3 > 5, but 3 was 3 and 5 was 5\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected 3 > 5, but 3 was 3 and 5 was 5",
+          "plan": "__Test_ATC.ASSERTIONS.GT_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertGtNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 3 > 5, but 3 was 3 and 5 was 5\" plan=\"__Test_ATC.ASSERTIONS.GT_NEGATIVE\" task=\"AssertGtNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 3 > 5, but 3 was 3 and 5 was 5",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.GT_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertGtNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.GT_NEGATIVE\" task=\"AssertGtNegative\" status=\"Fail\" message=\"Expected 3 > 5, but 3 was 3 and 5 was 5\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertGtNegative,ExpectGtNegative",
+          "plan": "__Test_ATC.ASSERTIONS.GT_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.GT_NEGATIVE\" success=false failedTasks=\"AssertGtNegative,ExpectGtNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected 3 > 5, but 3 was 3 and 5 was 5",
+          "plan": "__Test_ATC.ASSERTIONS.GT_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertGtNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 3 > 5, but 3 was 3 and 5 was 5\" plan=\"__Test_ATC.ASSERTIONS.GT_NEGATIVE\" task=\"AssertGtNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 3 > 5, but 3 was 3 and 5 was 5",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.GT_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertGtNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.GT_NEGATIVE\" task=\"AssertGtNegative\" status=\"Fail\" message=\"Expected 3 > 5, but 3 was 3 and 5 was 5\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected 3 > 5, but 3 was 3 and 5 was 5\" plan=\"__Test_ATC.ASSERTIONS.GT_NEGATIVE\" task=\"ExpectGtNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.GT_NEGATIVE\" task=\"ExpectGtNegative\" status=\"Fail\" message=\"Expected 3 > 5, but 3 was 3 and 5 was 5\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 3 > 5, but 3 was 3 and 5 was 5\" plan=\"__Test_ATC.ASSERTIONS.GT_NEGATIVE\" task=\"AssertGtNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.GT_NEGATIVE\" task=\"AssertGtNegative\" status=\"Fail\" message=\"Expected 3 > 5, but 3 was 3 and 5 was 5\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.GT_NEGATIVE\" success=false failedTasks=\"AssertGtNegative,ExpectGtNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 3 > 5, but 3 was 3 and 5 was 5\" plan=\"__Test_ATC.ASSERTIONS.GT_NEGATIVE\" task=\"AssertGtNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.GT_NEGATIVE\" task=\"AssertGtNegative\" status=\"Fail\" message=\"Expected 3 > 5, but 3 was 3 and 5 was 5\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.GT_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.GT_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.GT_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.GT_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.LE_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected 5 <= 3, but 5 was 5 and 3 was 3",
+          "plan": "__Test_ATC.ASSERTIONS.LE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectLeNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected 5 <= 3, but 5 was 5 and 3 was 3\" plan=\"__Test_ATC.ASSERTIONS.LE_NEGATIVE\" task=\"ExpectLeNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 5 <= 3, but 5 was 5 and 3 was 3",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.LE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectLeNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.LE_NEGATIVE\" task=\"ExpectLeNegative\" status=\"Fail\" message=\"Expected 5 <= 3, but 5 was 5 and 3 was 3\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected 5 <= 3, but 5 was 5 and 3 was 3",
+          "plan": "__Test_ATC.ASSERTIONS.LE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertLeNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 5 <= 3, but 5 was 5 and 3 was 3\" plan=\"__Test_ATC.ASSERTIONS.LE_NEGATIVE\" task=\"AssertLeNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 5 <= 3, but 5 was 5 and 3 was 3",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.LE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertLeNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.LE_NEGATIVE\" task=\"AssertLeNegative\" status=\"Fail\" message=\"Expected 5 <= 3, but 5 was 5 and 3 was 3\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertLeNegative,ExpectLeNegative",
+          "plan": "__Test_ATC.ASSERTIONS.LE_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.LE_NEGATIVE\" success=false failedTasks=\"AssertLeNegative,ExpectLeNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected 5 <= 3, but 5 was 5 and 3 was 3",
+          "plan": "__Test_ATC.ASSERTIONS.LE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertLeNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 5 <= 3, but 5 was 5 and 3 was 3\" plan=\"__Test_ATC.ASSERTIONS.LE_NEGATIVE\" task=\"AssertLeNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 5 <= 3, but 5 was 5 and 3 was 3",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.LE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertLeNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.LE_NEGATIVE\" task=\"AssertLeNegative\" status=\"Fail\" message=\"Expected 5 <= 3, but 5 was 5 and 3 was 3\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected 5 <= 3, but 5 was 5 and 3 was 3\" plan=\"__Test_ATC.ASSERTIONS.LE_NEGATIVE\" task=\"ExpectLeNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.LE_NEGATIVE\" task=\"ExpectLeNegative\" status=\"Fail\" message=\"Expected 5 <= 3, but 5 was 5 and 3 was 3\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 5 <= 3, but 5 was 5 and 3 was 3\" plan=\"__Test_ATC.ASSERTIONS.LE_NEGATIVE\" task=\"AssertLeNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.LE_NEGATIVE\" task=\"AssertLeNegative\" status=\"Fail\" message=\"Expected 5 <= 3, but 5 was 5 and 3 was 3\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.LE_NEGATIVE\" success=false failedTasks=\"AssertLeNegative,ExpectLeNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 5 <= 3, but 5 was 5 and 3 was 3\" plan=\"__Test_ATC.ASSERTIONS.LE_NEGATIVE\" task=\"AssertLeNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.LE_NEGATIVE\" task=\"AssertLeNegative\" status=\"Fail\" message=\"Expected 5 <= 3, but 5 was 5 and 3 was 3\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.LE_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.LE_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.LE_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.LE_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.LT_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected 5 < 3, but 5 was 5 and 3 was 3",
+          "plan": "__Test_ATC.ASSERTIONS.LT_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectLtNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected 5 < 3, but 5 was 5 and 3 was 3\" plan=\"__Test_ATC.ASSERTIONS.LT_NEGATIVE\" task=\"ExpectLtNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 5 < 3, but 5 was 5 and 3 was 3",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.LT_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectLtNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.LT_NEGATIVE\" task=\"ExpectLtNegative\" status=\"Fail\" message=\"Expected 5 < 3, but 5 was 5 and 3 was 3\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected 5 < 3, but 5 was 5 and 3 was 3",
+          "plan": "__Test_ATC.ASSERTIONS.LT_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertLtNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 5 < 3, but 5 was 5 and 3 was 3\" plan=\"__Test_ATC.ASSERTIONS.LT_NEGATIVE\" task=\"AssertLtNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 5 < 3, but 5 was 5 and 3 was 3",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.LT_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertLtNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.LT_NEGATIVE\" task=\"AssertLtNegative\" status=\"Fail\" message=\"Expected 5 < 3, but 5 was 5 and 3 was 3\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertLtNegative,ExpectLtNegative",
+          "plan": "__Test_ATC.ASSERTIONS.LT_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.LT_NEGATIVE\" success=false failedTasks=\"AssertLtNegative,ExpectLtNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected 5 < 3, but 5 was 5 and 3 was 3",
+          "plan": "__Test_ATC.ASSERTIONS.LT_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertLtNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 5 < 3, but 5 was 5 and 3 was 3\" plan=\"__Test_ATC.ASSERTIONS.LT_NEGATIVE\" task=\"AssertLtNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 5 < 3, but 5 was 5 and 3 was 3",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.LT_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertLtNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.LT_NEGATIVE\" task=\"AssertLtNegative\" status=\"Fail\" message=\"Expected 5 < 3, but 5 was 5 and 3 was 3\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected 5 < 3, but 5 was 5 and 3 was 3\" plan=\"__Test_ATC.ASSERTIONS.LT_NEGATIVE\" task=\"ExpectLtNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.LT_NEGATIVE\" task=\"ExpectLtNegative\" status=\"Fail\" message=\"Expected 5 < 3, but 5 was 5 and 3 was 3\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 5 < 3, but 5 was 5 and 3 was 3\" plan=\"__Test_ATC.ASSERTIONS.LT_NEGATIVE\" task=\"AssertLtNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.LT_NEGATIVE\" task=\"AssertLtNegative\" status=\"Fail\" message=\"Expected 5 < 3, but 5 was 5 and 3 was 3\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.LT_NEGATIVE\" success=false failedTasks=\"AssertLtNegative,ExpectLtNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 5 < 3, but 5 was 5 and 3 was 3\" plan=\"__Test_ATC.ASSERTIONS.LT_NEGATIVE\" task=\"AssertLtNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.LT_NEGATIVE\" task=\"AssertLtNegative\" status=\"Fail\" message=\"Expected 5 < 3, but 5 was 5 and 3 was 3\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.LT_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.LT_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.LT_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.LT_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.NEAR_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected 10.3 (10.3) to be within 0.1 (0.1) of 10.0 (10), but the difference was 0.3",
+          "plan": "__Test_ATC.ASSERTIONS.NEAR_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectNearNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected 10.3 (10.3) to be within 0.1 (0.1) of 10.0 (10), but the difference was 0.3\" plan=\"__Test_ATC.ASSERTIONS.NEAR_NEGATIVE\" task=\"ExpectNearNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 10.3 (10.3) to be within 0.1 (0.1) of 10.0 (10), but the difference was 0.3",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.NEAR_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectNearNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NEAR_NEGATIVE\" task=\"ExpectNearNegative\" status=\"Fail\" message=\"Expected 10.3 (10.3) to be within 0.1 (0.1) of 10.0 (10), but the difference was 0.3\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected 10.3 (10.3) to be within 0.1 (0.1) of 10.0 (10), but the difference was 0.3",
+          "plan": "__Test_ATC.ASSERTIONS.NEAR_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertNearNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 10.3 (10.3) to be within 0.1 (0.1) of 10.0 (10), but the difference was 0.3\" plan=\"__Test_ATC.ASSERTIONS.NEAR_NEGATIVE\" task=\"AssertNearNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 10.3 (10.3) to be within 0.1 (0.1) of 10.0 (10), but the difference was 0.3",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.NEAR_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertNearNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NEAR_NEGATIVE\" task=\"AssertNearNegative\" status=\"Fail\" message=\"Expected 10.3 (10.3) to be within 0.1 (0.1) of 10.0 (10), but the difference was 0.3\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertNearNegative,ExpectNearNegative",
+          "plan": "__Test_ATC.ASSERTIONS.NEAR_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NEAR_NEGATIVE\" success=false failedTasks=\"AssertNearNegative,ExpectNearNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected 10.3 (10.3) to be within 0.1 (0.1) of 10.0 (10), but the difference was 0.3",
+          "plan": "__Test_ATC.ASSERTIONS.NEAR_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertNearNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 10.3 (10.3) to be within 0.1 (0.1) of 10.0 (10), but the difference was 0.3\" plan=\"__Test_ATC.ASSERTIONS.NEAR_NEGATIVE\" task=\"AssertNearNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 10.3 (10.3) to be within 0.1 (0.1) of 10.0 (10), but the difference was 0.3",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.NEAR_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertNearNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NEAR_NEGATIVE\" task=\"AssertNearNegative\" status=\"Fail\" message=\"Expected 10.3 (10.3) to be within 0.1 (0.1) of 10.0 (10), but the difference was 0.3\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected 10.3 (10.3) to be within 0.1 (0.1) of 10.0 (10), but the difference was 0.3\" plan=\"__Test_ATC.ASSERTIONS.NEAR_NEGATIVE\" task=\"ExpectNearNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NEAR_NEGATIVE\" task=\"ExpectNearNegative\" status=\"Fail\" message=\"Expected 10.3 (10.3) to be within 0.1 (0.1) of 10.0 (10), but the difference was 0.3\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 10.3 (10.3) to be within 0.1 (0.1) of 10.0 (10), but the difference was 0.3\" plan=\"__Test_ATC.ASSERTIONS.NEAR_NEGATIVE\" task=\"AssertNearNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NEAR_NEGATIVE\" task=\"AssertNearNegative\" status=\"Fail\" message=\"Expected 10.3 (10.3) to be within 0.1 (0.1) of 10.0 (10), but the difference was 0.3\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NEAR_NEGATIVE\" success=false failedTasks=\"AssertNearNegative,ExpectNearNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 10.3 (10.3) to be within 0.1 (0.1) of 10.0 (10), but the difference was 0.3\" plan=\"__Test_ATC.ASSERTIONS.NEAR_NEGATIVE\" task=\"AssertNearNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NEAR_NEGATIVE\" task=\"AssertNearNegative\" status=\"Fail\" message=\"Expected 10.3 (10.3) to be within 0.1 (0.1) of 10.0 (10), but the difference was 0.3\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.NEAR_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.NEAR_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NEAR_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NEAR_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.NO_THROW_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected ThrowFStringException(TEXT(\"NoThrowFailure\")) to not throw, but it threw an FString exception: \"NoThrowFailure\"",
+          "plan": "__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectNoThrowNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected ThrowFStringException(TEXT(\\\"NoThrowFailure\\\")) to not throw, but it threw an FString exception: \\\"NoThrowFailure\\\"\" plan=\"__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE\" task=\"ExpectNoThrowNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected ThrowFStringException(TEXT(\"NoThrowFailure\")) to not throw, but it threw an FString exception: \"NoThrowFailure\"",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectNoThrowNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE\" task=\"ExpectNoThrowNegative\" status=\"Fail\" message=\"Expected ThrowFStringException(TEXT(\\\"NoThrowFailure\\\")) to not throw, but it threw an FString exception: \\\"NoThrowFailure\\\"\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected ThrowFStringException(TEXT(\"NoThrowFailure\")) to not throw, but it threw an FString exception: \"NoThrowFailure\"",
+          "plan": "__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertNoThrowNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected ThrowFStringException(TEXT(\\\"NoThrowFailure\\\")) to not throw, but it threw an FString exception: \\\"NoThrowFailure\\\"\" plan=\"__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE\" task=\"AssertNoThrowNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected ThrowFStringException(TEXT(\"NoThrowFailure\")) to not throw, but it threw an FString exception: \"NoThrowFailure\"",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertNoThrowNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE\" task=\"AssertNoThrowNegative\" status=\"Fail\" message=\"Expected ThrowFStringException(TEXT(\\\"NoThrowFailure\\\")) to not throw, but it threw an FString exception: \\\"NoThrowFailure\\\"\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertNoThrowNegative,ExpectNoThrowNegative",
+          "plan": "__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE\" success=false failedTasks=\"AssertNoThrowNegative,ExpectNoThrowNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected ThrowFStringException(TEXT(\"NoThrowFailure\")) to not throw, but it threw an FString exception: \"NoThrowFailure\"",
+          "plan": "__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertNoThrowNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected ThrowFStringException(TEXT(\\\"NoThrowFailure\\\")) to not throw, but it threw an FString exception: \\\"NoThrowFailure\\\"\" plan=\"__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE\" task=\"AssertNoThrowNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected ThrowFStringException(TEXT(\"NoThrowFailure\")) to not throw, but it threw an FString exception: \"NoThrowFailure\"",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertNoThrowNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE\" task=\"AssertNoThrowNegative\" status=\"Fail\" message=\"Expected ThrowFStringException(TEXT(\\\"NoThrowFailure\\\")) to not throw, but it threw an FString exception: \\\"NoThrowFailure\\\"\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected ThrowFStringException(TEXT(\\\"NoThrowFailure\\\")) to not throw, but it threw an FString exception: \\\"NoThrowFailure\\\"\" plan=\"__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE\" task=\"ExpectNoThrowNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE\" task=\"ExpectNoThrowNegative\" status=\"Fail\" message=\"Expected ThrowFStringException(TEXT(\\\"NoThrowFailure\\\")) to not throw, but it threw an FString exception: \\\"NoThrowFailure\\\"\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected ThrowFStringException(TEXT(\\\"NoThrowFailure\\\")) to not throw, but it threw an FString exception: \\\"NoThrowFailure\\\"\" plan=\"__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE\" task=\"AssertNoThrowNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE\" task=\"AssertNoThrowNegative\" status=\"Fail\" message=\"Expected ThrowFStringException(TEXT(\\\"NoThrowFailure\\\")) to not throw, but it threw an FString exception: \\\"NoThrowFailure\\\"\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE\" success=false failedTasks=\"AssertNoThrowNegative,ExpectNoThrowNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected ThrowFStringException(TEXT(\\\"NoThrowFailure\\\")) to not throw, but it threw an FString exception: \\\"NoThrowFailure\\\"\" plan=\"__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE\" task=\"AssertNoThrowNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NO_THROW_NEGATIVE\" task=\"AssertNoThrowNegative\" status=\"Fail\" message=\"Expected ThrowFStringException(TEXT(\\\"NoThrowFailure\\\")) to not throw, but it threw an FString exception: \\\"NoThrowFailure\\\"\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.NO_THROW_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.NO_THROW_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NO_THROW_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NO_THROW_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected 7 to not equal 7, but both resolved to 7",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectNotEqualNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected 7 to not equal 7, but both resolved to 7\" plan=\"__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE\" task=\"ExpectNotEqualNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 7 to not equal 7, but both resolved to 7",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectNotEqualNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE\" task=\"ExpectNotEqualNegative\" status=\"Fail\" message=\"Expected 7 to not equal 7, but both resolved to 7\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected 7 to not equal 7, but both resolved to 7",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertNotEqualNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 7 to not equal 7, but both resolved to 7\" plan=\"__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE\" task=\"AssertNotEqualNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 7 to not equal 7, but both resolved to 7",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertNotEqualNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE\" task=\"AssertNotEqualNegative\" status=\"Fail\" message=\"Expected 7 to not equal 7, but both resolved to 7\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertNotEqualNegative,ExpectNotEqualNegative",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE\" success=false failedTasks=\"AssertNotEqualNegative,ExpectNotEqualNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected 7 to not equal 7, but both resolved to 7",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertNotEqualNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 7 to not equal 7, but both resolved to 7\" plan=\"__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE\" task=\"AssertNotEqualNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected 7 to not equal 7, but both resolved to 7",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertNotEqualNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE\" task=\"AssertNotEqualNegative\" status=\"Fail\" message=\"Expected 7 to not equal 7, but both resolved to 7\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected 7 to not equal 7, but both resolved to 7\" plan=\"__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE\" task=\"ExpectNotEqualNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE\" task=\"ExpectNotEqualNegative\" status=\"Fail\" message=\"Expected 7 to not equal 7, but both resolved to 7\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 7 to not equal 7, but both resolved to 7\" plan=\"__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE\" task=\"AssertNotEqualNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE\" task=\"AssertNotEqualNegative\" status=\"Fail\" message=\"Expected 7 to not equal 7, but both resolved to 7\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE\" success=false failedTasks=\"AssertNotEqualNegative,ExpectNotEqualNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected 7 to not equal 7, but both resolved to 7\" plan=\"__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE\" task=\"AssertNotEqualNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NOT_EQUAL_NEGATIVE\" task=\"AssertNotEqualNegative\" status=\"Fail\" message=\"Expected 7 to not equal 7, but both resolved to 7\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.NOT_EQUAL_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_EQUAL_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NOT_EQUAL_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NOT_EQUAL_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.NOT_NULL_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected Object to not be null",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectNotNullNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected Object to not be null\" plan=\"__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE\" task=\"ExpectNotNullNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected Object to not be null",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectNotNullNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE\" task=\"ExpectNotNullNegative\" status=\"Fail\" message=\"Expected Object to not be null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected Object to not be null",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertNotNullNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected Object to not be null\" plan=\"__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE\" task=\"AssertNotNullNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected Object to not be null",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertNotNullNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE\" task=\"AssertNotNullNegative\" status=\"Fail\" message=\"Expected Object to not be null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertNotNullNegative,ExpectNotNullNegative",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE\" success=false failedTasks=\"AssertNotNullNegative,ExpectNotNullNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected Object to not be null",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertNotNullNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected Object to not be null\" plan=\"__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE\" task=\"AssertNotNullNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected Object to not be null",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertNotNullNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE\" task=\"AssertNotNullNegative\" status=\"Fail\" message=\"Expected Object to not be null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected Object to not be null\" plan=\"__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE\" task=\"ExpectNotNullNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE\" task=\"ExpectNotNullNegative\" status=\"Fail\" message=\"Expected Object to not be null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected Object to not be null\" plan=\"__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE\" task=\"AssertNotNullNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE\" task=\"AssertNotNullNegative\" status=\"Fail\" message=\"Expected Object to not be null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE\" success=false failedTasks=\"AssertNotNullNegative,ExpectNotNullNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected Object to not be null\" plan=\"__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE\" task=\"AssertNotNullNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NOT_NULL_NEGATIVE\" task=\"AssertNotNullNegative\" status=\"Fail\" message=\"Expected Object to not be null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.NOT_NULL_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_NULL_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NOT_NULL_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NOT_NULL_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.NOT_TAG_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected component Fixture.Component to not have tag AssertionComponentTag",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectNotTagNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected component Fixture.Component to not have tag AssertionComponentTag\" plan=\"__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE\" task=\"ExpectNotTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected component Fixture.Component to not have tag AssertionComponentTag",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectNotTagNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE\" task=\"ExpectNotTagNegative\" status=\"Fail\" message=\"Expected component Fixture.Component to not have tag AssertionComponentTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected component Fixture.Component to not have tag AssertionComponentTag",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertNotTagNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected component Fixture.Component to not have tag AssertionComponentTag\" plan=\"__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE\" task=\"AssertNotTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected component Fixture.Component to not have tag AssertionComponentTag",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertNotTagNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE\" task=\"AssertNotTagNegative\" status=\"Fail\" message=\"Expected component Fixture.Component to not have tag AssertionComponentTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertNotTagNegative,ExpectNotTagNegative",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE\" success=false failedTasks=\"AssertNotTagNegative,ExpectNotTagNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected component Fixture.Component to not have tag AssertionComponentTag",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertNotTagNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected component Fixture.Component to not have tag AssertionComponentTag\" plan=\"__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE\" task=\"AssertNotTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected component Fixture.Component to not have tag AssertionComponentTag",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertNotTagNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE\" task=\"AssertNotTagNegative\" status=\"Fail\" message=\"Expected component Fixture.Component to not have tag AssertionComponentTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected component Fixture.Component to not have tag AssertionComponentTag\" plan=\"__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE\" task=\"ExpectNotTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE\" task=\"ExpectNotTagNegative\" status=\"Fail\" message=\"Expected component Fixture.Component to not have tag AssertionComponentTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected component Fixture.Component to not have tag AssertionComponentTag\" plan=\"__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE\" task=\"AssertNotTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE\" task=\"AssertNotTagNegative\" status=\"Fail\" message=\"Expected component Fixture.Component to not have tag AssertionComponentTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE\" success=false failedTasks=\"AssertNotTagNegative,ExpectNotTagNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected component Fixture.Component to not have tag AssertionComponentTag\" plan=\"__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE\" task=\"AssertNotTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NOT_TAG_NEGATIVE\" task=\"AssertNotTagNegative\" status=\"Fail\" message=\"Expected component Fixture.Component to not have tag AssertionComponentTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.NOT_TAG_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.NOT_TAG_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NOT_TAG_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NOT_TAG_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.NULL_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected Object to be null, but it was <dynamic:pointer>",
+          "plan": "__Test_ATC.ASSERTIONS.NULL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectNullNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected Object to be null, but it was <dynamic:pointer>\" plan=\"__Test_ATC.ASSERTIONS.NULL_NEGATIVE\" task=\"ExpectNullNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected Object to be null, but it was <dynamic:pointer>",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.NULL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectNullNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NULL_NEGATIVE\" task=\"ExpectNullNegative\" status=\"Fail\" message=\"Expected Object to be null, but it was <dynamic:pointer>\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected Object to be null, but it was <dynamic:pointer>",
+          "plan": "__Test_ATC.ASSERTIONS.NULL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertNullNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected Object to be null, but it was <dynamic:pointer>\" plan=\"__Test_ATC.ASSERTIONS.NULL_NEGATIVE\" task=\"AssertNullNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected Object to be null, but it was <dynamic:pointer>",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.NULL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertNullNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NULL_NEGATIVE\" task=\"AssertNullNegative\" status=\"Fail\" message=\"Expected Object to be null, but it was <dynamic:pointer>\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertNullNegative,ExpectNullNegative",
+          "plan": "__Test_ATC.ASSERTIONS.NULL_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NULL_NEGATIVE\" success=false failedTasks=\"AssertNullNegative,ExpectNullNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected Object to be null, but it was <dynamic:pointer>",
+          "plan": "__Test_ATC.ASSERTIONS.NULL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertNullNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected Object to be null, but it was <dynamic:pointer>\" plan=\"__Test_ATC.ASSERTIONS.NULL_NEGATIVE\" task=\"AssertNullNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected Object to be null, but it was <dynamic:pointer>",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.NULL_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertNullNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NULL_NEGATIVE\" task=\"AssertNullNegative\" status=\"Fail\" message=\"Expected Object to be null, but it was <dynamic:pointer>\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected Object to be null, but it was <dynamic:pointer>\" plan=\"__Test_ATC.ASSERTIONS.NULL_NEGATIVE\" task=\"ExpectNullNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NULL_NEGATIVE\" task=\"ExpectNullNegative\" status=\"Fail\" message=\"Expected Object to be null, but it was <dynamic:pointer>\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected Object to be null, but it was <dynamic:pointer>\" plan=\"__Test_ATC.ASSERTIONS.NULL_NEGATIVE\" task=\"AssertNullNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NULL_NEGATIVE\" task=\"AssertNullNegative\" status=\"Fail\" message=\"Expected Object to be null, but it was <dynamic:pointer>\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NULL_NEGATIVE\" success=false failedTasks=\"AssertNullNegative,ExpectNullNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected Object to be null, but it was <dynamic:pointer>\" plan=\"__Test_ATC.ASSERTIONS.NULL_NEGATIVE\" task=\"AssertNullNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.NULL_NEGATIVE\" task=\"AssertNullNegative\" status=\"Fail\" message=\"Expected Object to be null, but it was <dynamic:pointer>\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.NULL_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.NULL_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NULL_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.NULL_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.TAG_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected component Fixture.Component to have tag AssertionComponentTag",
+          "plan": "__Test_ATC.ASSERTIONS.TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectTagNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected component Fixture.Component to have tag AssertionComponentTag\" plan=\"__Test_ATC.ASSERTIONS.TAG_NEGATIVE\" task=\"ExpectTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected component Fixture.Component to have tag AssertionComponentTag",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectTagNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.TAG_NEGATIVE\" task=\"ExpectTagNegative\" status=\"Fail\" message=\"Expected component Fixture.Component to have tag AssertionComponentTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected component Fixture.Component to have tag AssertionComponentTag",
+          "plan": "__Test_ATC.ASSERTIONS.TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertTagNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected component Fixture.Component to have tag AssertionComponentTag\" plan=\"__Test_ATC.ASSERTIONS.TAG_NEGATIVE\" task=\"AssertTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected component Fixture.Component to have tag AssertionComponentTag",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertTagNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.TAG_NEGATIVE\" task=\"AssertTagNegative\" status=\"Fail\" message=\"Expected component Fixture.Component to have tag AssertionComponentTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertTagNegative,ExpectTagNegative",
+          "plan": "__Test_ATC.ASSERTIONS.TAG_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.TAG_NEGATIVE\" success=false failedTasks=\"AssertTagNegative,ExpectTagNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected component Fixture.Component to have tag AssertionComponentTag",
+          "plan": "__Test_ATC.ASSERTIONS.TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertTagNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected component Fixture.Component to have tag AssertionComponentTag\" plan=\"__Test_ATC.ASSERTIONS.TAG_NEGATIVE\" task=\"AssertTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected component Fixture.Component to have tag AssertionComponentTag",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.TAG_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertTagNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.TAG_NEGATIVE\" task=\"AssertTagNegative\" status=\"Fail\" message=\"Expected component Fixture.Component to have tag AssertionComponentTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected component Fixture.Component to have tag AssertionComponentTag\" plan=\"__Test_ATC.ASSERTIONS.TAG_NEGATIVE\" task=\"ExpectTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.TAG_NEGATIVE\" task=\"ExpectTagNegative\" status=\"Fail\" message=\"Expected component Fixture.Component to have tag AssertionComponentTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected component Fixture.Component to have tag AssertionComponentTag\" plan=\"__Test_ATC.ASSERTIONS.TAG_NEGATIVE\" task=\"AssertTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.TAG_NEGATIVE\" task=\"AssertTagNegative\" status=\"Fail\" message=\"Expected component Fixture.Component to have tag AssertionComponentTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.TAG_NEGATIVE\" success=false failedTasks=\"AssertTagNegative,ExpectTagNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected component Fixture.Component to have tag AssertionComponentTag\" plan=\"__Test_ATC.ASSERTIONS.TAG_NEGATIVE\" task=\"AssertTagNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.TAG_NEGATIVE\" task=\"AssertTagNegative\" status=\"Fail\" message=\"Expected component Fixture.Component to have tag AssertionComponentTag\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.TAG_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.TAG_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.TAG_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.TAG_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.THROW_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected ThrowInt32Exception(7) to throw FString, but it threw an int32 exception: 7",
+          "plan": "__Test_ATC.ASSERTIONS.THROW_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectThrowNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected ThrowInt32Exception(7) to throw FString, but it threw an int32 exception: 7\" plan=\"__Test_ATC.ASSERTIONS.THROW_NEGATIVE\" task=\"ExpectThrowNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected ThrowInt32Exception(7) to throw FString, but it threw an int32 exception: 7",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.THROW_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectThrowNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.THROW_NEGATIVE\" task=\"ExpectThrowNegative\" status=\"Fail\" message=\"Expected ThrowInt32Exception(7) to throw FString, but it threw an int32 exception: 7\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected ThrowInt32Exception(7) to throw FString, but it threw an int32 exception: 7",
+          "plan": "__Test_ATC.ASSERTIONS.THROW_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertThrowNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected ThrowInt32Exception(7) to throw FString, but it threw an int32 exception: 7\" plan=\"__Test_ATC.ASSERTIONS.THROW_NEGATIVE\" task=\"AssertThrowNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected ThrowInt32Exception(7) to throw FString, but it threw an int32 exception: 7",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.THROW_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertThrowNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.THROW_NEGATIVE\" task=\"AssertThrowNegative\" status=\"Fail\" message=\"Expected ThrowInt32Exception(7) to throw FString, but it threw an int32 exception: 7\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertThrowNegative,ExpectThrowNegative",
+          "plan": "__Test_ATC.ASSERTIONS.THROW_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.THROW_NEGATIVE\" success=false failedTasks=\"AssertThrowNegative,ExpectThrowNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected ThrowInt32Exception(7) to throw FString, but it threw an int32 exception: 7",
+          "plan": "__Test_ATC.ASSERTIONS.THROW_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertThrowNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected ThrowInt32Exception(7) to throw FString, but it threw an int32 exception: 7\" plan=\"__Test_ATC.ASSERTIONS.THROW_NEGATIVE\" task=\"AssertThrowNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected ThrowInt32Exception(7) to throw FString, but it threw an int32 exception: 7",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.THROW_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertThrowNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.THROW_NEGATIVE\" task=\"AssertThrowNegative\" status=\"Fail\" message=\"Expected ThrowInt32Exception(7) to throw FString, but it threw an int32 exception: 7\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected ThrowInt32Exception(7) to throw FString, but it threw an int32 exception: 7\" plan=\"__Test_ATC.ASSERTIONS.THROW_NEGATIVE\" task=\"ExpectThrowNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.THROW_NEGATIVE\" task=\"ExpectThrowNegative\" status=\"Fail\" message=\"Expected ThrowInt32Exception(7) to throw FString, but it threw an int32 exception: 7\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected ThrowInt32Exception(7) to throw FString, but it threw an int32 exception: 7\" plan=\"__Test_ATC.ASSERTIONS.THROW_NEGATIVE\" task=\"AssertThrowNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.THROW_NEGATIVE\" task=\"AssertThrowNegative\" status=\"Fail\" message=\"Expected ThrowInt32Exception(7) to throw FString, but it threw an int32 exception: 7\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.THROW_NEGATIVE\" success=false failedTasks=\"AssertThrowNegative,ExpectThrowNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected ThrowInt32Exception(7) to throw FString, but it threw an int32 exception: 7\" plan=\"__Test_ATC.ASSERTIONS.THROW_NEGATIVE\" task=\"AssertThrowNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.THROW_NEGATIVE\" task=\"AssertThrowNegative\" status=\"Fail\" message=\"Expected ThrowInt32Exception(7) to throw FString, but it threw an int32 exception: 7\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.THROW_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.THROW_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.THROW_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.THROW_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.TRUE_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected false to be true, but it was false",
+          "plan": "__Test_ATC.ASSERTIONS.TRUE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectTrueNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected false to be true, but it was false\" plan=\"__Test_ATC.ASSERTIONS.TRUE_NEGATIVE\" task=\"ExpectTrueNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected false to be true, but it was false",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.TRUE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectTrueNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.TRUE_NEGATIVE\" task=\"ExpectTrueNegative\" status=\"Fail\" message=\"Expected false to be true, but it was false\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected false to be true, but it was false",
+          "plan": "__Test_ATC.ASSERTIONS.TRUE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertTrueNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected false to be true, but it was false\" plan=\"__Test_ATC.ASSERTIONS.TRUE_NEGATIVE\" task=\"AssertTrueNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected false to be true, but it was false",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.TRUE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertTrueNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.TRUE_NEGATIVE\" task=\"AssertTrueNegative\" status=\"Fail\" message=\"Expected false to be true, but it was false\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertTrueNegative,ExpectTrueNegative",
+          "plan": "__Test_ATC.ASSERTIONS.TRUE_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.TRUE_NEGATIVE\" success=false failedTasks=\"AssertTrueNegative,ExpectTrueNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected false to be true, but it was false",
+          "plan": "__Test_ATC.ASSERTIONS.TRUE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertTrueNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected false to be true, but it was false\" plan=\"__Test_ATC.ASSERTIONS.TRUE_NEGATIVE\" task=\"AssertTrueNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected false to be true, but it was false",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.TRUE_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertTrueNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.TRUE_NEGATIVE\" task=\"AssertTrueNegative\" status=\"Fail\" message=\"Expected false to be true, but it was false\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected false to be true, but it was false\" plan=\"__Test_ATC.ASSERTIONS.TRUE_NEGATIVE\" task=\"ExpectTrueNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.TRUE_NEGATIVE\" task=\"ExpectTrueNegative\" status=\"Fail\" message=\"Expected false to be true, but it was false\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected false to be true, but it was false\" plan=\"__Test_ATC.ASSERTIONS.TRUE_NEGATIVE\" task=\"AssertTrueNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.TRUE_NEGATIVE\" task=\"AssertTrueNegative\" status=\"Fail\" message=\"Expected false to be true, but it was false\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.TRUE_NEGATIVE\" success=false failedTasks=\"AssertTrueNegative,ExpectTrueNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected false to be true, but it was false\" plan=\"__Test_ATC.ASSERTIONS.TRUE_NEGATIVE\" task=\"AssertTrueNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.TRUE_NEGATIVE\" task=\"AssertTrueNegative\" status=\"Fail\" message=\"Expected false to be true, but it was false\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.TRUE_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.TRUE_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.TRUE_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.TRUE_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  },
+  "ATC.ASSERTIONS.VALID_NEGATIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 7,
+    "events": [
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "NonFatalError",
+          "message": "Expected Object to be valid, but it was null",
+          "plan": "__Test_ATC.ASSERTIONS.VALID_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "ExpectValidNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected Object to be valid, but it was null\" plan=\"__Test_ATC.ASSERTIONS.VALID_NEGATIVE\" task=\"ExpectValidNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected Object to be valid, but it was null",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.VALID_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "ExpectValidNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.VALID_NEGATIVE\" task=\"ExpectValidNegative\" status=\"Fail\" message=\"Expected Object to be valid, but it was null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected Object to be valid, but it was null",
+          "plan": "__Test_ATC.ASSERTIONS.VALID_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertValidNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected Object to be valid, but it was null\" plan=\"__Test_ATC.ASSERTIONS.VALID_NEGATIVE\" task=\"AssertValidNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected Object to be valid, but it was null",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.VALID_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertValidNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.VALID_NEGATIVE\" task=\"AssertValidNegative\" status=\"Fail\" message=\"Expected Object to be valid, but it was null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "0",
+          "failedTasks": "AssertValidNegative,ExpectValidNegative",
+          "plan": "__Test_ATC.ASSERTIONS.VALID_NEGATIVE",
+          "skippedTasks": "0",
+          "success": "false"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.VALID_NEGATIVE\" success=false failedTasks=\"AssertValidNegative,ExpectValidNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_MESSAGE",
+        "fields": {
+          "kind": "FatalError",
+          "message": "Expected Object to be valid, but it was null",
+          "plan": "__Test_ATC.ASSERTIONS.VALID_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "task": "AssertValidNegative"
+        },
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected Object to be valid, but it was null\" plan=\"__Test_ATC.ASSERTIONS.VALID_NEGATIVE\" task=\"AssertValidNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "category": "ATC_EVENT_TASK_RESULT",
+        "fields": {
+          "attempt": "1",
+          "maxRetries": "0",
+          "message": "Expected Object to be valid, but it was null",
+          "messageCount": "1",
+          "plan": "__Test_ATC.ASSERTIONS.VALID_NEGATIVE",
+          "sourceClientIndex": "-1",
+          "status": "Fail",
+          "task": "AssertValidNegative"
+        },
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.VALID_NEGATIVE\" task=\"AssertValidNegative\" status=\"Fail\" message=\"Expected Object to be valid, but it was null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 7,
+    "logs": [
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"NonFatalError\" message=\"Expected Object to be valid, but it was null\" plan=\"__Test_ATC.ASSERTIONS.VALID_NEGATIVE\" task=\"ExpectValidNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.VALID_NEGATIVE\" task=\"ExpectValidNegative\" status=\"Fail\" message=\"Expected Object to be valid, but it was null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected Object to be valid, but it was null\" plan=\"__Test_ATC.ASSERTIONS.VALID_NEGATIVE\" task=\"AssertValidNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.VALID_NEGATIVE\" task=\"AssertValidNegative\" status=\"Fail\" message=\"Expected Object to be valid, but it was null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.VALID_NEGATIVE\" success=false failedTasks=\"AssertValidNegative,ExpectValidNegative\" completedTasks=0 skippedTasks=0",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_MESSAGE: Display: kind=\"FatalError\" message=\"Expected Object to be valid, but it was null\" plan=\"__Test_ATC.ASSERTIONS.VALID_NEGATIVE\" task=\"AssertValidNegative\" sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\"",
+        "source": "STANDALONE"
+      },
+      {
+        "line": "ATC_EVENT_TASK_RESULT: Error: plan=\"__Test_ATC.ASSERTIONS.VALID_NEGATIVE\" task=\"AssertValidNegative\" status=\"Fail\" message=\"Expected Object to be valid, but it was null\" attempt=1 maxRetries=0 sourceClientIndex=-1 sourceFile=\"<dynamic:sourceFile>\" sourceLine=<dynamic:sourceLine> sourceFunction=\"<dynamic:sourceFunction>\" messageCount=1",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Fail"
+  },
+  "ATC.ASSERTIONS.VALID_POSITIVE.": {
+    "completed": true,
+    "coordinator": "STANDALONE",
+    "eventCount": 1,
+    "events": [
+      {
+        "category": "ATC_EVENT_PLAN_END",
+        "fields": {
+          "completedTasks": "2",
+          "failedTasks": "",
+          "plan": "__Test_ATC.ASSERTIONS.VALID_POSITIVE",
+          "skippedTasks": "0",
+          "success": "true"
+        },
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.VALID_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "logCount": 1,
+    "logs": [
+      {
+        "line": "ATC_EVENT_PLAN_END: Display: plan=\"__Test_ATC.ASSERTIONS.VALID_POSITIVE\" success=true failedTasks=\"\" completedTasks=2 skippedTasks=0",
+        "source": "STANDALONE"
+      }
+    ],
+    "result": "Success"
+  }
+}
