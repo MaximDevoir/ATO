@@ -24,6 +24,6 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - run: corepack enable
+      - run: corepack disable
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify
