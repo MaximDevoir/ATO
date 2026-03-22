@@ -59,7 +59,7 @@ importers:
   packages/buildgraph:
     dependencies:
       '@maximdevoir/ato':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../ato
 
   packages/unreal-lag: {}

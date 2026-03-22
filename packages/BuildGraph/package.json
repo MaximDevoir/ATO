@@ -3,6 +3,6 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@maximdevoir/ato": "workspace:^"
+    "@maximdevoir/ato": "workspace:*"
   }
 }
