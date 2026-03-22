@@ -420,7 +420,10 @@ const ATCStandaloneTest = ATO.fromCommandLine();
 ATO.FrameworkValidationReporter.reset().enable();
 
 const coordinator = new Coordinator(CoordinatorMode.Standalone);
-
+coordinator.configureServer({
+  extraArgs: ['-LogCommand=global VeryVerbose'],
+  excludeArgs: ['-Verbose'],
+});
 coordinator.addTests('ATC.AssetAudits');
 coordinator.addTests('ATC.STANDALONE_MODE');
 coordinator.addTests('ATC.ATC_SKIP_TESTS');

@@ -23,6 +23,8 @@ export type ATCParameterBinding = {
 };
 
 export type ATCEventType =
+  | 'SessionStarted'
+  | 'SessionFinished'
   | 'TestStarted'
   | 'TestPhaseChanged'
   | 'TestFinished'
@@ -55,6 +57,15 @@ export type ATCEventBase = {
   requiredClients?: number;
   parameters?: ATCParameterBinding[];
   metadata?: ATCParameterBinding[];
+};
+
+export type ATCSessionStartedEvent = ATCEventBase & {
+  type: 'SessionStarted';
+};
+
+export type ATCSessionFinishedEvent = ATCEventBase & {
+  type: 'SessionFinished';
+  durationSeconds?: number;
 };
 
 export type ATCTestStartedEvent = ATCEventBase & {
@@ -224,6 +235,8 @@ export type ATCClientReadyEvent = ATCEventBase & {
 };
 
 export type ATCKnownEvent =
+  | ATCSessionStartedEvent
+  | ATCSessionFinishedEvent
   | ATCTestStartedEvent
   | ATCTestPhaseChangedEvent
   | ATCTestFinishedEvent
@@ -248,6 +261,8 @@ export type ATCForwardCompatibleEvent = ATCEventBase & {
 export type ATCEvent = ATCKnownEvent | ATCForwardCompatibleEvent;
 
 export const knownATCEventTypes = new Set<ATCEventType>([
+  'SessionStarted',
+  'SessionFinished',
   'TestStarted',
   'TestPhaseChanged',
   'TestFinished',

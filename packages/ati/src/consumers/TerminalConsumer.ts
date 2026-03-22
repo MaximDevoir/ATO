@@ -1,10 +1,27 @@
 import type { IATIConsumer } from '../ATIConsumer';
 import type { ATCEvent } from '../ATIEvents';
+import { ATISimpleReporter } from '../ATISimpleReporter';
+
+export type TerminalConsumerOptions = {
+  reporter?: ATISimpleReporter;
+  echoToConsole?: boolean;
+};
 
 export class TerminalConsumer implements IATIConsumer {
   readonly id = 'terminal';
+  readonly reporter: ATISimpleReporter;
+
+  constructor(private readonly options: TerminalConsumerOptions = {}) {
+    this.reporter = options.reporter ?? new ATISimpleReporter();
+  }
 
   onEvent(event: ATCEvent) {
+    this.reporter.addEvent(event);
+
+    if (this.options.echoToConsole !== true) {
+      return;
+    }
+
     const scope = event.testPath ? ` ${event.testPath}` : '';
     switch (event.type) {
       case 'TaskResult':

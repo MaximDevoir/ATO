@@ -176,6 +176,9 @@ const coordinator = new Coordinator(CoordinatorMode.ListenServer).addTests().con
   serverProfile: 'Bad',
   clientProfile: 'Bad',
 });
+coordinator.configureServer({
+  extraArgs: ['-verbose'],
+});
 
 coordinator.addTests('ATC.AssetAudits');
 coordinator.addTests('ATC.COORDINATOR_LISTEN');

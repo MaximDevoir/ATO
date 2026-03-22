@@ -2,7 +2,7 @@ import { once } from 'node:events';
 import type { SocketAddress } from 'node:net';
 import net from 'node:net';
 import type { ATIConsumerBackpressure, ATIContext, IATIConsumer } from './ATIConsumer';
-import type { ATCEvent } from './ATIEvents';
+import type { ATCEvent, ATCSessionFinishedEvent, ATCSessionStartedEvent } from './ATIEvents';
 import { parseATCEvent } from './validation';
 
 export type ATIServiceOptions = {
@@ -16,7 +16,24 @@ type SessionState = {
   sessionId: string;
   startTime: number;
   lastSequence: number;
+  firstTimestamp: number;
+  lastTimestamp: number;
+  coordinatorMode?: string;
+  effectiveCoordinatorModes: string[];
 };
+
+function appendUnique(values: string[], value: string | undefined) {
+  if (!value || values.includes(value)) {
+    return;
+  }
+
+  values.push(value);
+}
+
+function getModes(event: ATCEvent) {
+  const maybeModes = (event as ATCEvent & { modes?: string[] }).modes;
+  return Array.isArray(maybeModes) ? maybeModes : [];
+}
 
 function deferredPromise() {
   let resolve!: () => void;
@@ -120,6 +137,7 @@ class ATIConsumerPump {
 export class ATIService {
   private readonly consumers = new Map<string, ATIConsumerPump>();
   private readonly sockets = new Set<net.Socket>();
+  private pendingInboundWork: Promise<void> = Promise.resolve();
   private server?: net.Server;
   private currentSession?: SessionState;
   private started = false;
@@ -145,31 +163,38 @@ export class ATIService {
       socket.setEncoding('utf8');
 
       let buffer = '';
-      socket.on('data', async (chunk: string) => {
-        buffer += chunk;
+      socket.on('data', (chunk: string) => {
+        this.pendingInboundWork = this.pendingInboundWork
+          .then(async () => {
+            buffer += chunk;
 
-        if (this.options.maxEventSizeBytes && Buffer.byteLength(buffer, 'utf8') > this.options.maxEventSizeBytes) {
-          socket.destroy(new Error(`ATI event buffer exceeded ${this.options.maxEventSizeBytes} bytes`));
-          return;
-        }
+            if (this.options.maxEventSizeBytes && Buffer.byteLength(buffer, 'utf8') > this.options.maxEventSizeBytes) {
+              socket.destroy(new Error(`ATI event buffer exceeded ${this.options.maxEventSizeBytes} bytes`));
+              return;
+            }
 
-        let newlineIndex = buffer.indexOf('\n');
-        while (newlineIndex >= 0) {
-          const line = buffer.slice(0, newlineIndex).trim();
-          buffer = buffer.slice(newlineIndex + 1);
-          newlineIndex = buffer.indexOf('\n');
+            let newlineIndex = buffer.indexOf('\n');
+            while (newlineIndex >= 0) {
+              const line = buffer.slice(0, newlineIndex).trim();
+              buffer = buffer.slice(newlineIndex + 1);
+              newlineIndex = buffer.indexOf('\n');
 
-          if (!line) {
-            continue;
-          }
+              if (!line) {
+                continue;
+              }
 
-          try {
-            const event = this.options.validateSchema === false ? (JSON.parse(line) as ATCEvent) : parseATCEvent(line);
-            await this.publish(event);
-          } catch (error) {
+              try {
+                const event =
+                  this.options.validateSchema === false ? (JSON.parse(line) as ATCEvent) : parseATCEvent(line);
+                await this.publish(event);
+              } catch (error) {
+                console.error(error instanceof Error ? error.message : error);
+              }
+            }
+          })
+          .catch((error) => {
             console.error(error instanceof Error ? error.message : error);
-          }
-        }
+          });
       });
 
       socket.once('close', () => {
@@ -204,12 +229,15 @@ export class ATIService {
       return;
     }
 
+    await this.pendingInboundWork;
+
     for (const socket of this.sockets) {
       socket.destroy();
     }
     this.sockets.clear();
 
     if (this.currentSession) {
+      await this.publishSessionFinished(this.currentSession);
       const ctx = {
         sessionId: this.currentSession.sessionId,
         startTime: this.currentSession.startTime,
@@ -234,7 +262,7 @@ export class ATIService {
   }
 
   private async publish(event: ATCEvent) {
-    await this.ensureSession(event.sessionId, event.sequence);
+    await this.ensureSession(event);
     if (this.currentSession) {
       if (event.sequence !== this.currentSession.lastSequence + 1) {
         console.warn(
@@ -242,6 +270,17 @@ export class ATIService {
         );
       }
       this.currentSession.lastSequence = event.sequence;
+      this.currentSession.lastTimestamp = event.timestamp;
+      if (!this.currentSession.coordinatorMode && event.coordinatorMode) {
+        this.currentSession.coordinatorMode = event.coordinatorMode;
+      }
+      appendUnique(
+        this.currentSession.effectiveCoordinatorModes,
+        event.effectiveCoordinatorMode ?? event.coordinatorMode,
+      );
+      for (const mode of getModes(event)) {
+        appendUnique(this.currentSession.effectiveCoordinatorModes, mode);
+      }
     }
 
     for (const pump of this.consumers.values()) {
@@ -249,17 +288,26 @@ export class ATIService {
     }
   }
 
-  private async ensureSession(sessionId: string, sequence: number) {
+  private async ensureSession(event: ATCEvent) {
+    const { sessionId, sequence, timestamp } = event;
     if (!this.currentSession) {
       this.currentSession = {
         sessionId,
         startTime: Date.now(),
         lastSequence: sequence - 1,
+        firstTimestamp: timestamp,
+        lastTimestamp: timestamp,
+        coordinatorMode: event.coordinatorMode,
+        effectiveCoordinatorModes: event.effectiveCoordinatorMode ? [event.effectiveCoordinatorMode] : [],
       };
       const ctx = { sessionId, startTime: this.currentSession.startTime } satisfies ATIContext;
       for (const pump of this.consumers.values()) {
         await pump.onSessionStart(ctx);
       }
+      for (const mode of getModes(event)) {
+        appendUnique(this.currentSession.effectiveCoordinatorModes, mode);
+      }
+      await this.publishSessionStarted(this.currentSession);
       return;
     }
 
@@ -268,6 +316,7 @@ export class ATIService {
     }
 
     const previous = this.currentSession;
+    await this.publishSessionFinished(previous);
     const previousCtx = { sessionId: previous.sessionId, startTime: previous.startTime } satisfies ATIContext;
     for (const pump of this.consumers.values()) {
       await pump.onSessionEnd(previousCtx);
@@ -277,10 +326,51 @@ export class ATIService {
       sessionId,
       startTime: Date.now(),
       lastSequence: sequence - 1,
+      firstTimestamp: timestamp,
+      lastTimestamp: timestamp,
+      coordinatorMode: event.coordinatorMode,
+      effectiveCoordinatorModes: event.effectiveCoordinatorMode ? [event.effectiveCoordinatorMode] : [],
     };
     const nextCtx = { sessionId, startTime: this.currentSession.startTime } satisfies ATIContext;
     for (const pump of this.consumers.values()) {
       await pump.onSessionStart(nextCtx);
+    }
+    for (const mode of getModes(event)) {
+      appendUnique(this.currentSession.effectiveCoordinatorModes, mode);
+    }
+    await this.publishSessionStarted(this.currentSession);
+  }
+
+  private async publishSessionStarted(session: SessionState) {
+    const event = {
+      version: 1,
+      sessionId: session.sessionId,
+      sequence: session.lastSequence,
+      timestamp: session.firstTimestamp,
+      type: 'SessionStarted',
+      ...(session.coordinatorMode ? { coordinatorMode: session.coordinatorMode } : {}),
+      ...(session.effectiveCoordinatorModes.length > 0 ? { modes: [...session.effectiveCoordinatorModes] } : {}),
+    } satisfies ATCSessionStartedEvent;
+
+    for (const pump of this.consumers.values()) {
+      await pump.enqueue(event);
+    }
+  }
+
+  private async publishSessionFinished(session: SessionState) {
+    const event = {
+      version: 1,
+      sessionId: session.sessionId,
+      sequence: session.lastSequence + 1,
+      timestamp: session.lastTimestamp,
+      type: 'SessionFinished',
+      ...(session.coordinatorMode ? { coordinatorMode: session.coordinatorMode } : {}),
+      ...(session.effectiveCoordinatorModes.length > 0 ? { modes: [...session.effectiveCoordinatorModes] } : {}),
+      durationSeconds: Math.max(0, session.lastTimestamp - session.firstTimestamp),
+    } satisfies ATCSessionFinishedEvent;
+
+    for (const pump of this.consumers.values()) {
+      await pump.enqueue(event);
     }
   }
 }

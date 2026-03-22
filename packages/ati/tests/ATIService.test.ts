@@ -71,14 +71,18 @@ describe('ATIService', () => {
     await service.stop();
 
     expect(memory.sessions).toHaveLength(1);
-    expect(memory.events).toHaveLength(2);
-    expect(memory.events[0]?.type).toBe('TestStarted');
-    expect(memory.events[1]?.type).toBe('TaskResult');
+    expect(memory.events).toHaveLength(4);
+    expect(memory.events[0]?.type).toBe('SessionStarted');
+    expect(memory.events[1]?.type).toBe('TestStarted');
+    expect(memory.events[2]?.type).toBe('TaskResult');
+    expect(memory.events[3]?.type).toBe('SessionFinished');
 
     const ndjsonPath = path.join(tempDir, 'session_session-1.ndjson');
     const contents = await readFile(ndjsonPath, 'utf8');
+    expect(contents.split('\n').find((line) => line.length > 0)).toContain('"type":"SessionStarted"');
     expect(contents).toContain('"type":"TestStarted"');
     expect(contents).toContain('"type":"TaskResult"');
+    expect(contents.trimEnd().endsWith('"type":"SessionFinished","durationSeconds":1}')).toBe(true);
   });
 
   it('starts a new consumer session when a different session id is observed', async () => {
@@ -97,6 +101,13 @@ describe('ATIService', () => {
     await service.stop();
 
     expect(memory.sessions.map((session) => session.sessionId)).toEqual(['session-a', 'session-b']);
-    expect(memory.events).toHaveLength(2);
+    expect(memory.events.map((event) => event.type)).toEqual([
+      'SessionStarted',
+      'TestStarted',
+      'SessionFinished',
+      'SessionStarted',
+      'TestStarted',
+      'SessionFinished',
+    ]);
   });
 });
