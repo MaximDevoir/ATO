@@ -23,3 +23,24 @@ if [ $LINT_STATUS -ne 0 ]; then
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   exit 1;
 fi
+
+pnpm typecheck
+TYPECHECK_STATUS=$?
+if [ $TYPECHECK_STATUS -ne 0 ]; then
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "❌ Typecheck failed"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  exit 1;
+fi
+
+pnpm test
+TEST_STATUS=$?
+if [ $TEST_STATUS -ne 0 ]; then
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "❌ Tests failed"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  exit 1;
+fi
+
