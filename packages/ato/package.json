@@ -15,9 +15,10 @@
   },
   "types": "./src/index.ts",
   "dependencies": {
-    "@maximdevoir/unreal-lag": "workspace:^",
     "@maximdevoir/ati": "workspace:^",
+    "@maximdevoir/unreal-lag": "workspace:^",
     "@types/yargs": "17.0.35",
+    "is-interactive": "2.0.0",
     "yargs": "18.0.0"
   },
   "scripts": {

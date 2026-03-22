@@ -138,7 +138,7 @@
           Requires="CompileEditor">
       <Spawn Exe="node"
              WorkingDir="$(ProjectDir)"
-             Arguments="--import tsx BuildGraph/Scripts/RunPIETest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot; --reporter=basic"
+             Arguments="--import tsx BuildGraph/Scripts/RunPIETest.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot; --reporter=default"
              LogOutput="true"
              ErrorLevel="1"/>
     </Node>

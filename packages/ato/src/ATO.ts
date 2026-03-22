@@ -6,6 +6,7 @@ import { ATIService, NDJSONConsumer, TerminalConsumer } from '@maximdevoir/ati';
 import { logWarningIfNetworkProfileUnstable, UnrealLagProfiles } from '@maximdevoir/unreal-lag/profiles';
 import type { BindInfo } from '@maximdevoir/unreal-lag/types';
 import { UnrealLag } from '@maximdevoir/unreal-lag/UnrealLag';
+import isInteractive from 'is-interactive';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { ATC_CLIENT_REQUEST_LOG_PREFIX, ATC_RUN_TESTS_COMMAND } from './ATCAutomationNames';
@@ -1402,6 +1403,9 @@ export class ATO {
   }
 
   get reporterMode(): ATOReporterMode {
+    if (!isInteractive()) {
+      return 'basic';
+    }
     return this.runtimeOptions.reporter ?? 'default';
   }
 

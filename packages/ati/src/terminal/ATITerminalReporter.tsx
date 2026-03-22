@@ -1,6 +1,6 @@
 import { Box, render, Static, Text } from 'ink';
-import type React from 'react';
-import { useEffect, useState } from 'react';
+// biome-ignore lint/style/useImportType: React is required at runtime for JSX
+import React, { useEffect, useState } from 'react';
 import type { ATISession, ATISimpleReporter } from '../ATISimpleReporter';
 import type {
   ATITerminalDisplayedStatus,
