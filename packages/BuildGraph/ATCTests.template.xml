@@ -93,6 +93,16 @@
              ErrorLevel="1"/>
     </Node>
 
+    <!-- ================= RUN: STANDALONE (ASSERTIONS) ================= -->
+    <Node Name="RunStandaloneAssertionsTest"
+          Requires="CookGame;CompileGame">
+      <Spawn Exe="node"
+             WorkingDir="$(ProjectDir)"
+             Arguments="--import tsx BuildGraph/Scripts/RunStandaloneWithAssertions.ts --UERoot &quot;$(EngineDir)&quot; --Project &quot;$(ProjectFile)&quot;"
+             LogOutput="true"
+             ErrorLevel="1"/>
+    </Node>
+
     <!-- ================= RUN: LISTEN ================= -->
     <Node Name="RunListenTests"
           Requires="CookGame;CompileGame">
@@ -127,10 +137,11 @@
   <!-- ================= AGGREGATES ================= -->
 
   <Aggregate Name="StandaloneWithExceptions" Requires="RunStandaloneTestWithExceptions"/>
+  <Aggregate Name="StandaloneAssertions" Requires="RunStandaloneAssertionsTest"/>
   <Aggregate Name="Standalone" Requires="RunStandaloneTest"/>
   <Aggregate Name="Dedicated" Requires="RunDedicatedTests"/>
   <Aggregate Name="Listen" Requires="RunListenTests"/>
   <Aggregate Name="PIE" Requires="RunPIETests"/>
 
-  <Aggregate Name="ATCTests" Requires="RunStandaloneTest;RunDedicatedTests;RunListenTests;RunPIETests"/>
+  <Aggregate Name="ATCTests" Requires="RunStandaloneTest;StandaloneAssertions;RunDedicatedTests;RunListenTests;RunPIETests"/>
 </BuildGraph>
