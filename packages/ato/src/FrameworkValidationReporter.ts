@@ -1,5 +1,14 @@
+import type { ATISimpleReporter } from '@maximdevoir/ati';
+import { matchFileSnapshot } from './FileSnapshot';
+
 export type FrameworkValidationCoordinatorLabel = 'DEDICATED' | 'LISTEN' | 'STANDALONE' | 'PIE' | 'SERVER';
 export type FrameworkValidationTestResult = 'Success' | 'Fail' | 'Error' | 'NotRun' | 'Unknown';
+
+export interface FrameworkValidationSnapshotInit {
+  simpleReporter?: ATISimpleReporter;
+  updateSnapshots?: boolean;
+  snapshotRelativeTo?: string | URL;
+}
 
 export interface FrameworkValidationCoordinatorLogSource {
   type: 'Coordinator';
@@ -756,8 +765,31 @@ export class FrameworkValidationTest {
   }
 }
 
+export class FrameworkValidationSnapshotSubject {
+  constructor(
+    private readonly value: unknown,
+    private readonly updateSnapshots: boolean,
+    private readonly snapshotRelativeTo?: string | URL,
+  ) {}
+
+  get data() {
+    return this.value;
+  }
+
+  async toMatchFileSnapshot(snapshotPath: string, relativeTo?: string | URL) {
+    await matchFileSnapshot(this.value, snapshotPath, {
+      updateSnapshot: this.updateSnapshots,
+      relativeTo: relativeTo ?? this.snapshotRelativeTo,
+    });
+    return this;
+  }
+}
+
 export class FrameworkValidation {
-  constructor(private readonly report: FrameworkValidationReport) {}
+  constructor(
+    private readonly report: FrameworkValidationReport,
+    private readonly snapshotInit: FrameworkValidationSnapshotInit = {},
+  ) {}
 
   get issues() {
     return [...this.report.issues];
@@ -800,6 +832,18 @@ export class FrameworkValidation {
       this.report.tests.filter((test) => test.pathName === pathName),
       `pathName '${pathName}'`,
       ordinal,
+    );
+  }
+
+  getBySimpleReporterPath(path: readonly (string | number)[]) {
+    if (!this.snapshotInit.simpleReporter) {
+      throw new Error('FrameworkValidation does not have an ATISimpleReporter attached for snapshot traversal');
+    }
+
+    return new FrameworkValidationSnapshotSubject(
+      this.snapshotInit.simpleReporter.getBySimpleReporterPath(path),
+      this.snapshotInit.updateSnapshots === true,
+      this.snapshotInit.snapshotRelativeTo,
     );
   }
 

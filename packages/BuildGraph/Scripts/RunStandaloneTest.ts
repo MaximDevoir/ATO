@@ -1,8 +1,17 @@
 #!/usr/bin/env node
+import * as path from 'node:path';
+import { loadLatestATISimpleReporterFromDirectory } from '@maximdevoir/ati';
 import { ATO, Coordinator, CoordinatorMode, FrameworkValidation } from '@maximdevoir/ato';
 
-function validateStandaloneFrameworkReport() {
-  const validation = new FrameworkValidation(ATO.FrameworkValidationReporter.getReport()).assertNoIssues();
+async function validateStandaloneFrameworkReport(ato: ATO) {
+  const simpleReporter = await loadLatestATISimpleReporterFromDirectory(
+    path.join(path.dirname(ato.projectPath), 'Saved', 'Logs', 'ATI', 'Standalone'),
+  );
+  const validation = new FrameworkValidation(ATO.FrameworkValidationReporter.getReport(), {
+    simpleReporter,
+    updateSnapshots: ato.shouldUpdateSnapshots,
+    snapshotRelativeTo: import.meta.url,
+  }).assertNoIssues();
 
   const expectedFails = new Set([
     'ATC.STANDALONE_MODE.STANDALONE_REJECTS_EXTERNAL_CLIENTS.[Clients=1]',
@@ -163,38 +172,16 @@ function validateStandaloneFrameworkReport() {
     logContains: 'NonFatalExpect.SecondTaskRan',
   });
 
-  const actorWorldRepeat = validation
+  const _actorWorldRepeat = validation
     .getTestByPath('ATC.STANDALONE_MODE.ACTOR_WORLD_REPEAT_RESETS_STATE.')
     .expectResult('Success');
-
-  for (let run = 0; run < 2; run += 1) {
-    actorWorldRepeat.expectNextEvent({
-      category: 'ATC_EVENT_REPEAT',
-      source: { type: 'Coordinator', coordinator: 'STANDALONE' },
-      fields: { state: 'RunStart', currentRun: run + 1, totalRuns: 2, repeatMode: 'Count' },
-    });
-    actorWorldRepeat.expectNextLog({
-      type: 'Coordinator',
-      coordinator: 'STANDALONE',
-      logContains: 'ActorWorldRepeat.SetupWorldFreshActor',
-    });
-    actorWorldRepeat.expectNextLog({
-      type: 'Coordinator',
-      coordinator: 'STANDALONE',
-      logContains: 'ActorWorldRepeat.ComponentFound',
-    });
-    actorWorldRepeat.expectNextEvent({
-      category: 'ATC_EVENT_REPEAT',
-      source: { type: 'Coordinator', coordinator: 'STANDALONE' },
-      fields: { state: 'RunEnd', currentRun: run + 1, totalRuns: 2, repeatMode: 'Count', failed: false },
-    });
-  }
-
-  actorWorldRepeat.expectNextEvent({
-    category: 'ATC_EVENT_REPEAT',
-    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
-    fields: { state: 'Complete', completedRuns: 2, totalRuns: 2, repeatMode: 'Count', stopReason: 'MaxRunsReached' },
-  });
+  await validation
+    .getBySimpleReporterPath([
+      'testsByEffectiveCoordinatorMode',
+      'Standalone',
+      'ATC.STANDALONE_MODE.ACTOR_WORLD_REPEAT_RESETS_STATE::0',
+    ])
+    .toMatchFileSnapshot('./__snapshots__/RunStandaloneTest.actorWorldRepeat.snapshot.json');
 
   const skipTask = validation
     .getTestByPath('ATC.ATC_SKIP_TESTS.TASK_SKIP_ONLY_SKIPS_CURRENT_TASK.')
@@ -213,12 +200,13 @@ function validateStandaloneFrameworkReport() {
 
   const skipTest = validation.getTestByPath('ATC.ATC_SKIP_TESTS.TEST_SKIP_STOPS_CURRENT_RUN.').expectResult('Success');
   skipTest.expectNextLog({ type: 'Coordinator', coordinator: 'STANDALONE', logContains: 'SkipTest.Before' });
-  skipTest.expectNextEvent({
-    category: 'ATC_EVENT_TEST_END',
-    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
-    fields: { testPath: 'ATC.ATC_SKIP_TESTS.TEST_SKIP_STOPS_CURRENT_RUN', success: true, skipped: true },
-    fieldContains: { message: 'SkipTest.Message' },
-  });
+  await validation
+    .getBySimpleReporterPath([
+      'testsByEffectiveCoordinatorMode',
+      'Standalone',
+      'ATC.ATC_SKIP_TESTS.TEST_SKIP_STOPS_CURRENT_RUN::0',
+    ])
+    .toMatchFileSnapshot('./__snapshots__/RunStandaloneTest.skipStopsCurrentRun.snapshot.json');
   if (skipTest.logs.some((entry) => entry.line.includes('SkipTest.AfterTaskRan'))) {
     throw new Error('ATC_SKIP unexpectedly allowed later tasks in the run to execute');
   }
@@ -243,42 +231,26 @@ function validateStandaloneFrameworkReport() {
     throw new Error('ATC_SKIP_TASK unexpectedly triggered task retry handling');
   }
 
-  const skipManyZero = validation.getTestByPath('ATC.ATC_SKIP_TESTS.SKIP_MANY_ZERO_IS_NOOP.').expectResult('Success');
-  skipManyZero.expectNextEvent({
-    category: 'ATC_EVENT_REPEAT',
-    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
-    fields: { state: 'RunStart', currentRun: 1, totalRuns: 2, repeatMode: 'Count' },
-  });
-  skipManyZero.expectNextEvent({
-    category: 'ATC_EVENT_REPEAT',
-    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
-    fields: { state: 'RunStart', currentRun: 2, totalRuns: 2, repeatMode: 'Count' },
-  });
-  if (
-    skipManyZero.events.some((entry) => entry.category === 'ATC_EVENT_REPEAT' && entry.fields.state === 'RunsSkipped')
-  ) {
-    throw new Error('ATC_SKIP_MANY(0) unexpectedly skipped one or more runs');
-  }
+  const _skipManyZero = validation.getTestByPath('ATC.ATC_SKIP_TESTS.SKIP_MANY_ZERO_IS_NOOP.').expectResult('Success');
+  await validation
+    .getBySimpleReporterPath([
+      'testsByEffectiveCoordinatorMode',
+      'Standalone',
+      'ATC.ATC_SKIP_TESTS.SKIP_MANY_ZERO_IS_NOOP::0',
+    ])
+    .toMatchFileSnapshot('./__snapshots__/RunStandaloneTest.skipManyZero.snapshot.json');
 
   const skipMany = validation
     .getTestByPath('ATC.ATC_SKIP_TESTS.TEST_SKIP_MANY_ADVANCES_REPEAT.')
     .expectResult('Success');
-  skipMany.expectNextEvent({
-    category: 'ATC_EVENT_REPEAT',
-    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
-    fields: { state: 'RunStart', currentRun: 1, totalRuns: 11, repeatMode: 'Count' },
-  });
   skipMany.expectNextLog({ type: 'Coordinator', coordinator: 'STANDALONE', logContains: 'SkipMany.Execution=1' });
-  skipMany.expectNextEvent({
-    category: 'ATC_EVENT_REPEAT',
-    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
-    fields: { state: 'RunsSkipped', afterRun: 1, skippedRuns: 4, nextRun: 6, totalRuns: 11, repeatMode: 'Count' },
-  });
-  skipMany.expectNextEvent({
-    category: 'ATC_EVENT_REPEAT',
-    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
-    fields: { state: 'RunStart', currentRun: 6, totalRuns: 11, repeatMode: 'Count' },
-  });
+  await validation
+    .getBySimpleReporterPath([
+      'testsByEffectiveCoordinatorMode',
+      'Standalone',
+      'ATC.ATC_SKIP_TESTS.TEST_SKIP_MANY_ADVANCES_REPEAT::0',
+    ])
+    .toMatchFileSnapshot('./__snapshots__/RunStandaloneTest.skipMany.snapshot.json');
   if (skipMany.logs.some((entry) => entry.line.includes('SkipMany.Continued.Execution=1'))) {
     throw new Error('ATC_SKIP_MANY unexpectedly continued executing the current run after requesting a skip');
   }
@@ -289,38 +261,14 @@ function validateStandaloneFrameworkReport() {
   const skipAll = validation
     .getTestByPath('ATC.ATC_SKIP_TESTS.TEST_SKIP_ALL_STOPS_ALL_REPEATS.')
     .expectResult('Success');
-  skipAll.expectNextEvent({
-    category: 'ATC_EVENT_REPEAT',
-    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
-    fields: { state: 'RunStart', currentRun: 1, totalRuns: 5, repeatMode: 'Count' },
-  });
   skipAll.expectNextLog({ type: 'Coordinator', coordinator: 'STANDALONE', logContains: 'SkipAll.Execution=1' });
-  skipAll.expectNextEvent({
-    category: 'ATC_EVENT_REPEAT',
-    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
-    fields: { state: 'RunsSkipped', afterRun: 1, skippedRuns: 4, nextRun: 6, totalRuns: 5, repeatMode: 'Count' },
-  });
-  skipAll.expectNextEvent({
-    category: 'ATC_EVENT_REPEAT',
-    source: { type: 'Coordinator', coordinator: 'STANDALONE' },
-    fields: {
-      state: 'Complete',
-      completedRuns: 5,
-      executedRuns: 1,
-      skippedRuns: 4,
-      totalRuns: 5,
-      repeatMode: 'Count',
-      stopReason: 'SkipAllRequested',
-    },
-  });
-  if (
-    skipAll.events.some(
-      (entry) =>
-        entry.category === 'ATC_EVENT_REPEAT' && entry.fields.state === 'RunStart' && entry.fields.currentRun === '2',
-    )
-  ) {
-    throw new Error('ATC_SKIP_ALL unexpectedly scheduled another concrete run after the skip-all request');
-  }
+  await validation
+    .getBySimpleReporterPath([
+      'testsByEffectiveCoordinatorMode',
+      'Standalone',
+      'ATC.ATC_SKIP_TESTS.TEST_SKIP_ALL_STOPS_ALL_REPEATS::0',
+    ])
+    .toMatchFileSnapshot('./__snapshots__/RunStandaloneTest.skipAll.snapshot.json');
   if (skipAll.logs.some((entry) => entry.line.includes('SkipAll.TailTaskRan'))) {
     throw new Error('ATC_SKIP_ALL unexpectedly allowed later tasks in the skipped run to execute');
   }
@@ -438,7 +386,7 @@ let code = 0;
 code = await ATCStandaloneTest.start();
 
 try {
-  validateStandaloneFrameworkReport();
+  await validateStandaloneFrameworkReport(ATCStandaloneTest);
   console.log('Framework validation passed');
   code = 0;
 } catch (error) {

@@ -1,6 +1,7 @@
 # Project Specific
 ATCTests.generated.xml
 !.env.sample
+**/*.actual.json
 
 /.nx-cache
 /.nx/cache

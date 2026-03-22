@@ -114,6 +114,7 @@ interface ParsedCommandLineArguments {
   serverExe?: string;
   clientExe?: string;
   dryRun: boolean;
+  updateSnapshots: boolean;
 }
 
 export interface ATCClientRequestMetadata {
@@ -1327,6 +1328,11 @@ export class ATO {
         default: false,
         description: 'Print planned actions and exit without spawning processes (useful for CI validation)',
       })
+      .option('updateSnapshots', {
+        type: 'boolean',
+        default: false,
+        description: 'Update file-backed ATO/ATI snapshots instead of comparing against the checked-in value',
+      })
       .help()
       .parseSync() as unknown as ParsedCommandLineArguments;
 
@@ -1344,6 +1350,7 @@ export class ATO {
         serverExe: argv.serverExe ?? options.serverExe,
         clientExe: argv.clientExe ?? options.clientExe,
         dryRun: argv.dryRun ?? options.dryRun,
+        updateSnapshots: argv.updateSnapshots ?? options.updateSnapshots,
       },
     });
   }
@@ -1369,6 +1376,10 @@ export class ATO {
 
   get projectPath() {
     return this.commandLineContext?.projectPath ?? '';
+  }
+
+  get shouldUpdateSnapshots() {
+    return this.runtimeOptions.updateSnapshots === true;
   }
 
   configureRuntime(opts: E2ERuntimeOptions) {

@@ -2,6 +2,7 @@ export * from './ATIConsumer';
 export * from './ATIEvents';
 export * from './ATIService';
 export * from './ATISimpleReporter';
+export * from './ATISimpleReporterLoader';
 export * from './consumers/InMemoryConsumer';
 export * from './consumers/NDJSONConsumer';
 export * from './consumers/TerminalConsumer';

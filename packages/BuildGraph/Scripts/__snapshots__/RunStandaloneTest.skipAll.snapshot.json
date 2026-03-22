@@ -1,0 +1,107 @@
+{
+  "coordinatorMode": "Standalone",
+  "currentRunIndex": 1,
+  "effectiveCoordinatorModes": ["Standalone"],
+  "invocationIndex": 0,
+  "key": "ATC.ATC_SKIP_TESTS.TEST_SKIP_ALL_STOPS_ALL_REPEATS::0",
+  "maxRuns": 5,
+  "metadata": [
+    {
+      "name": "automationLabel",
+      "value": ""
+    },
+    {
+      "name": "repeatMode",
+      "value": "Count"
+    },
+    {
+      "name": "repeatTotalRuns",
+      "value": "5"
+    }
+  ],
+  "parameters": [
+    {
+      "name": "Clients",
+      "value": "0"
+    }
+  ],
+  "phase": "Completed",
+  "repeatMode": "Count",
+  "result": {
+    "durationSeconds": "<dynamic:durationSeconds>",
+    "message": "[__Test_ATC.ATC_SKIP_TESTS.TEST_SKIP_ALL_STOPS_ALL_REPEATS.SkipAllController] ATCSkip.test.cpp:86 ATC_Suite_ATC::ATC_Suite_ATC_SKIP_TESTS::ATC_TestPlan_TEST_SKIP_ALL_STOPS_ALL_REPEATS::SkipAllController_UserCode() SkipAll.StopEverything",
+    "messageCount": 2,
+    "skipAllRemainingRuns": true,
+    "skipped": true,
+    "skipRunsRequested": 1,
+    "success": true
+  },
+  "runs": [
+    {
+      "executions": {
+        "Standalone": {
+          "coordinatorMode": "Standalone",
+          "effectiveCoordinatorMode": "Standalone",
+          "finishedAt": "<dynamic:finishedAt>",
+          "phase": "Completed",
+          "plans": {
+            "__Test_ATC.ATC_SKIP_TESTS.TEST_SKIP_ALL_STOPS_ALL_REPEATS": {
+              "planName": "__Test_ATC.ATC_SKIP_TESTS.TEST_SKIP_ALL_STOPS_ALL_REPEATS",
+              "status": "Running",
+              "tasks": {
+                "SkipAllController": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "[__Test_ATC.ATC_SKIP_TESTS.TEST_SKIP_ALL_STOPS_ALL_REPEATS.SkipAllController] ATCSkip.test.cpp:86 ATC_Suite_ATC::ATC_Suite_ATC_SKIP_TESTS::ATC_TestPlan_TEST_SKIP_ALL_STOPS_ALL_REPEATS::SkipAllController_UserCode() SkipAll.StopEverything",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": true,
+                      "startTime": "<dynamic:startTime>",
+                      "status": "Skipped",
+                      "success": true,
+                      "targetClientIndex": -1,
+                      "taskRole": "Server",
+                      "taskTarget": "Coordinator",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "SkipAllController"
+                }
+              }
+            }
+          },
+          "result": {
+            "durationSeconds": "<dynamic:durationSeconds>",
+            "message": "[__Test_ATC.ATC_SKIP_TESTS.TEST_SKIP_ALL_STOPS_ALL_REPEATS.SkipAllController] ATCSkip.test.cpp:86 ATC_Suite_ATC::ATC_Suite_ATC_SKIP_TESTS::ATC_TestPlan_TEST_SKIP_ALL_STOPS_ALL_REPEATS::SkipAllController_UserCode() SkipAll.StopEverything",
+            "messageCount": 2,
+            "skipped": true,
+            "success": true
+          },
+          "startedAt": "<dynamic:startedAt>",
+          "testId": "<dynamic:testId>",
+          "travelSessionId": "<dynamic:travelSessionId>"
+        }
+      },
+      "meta": {
+        "afterRun": 1,
+        "completedRuns": 5,
+        "executedRuns": 1,
+        "invocationIndex": 0,
+        "nextRun": 6,
+        "repeatMode": "Count",
+        "skippedRuns": 4,
+        "stopReason": "SkipAllRequested",
+        "totalRuns": 5
+      },
+      "runIndex": 1,
+      "status": "Skipped"
+    }
+  ],
+  "testId": "<dynamic:testId>",
+  "testPath": "ATC.ATC_SKIP_TESTS.TEST_SKIP_ALL_STOPS_ALL_REPEATS"
+}

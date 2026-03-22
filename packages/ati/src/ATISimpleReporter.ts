@@ -194,6 +194,59 @@ function resolveAttemptStatus(success: boolean | undefined, skipped: boolean | u
   return 'Failed' as const;
 }
 
+function resolveMapSegment(current: Map<unknown, unknown>, segment: string | number) {
+  if (current.has(segment)) {
+    return current.get(segment);
+  }
+
+  const normalizedSegment = String(segment);
+  for (const [key, value] of current.entries()) {
+    if (String(key) === normalizedSegment) {
+      return value;
+    }
+
+    if (typeof value !== 'object' || value === null) {
+      continue;
+    }
+
+    const candidate = value as Record<string, unknown>;
+    for (const identityKey of ['key', 'testPath', 'planName', 'taskName', 'effectiveCoordinatorMode', 'sessionId']) {
+      if (String(candidate[identityKey] ?? '') === normalizedSegment) {
+        return value;
+      }
+    }
+  }
+
+  throw new Error(`Unable to resolve simple reporter Map segment '${normalizedSegment}'`);
+}
+
+function resolveArraySegment(current: unknown[], segment: string | number) {
+  if (typeof segment === 'number') {
+    return current[segment];
+  }
+
+  if (/^\d+$/.test(segment)) {
+    return current[Number.parseInt(segment, 10)];
+  }
+
+  const matched = current.find((entry) => {
+    if (typeof entry !== 'object' || entry === null) {
+      return false;
+    }
+
+    const candidate = entry as Record<string, unknown>;
+    return ['key', 'testPath', 'planName', 'taskName', 'effectiveCoordinatorMode', 'runIndex'].some(
+      (identityKey) => String(candidate[identityKey] ?? '') === segment,
+    );
+  });
+
+  if (matched !== undefined) {
+    return matched;
+  }
+
+  throw new Error(`Unable to resolve simple reporter array segment '${segment}'`);
+}
+
 export class ATISimpleReporter {
   private session?: ATISession;
   private readonly executionIndex = new Map<string, ExecutionLocator>();
@@ -258,6 +311,30 @@ export class ATISimpleReporter {
     return this.session;
   }
 
+  getBySimpleReporterPath(path: readonly (string | number)[]) {
+    let current: unknown = this.session;
+    for (const segment of path) {
+      if (current instanceof Map) {
+        current = resolveMapSegment(current, segment);
+        continue;
+      }
+
+      if (Array.isArray(current)) {
+        current = resolveArraySegment(current, segment);
+        continue;
+      }
+
+      if (typeof current === 'object' && current !== null) {
+        current = (current as Record<string, unknown>)[String(segment)];
+        continue;
+      }
+
+      throw new Error(`Unable to resolve simple reporter path at segment '${String(segment)}'`);
+    }
+
+    return current;
+  }
+
   reset() {
     this.session = undefined;
     this.executionIndex.clear();
@@ -320,12 +397,13 @@ export class ATISimpleReporter {
       execution.totalVariants = matrixState.totalVariants ?? execution.totalVariants;
       const variantSuccess = getBooleanField(event, 'success');
       if (getStringField(event, 'state') === 'VariantEnd' && variantSuccess !== undefined) {
+        const variantMessage = variantSuccess
+          ? 'Coordinator matrix variant completed successfully'
+          : 'Coordinator matrix variant failed';
         execution.result = execution.result ?? {
           success: variantSuccess,
           skipped: false,
-          message: variantSuccess
-            ? 'Coordinator matrix variant completed successfully'
-            : 'Coordinator matrix variant failed',
+          message: variantMessage,
         };
         execution.result.success = variantSuccess;
       }
@@ -808,7 +886,14 @@ export class ATISimpleReporter {
   }
 
   private resolveLatestAttempt(task: ATITask, sourceClientIndex: number | undefined, createIfMissing: boolean) {
-    const latestMatching = task.attempts.filter((attempt) => attempt.sourceClientIndex === sourceClientIndex).at(-1);
+    let latestMatching: ATITaskAttempt | undefined;
+    for (let index = task.attempts.length - 1; index >= 0; index -= 1) {
+      const attempt = task.attempts[index];
+      if (attempt?.sourceClientIndex === sourceClientIndex) {
+        latestMatching = attempt;
+        break;
+      }
+    }
     const latest = latestMatching ?? task.attempts.at(-1);
     if (latest) {
       return latest;

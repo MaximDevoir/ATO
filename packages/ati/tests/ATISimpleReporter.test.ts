@@ -261,6 +261,16 @@ describe('ATISimpleReporter', () => {
     expect(session?.sessionId).toBe('session-1');
     expect(session?.coordinatorMode).toBe('Standalone');
     expect(session?.effectiveCoordinatorModes).toEqual(['Standalone']);
+    expect(
+      reporter.getBySimpleReporterPath([
+        'testsByEffectiveCoordinatorMode',
+        'Standalone',
+        'ATC.Sample',
+        'runs',
+        0,
+        'runIndex',
+      ]),
+    ).toBe(1);
 
     const test = session?.tests.get('ATC.Sample::0');
     expect(test).toBeTruthy();

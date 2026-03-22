@@ -1,3 +1,7 @@
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import { ATISimpleReporter } from '@maximdevoir/ati';
 import { describe, expect, it } from 'vitest';
 import {
   ATO,
@@ -277,5 +281,77 @@ describe('FrameworkValidationReporter', () => {
     ]);
 
     FrameworkValidationReporter.reset().disable();
+  });
+
+  it('updates and compares simple-reporter snapshots with sanitized dynamic fields', async () => {
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), 'ato-snapshots-'));
+    const fakeScriptPath = path.join(tempDir, 'RunStandaloneTest.ts');
+    const snapshotPath = './__snapshots__/actorWorld.snapshot.json';
+    const snapshotAbsolutePath = path.join(tempDir, '__snapshots__', 'actorWorld.snapshot.json');
+
+    const reporter = new ATISimpleReporter();
+    reporter.addEvent({
+      version: 1,
+      sessionId: 'session-1',
+      sequence: -1,
+      timestamp: 0,
+      type: 'SessionStarted',
+      coordinatorMode: 'Standalone',
+    });
+    reporter.addEvent({
+      version: 1,
+      sessionId: 'session-1',
+      sequence: 0,
+      timestamp: 1,
+      type: 'TestRepeat',
+      testId: 'ATC.Sample|Invocation=0|Run=1',
+      testPath: 'ATC.Sample',
+      coordinatorMode: 'Standalone',
+      effectiveCoordinatorMode: 'Standalone',
+      invocationIndex: 0,
+      state: 'RunStart',
+      currentRun: 1,
+      totalRuns: 1,
+      repeatMode: 'None',
+    });
+
+    const validation = new FrameworkValidation(
+      { enabled: true, tests: [], issues: [], totalObservedEntries: 0 },
+      { simpleReporter: reporter, updateSnapshots: true, snapshotRelativeTo: fakeScriptPath },
+    );
+
+    await validation
+      .getBySimpleReporterPath(['testsByEffectiveCoordinatorMode', 'Standalone', 'ATC.Sample'])
+      .toMatchFileSnapshot(snapshotPath);
+
+    const snapshot = JSON.parse(await readFile(snapshotAbsolutePath, 'utf8')) as Record<string, unknown>;
+    expect(snapshot).toMatchObject({
+      currentRunIndex: 1,
+      testId: '<dynamic:testId>',
+      testPath: 'ATC.Sample',
+    });
+
+    await new FrameworkValidation(
+      { enabled: true, tests: [], issues: [], totalObservedEntries: 0 },
+      { simpleReporter: reporter, updateSnapshots: false, snapshotRelativeTo: fakeScriptPath },
+    )
+      .getBySimpleReporterPath(['testsByEffectiveCoordinatorMode', 'Standalone', 'ATC.Sample'])
+      .toMatchFileSnapshot(snapshotPath);
+
+    await writeFile(snapshotAbsolutePath, JSON.stringify({ unexpected: true }, null, 2), 'utf8');
+    await expect(
+      new FrameworkValidation(
+        { enabled: true, tests: [], issues: [], totalObservedEntries: 0 },
+        { simpleReporter: reporter, updateSnapshots: false, snapshotRelativeTo: fakeScriptPath },
+      )
+        .getBySimpleReporterPath(['testsByEffectiveCoordinatorMode', 'Standalone', 'ATC.Sample'])
+        .toMatchFileSnapshot(snapshotPath),
+    ).rejects.toThrow('Snapshot mismatch');
+
+    const actualPath = path.join(tempDir, '__snapshots__', 'actorWorld.snapshot.actual.json');
+    const actual = JSON.parse(await readFile(actualPath, 'utf8')) as Record<string, unknown>;
+    expect(actual.testId).toBe('<dynamic:testId>');
+
+    await rm(tempDir, { recursive: true, force: true });
   });
 });
