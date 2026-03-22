@@ -29,9 +29,6 @@ const assertionCaseNames = [
   'NOT_TAG',
   'ACTOR_TAG',
   'ACTOR_NOT_TAG',
-  'THROW',
-  'ANY_THROW',
-  'NO_THROW',
 ] as const;
 
 function resolveSnapshotRelativeTo(scriptMetaUrl: string) {
