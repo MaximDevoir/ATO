@@ -1,7 +1,9 @@
 {
   "coordinatorMode": "Standalone",
   "currentRunIndex": 1,
-  "effectiveCoordinatorModes": ["Standalone"],
+  "effectiveCoordinatorModes": [
+    "Standalone"
+  ],
   "invocationIndex": 0,
   "key": "ATC.ATC_SKIP_TESTS.TEST_SKIP_ALL_STOPS_ALL_REPEATS::0",
   "maxRuns": 5,
@@ -29,11 +31,14 @@
   "repeatMode": "Count",
   "result": {
     "durationSeconds": "<dynamic:durationSeconds>",
-    "message": "[__Test_ATC.ATC_SKIP_TESTS.TEST_SKIP_ALL_STOPS_ALL_REPEATS.SkipAllController] ATCSkip.test.cpp:86 ATC_Suite_ATC::ATC_Suite_ATC_SKIP_TESTS::ATC_TestPlan_TEST_SKIP_ALL_STOPS_ALL_REPEATS::SkipAllController_UserCode() SkipAll.StopEverything",
+    "message": "SkipAll.StopEverything",
     "messageCount": 2,
     "skipAllRemainingRuns": true,
     "skipped": true,
     "skipRunsRequested": 1,
+    "sourceFile": "<dynamic:sourceFile>",
+    "sourceFunction": "<dynamic:sourceFunction>",
+    "sourceLine": "<dynamic:sourceLine>",
     "success": true
   },
   "runs": [
@@ -53,14 +58,24 @@
                   "attempts": [
                     {
                       "assertionErrors": [],
-                      "assertionWarnings": [],
+                      "assertionWarnings": [
+                        {
+                          "file": "<dynamic:file>",
+                          "line": "<dynamic:line>",
+                          "message": "SkipAll.StopEverything",
+                          "sourceFunction": "<dynamic:sourceFunction>"
+                        }
+                      ],
                       "attempt": 1,
                       "durationSeconds": "<dynamic:durationSeconds>",
                       "endTime": "<dynamic:endTime>",
                       "maxRetries": 0,
-                      "message": "[__Test_ATC.ATC_SKIP_TESTS.TEST_SKIP_ALL_STOPS_ALL_REPEATS.SkipAllController] ATCSkip.test.cpp:86 ATC_Suite_ATC::ATC_Suite_ATC_SKIP_TESTS::ATC_TestPlan_TEST_SKIP_ALL_STOPS_ALL_REPEATS::SkipAllController_UserCode() SkipAll.StopEverything",
+                      "message": "SkipAll.StopEverything",
                       "retryDelaySeconds": 0.25,
                       "skipped": true,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
                       "startTime": "<dynamic:startTime>",
                       "status": "Skipped",
                       "success": true,
@@ -77,9 +92,12 @@
           },
           "result": {
             "durationSeconds": "<dynamic:durationSeconds>",
-            "message": "[__Test_ATC.ATC_SKIP_TESTS.TEST_SKIP_ALL_STOPS_ALL_REPEATS.SkipAllController] ATCSkip.test.cpp:86 ATC_Suite_ATC::ATC_Suite_ATC_SKIP_TESTS::ATC_TestPlan_TEST_SKIP_ALL_STOPS_ALL_REPEATS::SkipAllController_UserCode() SkipAll.StopEverything",
+            "message": "SkipAll.StopEverything",
             "messageCount": 2,
             "skipped": true,
+            "sourceFile": "<dynamic:sourceFile>",
+            "sourceFunction": "<dynamic:sourceFunction>",
+            "sourceLine": "<dynamic:sourceLine>",
             "success": true
           },
           "startedAt": "<dynamic:startedAt>",

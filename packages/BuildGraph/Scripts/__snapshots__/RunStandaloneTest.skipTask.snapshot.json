@@ -1,12 +1,12 @@
 {
   "coordinatorMode": "Standalone",
-  "currentRunIndex": 2,
+  "currentRunIndex": 1,
   "effectiveCoordinatorModes": [
     "Standalone"
   ],
   "invocationIndex": 0,
-  "key": "ATC.STANDALONE_MODE.ACTOR_WORLD_REPEAT_RESETS_STATE::0",
-  "maxRuns": 2,
+  "key": "ATC.ATC_SKIP_TESTS.TASK_SKIP_ONLY_SKIPS_CURRENT_TASK::0",
+  "maxRuns": 1,
   "metadata": [
     {
       "name": "automationLabel",
@@ -14,11 +14,11 @@
     },
     {
       "name": "repeatMode",
-      "value": "Count"
+      "value": "None"
     },
     {
       "name": "repeatTotalRuns",
-      "value": "2"
+      "value": "1"
     }
   ],
   "parameters": [
@@ -28,11 +28,11 @@
     }
   ],
   "phase": "Completed",
-  "repeatMode": "Count",
+  "repeatMode": "None",
   "result": {
     "durationSeconds": "<dynamic:durationSeconds>",
-    "message": "ATC test completed successfully",
-    "messageCount": 0,
+    "message": "Test completed with 1 warning(s); first: SkipTask.Message",
+    "messageCount": 1,
     "skipAllRemainingRuns": false,
     "skipped": false,
     "skipRunsRequested": 0,
@@ -50,12 +50,45 @@
           "finishedAt": "<dynamic:finishedAt>",
           "phase": "Completed",
           "plans": {
-            "__Test_ATC.STANDALONE_MODE.ACTOR_WORLD_REPEAT_RESETS_STATE": {
-              "planName": "__Test_ATC.STANDALONE_MODE.ACTOR_WORLD_REPEAT_RESETS_STATE",
+            "__Test_ATC.ATC_SKIP_TESTS.TASK_SKIP_ONLY_SKIPS_CURRENT_TASK": {
+              "planName": "__Test_ATC.ATC_SKIP_TESTS.TASK_SKIP_ONLY_SKIPS_CURRENT_TASK",
               "status": "Passed",
               "success": true,
               "tasks": {
-                "VerifyActorWorldRepeatState": {
+                "SkipOnlyCurrentTask": {
+                  "attempts": [
+                    {
+                      "assertionErrors": [],
+                      "assertionWarnings": [
+                        {
+                          "file": "<dynamic:file>",
+                          "line": "<dynamic:line>",
+                          "message": "SkipTask.Message",
+                          "sourceFunction": "<dynamic:sourceFunction>"
+                        }
+                      ],
+                      "attempt": 1,
+                      "durationSeconds": "<dynamic:durationSeconds>",
+                      "endTime": "<dynamic:endTime>",
+                      "maxRetries": 0,
+                      "message": "SkipTask.Message",
+                      "retryDelaySeconds": 0.25,
+                      "skipped": true,
+                      "sourceFile": "<dynamic:sourceFile>",
+                      "sourceFunction": "<dynamic:sourceFunction>",
+                      "sourceLine": "<dynamic:sourceLine>",
+                      "startTime": "<dynamic:startTime>",
+                      "status": "Skipped",
+                      "success": true,
+                      "targetClientIndex": -1,
+                      "taskRole": "Server",
+                      "taskTarget": "Coordinator",
+                      "timeoutSeconds": 0
+                    }
+                  ],
+                  "taskName": "SkipOnlyCurrentTask"
+                },
+                "TaskAfterSkippedTaskStillRuns": {
                   "attempts": [
                     {
                       "assertionErrors": [],
@@ -79,15 +112,15 @@
                       "timeoutSeconds": 0
                     }
                   ],
-                  "taskName": "VerifyActorWorldRepeatState"
+                  "taskName": "TaskAfterSkippedTaskStillRuns"
                 }
               }
             }
           },
           "result": {
             "durationSeconds": "<dynamic:durationSeconds>",
-            "message": "ATC test completed successfully",
-            "messageCount": 0,
+            "message": "Test completed with 1 warning(s); first: SkipTask.Message",
+            "messageCount": 1,
             "skipped": false,
             "sourceFile": "<dynamic:sourceFile>",
             "sourceFunction": "<dynamic:sourceFunction>",
@@ -100,83 +133,18 @@
         }
       },
       "meta": {
+        "completedRuns": 1,
+        "executedRuns": 1,
         "invocationIndex": 0,
-        "repeatMode": "Count",
-        "totalRuns": 2
-      },
-      "runIndex": 1,
-      "status": "Passed"
-    },
-    {
-      "executions": {
-        "Standalone": {
-          "coordinatorMode": "Standalone",
-          "effectiveCoordinatorMode": "Standalone",
-          "finishedAt": "<dynamic:finishedAt>",
-          "phase": "Completed",
-          "plans": {
-            "__Test_ATC.STANDALONE_MODE.ACTOR_WORLD_REPEAT_RESETS_STATE": {
-              "planName": "__Test_ATC.STANDALONE_MODE.ACTOR_WORLD_REPEAT_RESETS_STATE",
-              "status": "Passed",
-              "success": true,
-              "tasks": {
-                "VerifyActorWorldRepeatState": {
-                  "attempts": [
-                    {
-                      "assertionErrors": [],
-                      "assertionWarnings": [],
-                      "attempt": 1,
-                      "durationSeconds": "<dynamic:durationSeconds>",
-                      "endTime": "<dynamic:endTime>",
-                      "maxRetries": 0,
-                      "message": "Success",
-                      "retryDelaySeconds": 0.25,
-                      "skipped": false,
-                      "sourceFile": "<dynamic:sourceFile>",
-                      "sourceFunction": "<dynamic:sourceFunction>",
-                      "sourceLine": "<dynamic:sourceLine>",
-                      "startTime": "<dynamic:startTime>",
-                      "status": "Passed",
-                      "success": true,
-                      "targetClientIndex": -1,
-                      "taskRole": "Server",
-                      "taskTarget": "Coordinator",
-                      "timeoutSeconds": 0
-                    }
-                  ],
-                  "taskName": "VerifyActorWorldRepeatState"
-                }
-              }
-            }
-          },
-          "result": {
-            "durationSeconds": "<dynamic:durationSeconds>",
-            "message": "ATC test completed successfully",
-            "messageCount": 0,
-            "skipped": false,
-            "sourceFile": "<dynamic:sourceFile>",
-            "sourceFunction": "<dynamic:sourceFunction>",
-            "sourceLine": "<dynamic:sourceLine>",
-            "success": true
-          },
-          "startedAt": "<dynamic:startedAt>",
-          "testId": "<dynamic:testId>",
-          "travelSessionId": "<dynamic:travelSessionId>"
-        }
-      },
-      "meta": {
-        "completedRuns": 2,
-        "executedRuns": 2,
-        "invocationIndex": 0,
-        "repeatMode": "Count",
+        "repeatMode": "None",
         "skippedRuns": 0,
         "stopReason": "MaxRunsReached",
-        "totalRuns": 2
+        "totalRuns": 1
       },
-      "runIndex": 2,
+      "runIndex": 1,
       "status": "Passed"
     }
   ],
   "testId": "<dynamic:testId>",
-  "testPath": "ATC.STANDALONE_MODE.ACTOR_WORLD_REPEAT_RESETS_STATE"
+  "testPath": "ATC.ATC_SKIP_TESTS.TASK_SKIP_ONLY_SKIPS_CURRENT_TASK"
 }
