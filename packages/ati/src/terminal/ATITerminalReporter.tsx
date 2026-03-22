@@ -1,5 +1,6 @@
 import { Box, render, Static, Text } from 'ink';
-import React, { useEffect, useState } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import type { ATISession, ATISimpleReporter } from '../ATISimpleReporter';
 import type {
   ATITerminalDisplayedStatus,
@@ -78,16 +79,15 @@ function SpinnerText() {
       clearInterval(timer);
     };
   }, []);
-
-  return React.createElement(Text, { color: 'cyan' }, spinnerFrames[frameIndex]);
+  return <Text color="cyan">{spinnerFrames[frameIndex]}</Text>;
 }
 
 function TestStatusIcon({ status, isCurrent }: { status: ATITerminalDisplayedStatus; isCurrent: boolean }) {
   if (isCurrent && status === 'running') {
-    return React.createElement(SpinnerText);
+    return <SpinnerText />;
   }
 
-  return React.createElement(Text, { color: statusColor(status) }, statusSymbol(status));
+  return <Text color={statusColor(status)}>{statusSymbol(status)}</Text>;
 }
 
 function MessageLine({ message }: { message: ATITerminalMessageLine }) {
@@ -102,7 +102,7 @@ function TestLine({ test, isCurrent }: { test: ATITerminalDisplayedTest; isCurre
       <Box gap={1}>
         <TestStatusIcon status={test.status} isCurrent={isCurrent} />
         <Text bold={isCurrent}>{test.simpleName}</Text>
-        <Text color="gray">{`${test.coordinatorMode}`} | </Text>
+        <Text color="gray">{`${test.coordinatorMode}`} |</Text>
         <Text color="gray">{`${test.phase}`}</Text>
         <Text color="gray">{test.runLabel ? `| ${test.runLabel}` : ``}</Text>
       </Box>
@@ -136,21 +136,15 @@ function ReporterApp({
   state: ATITerminalState;
   completedTests: ATITerminalDisplayedTest[];
 }) {
-  const children = [] as React.ReactNode[];
+  return (
+    <Box flexDirection="column">
+      {completedTests.length > 0 && <CompletedTestsStatic key="completed" tests={completedTests} />}
 
-  if (completedTests.length > 0) {
-    children.push(React.createElement(CompletedTestsStatic, { key: 'completed', tests: completedTests }));
-  }
+      {state.currentTest && <TestLine key="current" test={state.currentTest} isCurrent />}
 
-  if (state.currentTest) {
-    children.push(React.createElement(TestLine, { key: 'current', test: state.currentTest, isCurrent: true }));
-  }
-
-  if (children.length === 0) {
-    children.push(React.createElement(Text, { key: 'idle', color: 'gray' }, 'Waiting for ATI events...'));
-  }
-
-  return React.createElement(Box, { flexDirection: 'column' }, ...children);
+      {completedTests.length === 0 && !state.currentTest && <Text color="gray">Waiting for ATI events...</Text>}
+    </Box>
+  );
 }
 
 function formatSummary(session: ATISession | undefined) {
@@ -215,9 +209,7 @@ export class ATITerminalReporter {
 
     try {
       process.env.FORCE_COLOR ??= '1';
-      this.inkApp = render(
-        React.createElement(ReporterApp, { state: this.state, completedTests: this.completedTests }),
-      );
+      this.inkApp = render(<ReporterApp state={this.state} completedTests={this.completedTests} />);
     } catch (error) {
       this.inkEnabled = false;
       this.writeWarn(
@@ -255,7 +247,7 @@ export class ATITerminalReporter {
       return;
     }
 
-    this.inkApp.rerender(React.createElement(ReporterApp, { state: this.state, completedTests: this.completedTests }));
+    this.inkApp.rerender(<ReporterApp state={this.state} completedTests={this.completedTests} />);
   }
 
   private flushMessages(messages: ATITerminalMessageLine[]) {
