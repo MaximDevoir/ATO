@@ -31,6 +31,11 @@ export interface ATITerminalStateUpdate {
   flushedTest?: ATITerminalDisplayedTest;
 }
 
+export interface ATITerminalFormattedLine {
+  level: ATITerminalMessageLevel;
+  line: string;
+}
+
 function trimTrailingDot(value: string) {
   return value.endsWith('.') ? value.slice(0, -1) : value;
 }
@@ -170,6 +175,50 @@ function flushCurrentTest(state: ATITerminalState, reporter: ATISimpleReporter) 
       lastTest: flushedTest,
     },
   } satisfies ATITerminalStateUpdate;
+}
+
+function statusSymbol(status: ATITerminalDisplayedStatus) {
+  switch (status) {
+    case 'passed':
+      return 'OK';
+    case 'failed':
+      return 'X';
+    case 'skipped':
+      return '!';
+    default:
+      return '>';
+  }
+}
+
+function formatDisplayedTestHeader(test: ATITerminalDisplayedTest) {
+  return `${statusSymbol(test.status)} ${test.simpleName} ${test.coordinatorMode} | ${test.phase}${test.runLabel ? ` | ${test.runLabel}` : ''}`;
+}
+
+export function flushATITerminalState(state: ATITerminalState, reporter: ATISimpleReporter) {
+  return flushCurrentTest(state, reporter);
+}
+
+export function formatATITerminalDisplayedTestSummary(test: ATITerminalDisplayedTest): ATITerminalFormattedLine[] {
+  const summaryMessages = test.messages.filter((message) => message.level === 'warn' || message.level === 'error');
+  return [
+    {
+      level: 'log',
+      line: formatDisplayedTestHeader(test),
+    },
+    ...summaryMessages.map((message) => ({
+      level: message.level,
+      line: `  ${message.line}`,
+    })),
+  ];
+}
+
+export function formatATITerminalSessionSummary(session: ATISession | undefined) {
+  const tests = [...(session?.tests.values() ?? [])];
+  const total = tests.length;
+  const passed = tests.filter((test) => test.result?.success).length;
+  const skipped = tests.filter((test) => test.result?.skipped).length;
+  const failed = tests.filter((test) => test.result && !test.result.success && !test.result.skipped).length;
+  return `ATI summary: ${passed} passed, ${failed} failed, ${skipped} skipped, ${total} total`;
 }
 
 export function createATITerminalState(): ATITerminalState {

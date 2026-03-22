@@ -6,6 +6,7 @@ export interface SpawnProcessOptions {
   onStderrLine?: (line: string) => void;
   emitLine?: (line: string, stream: 'stdout' | 'stderr') => void;
 }
+
 function formatTwelveHourTime(hours24: number, minutes: number, seconds: number) {
   const suffix = hours24 >= 12 ? 'PM' : 'AM';
   const hours12 = hours24 % 12 || 12;

@@ -6,4 +6,6 @@ export * from './ATISimpleReporterLoader';
 export * from './consumers/InMemoryConsumer';
 export * from './consumers/NDJSONConsumer';
 export * from './consumers/TerminalConsumer';
+export * from './terminal/ATITerminalReporter';
+export * from './terminal/ATITerminalState';
 export * from './validation';

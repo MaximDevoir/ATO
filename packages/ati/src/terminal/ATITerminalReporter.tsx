@@ -1,14 +1,14 @@
 import { Box, render, Static, Text } from 'ink';
 // biome-ignore lint/style/useImportType: React is required at runtime for JSX
 import React, { useEffect, useState } from 'react';
-import type { ATISession, ATISimpleReporter } from '../ATISimpleReporter';
+import type { ATISimpleReporter } from '../ATISimpleReporter';
 import type {
   ATITerminalDisplayedStatus,
   ATITerminalDisplayedTest,
   ATITerminalMessageLine,
   ATITerminalState,
 } from './ATITerminalState';
-import { createATITerminalState, updateATITerminalState } from './ATITerminalState';
+import { createATITerminalState, formatATITerminalSessionSummary, updateATITerminalState } from './ATITerminalState';
 
 const spinnerFrames = ['-', '\\', '|', '/'] as const;
 const spinnerIntervalMs = 80;
@@ -16,13 +16,17 @@ const spinnerIntervalMs = 80;
 type TerminalLineWriter = (line: string) => void;
 
 type CompletedTestsStaticProps = {
-  tests: ATITerminalDisplayedTest[];
+  tests: readonly ATITerminalDisplayedTest[];
 };
+
+type ReporterAppProps = Readonly<{
+  state: ATITerminalState;
+  completedTests: readonly ATITerminalDisplayedTest[];
+}>;
 
 export interface ATITerminalReporterOptions {
   reporter: ATISimpleReporter;
   isTTY?: boolean;
-  forceRender?: boolean;
   writeLog?: TerminalLineWriter;
   writeWarn?: TerminalLineWriter;
   writeError?: TerminalLineWriter;
@@ -41,19 +45,6 @@ function writeWithFallback(
   fallback(line);
 }
 
-function statusSymbol(status: ATITerminalDisplayedStatus) {
-  switch (status) {
-    case 'passed':
-      return 'OK';
-    case 'failed':
-      return 'X';
-    case 'skipped':
-      return '!';
-    default:
-      return '>';
-  }
-}
-
 function statusColor(status: ATITerminalDisplayedStatus) {
   switch (status) {
     case 'passed':
@@ -64,6 +55,19 @@ function statusColor(status: ATITerminalDisplayedStatus) {
       return 'yellow';
     default:
       return 'cyan';
+  }
+}
+
+function statusSymbol(status: ATITerminalDisplayedStatus) {
+  switch (status) {
+    case 'passed':
+      return 'OK';
+    case 'failed':
+      return 'X';
+    case 'skipped':
+      return '!';
+    default:
+      return '>';
   }
 }
 
@@ -82,7 +86,7 @@ function SpinnerText() {
   return <Text color="cyan">{spinnerFrames[frameIndex]}</Text>;
 }
 
-function TestStatusIcon({ status, isCurrent }: { status: ATITerminalDisplayedStatus; isCurrent: boolean }) {
+function TestStatusIcon({ status, isCurrent }: Readonly<{ status: ATITerminalDisplayedStatus; isCurrent: boolean }>) {
   if (isCurrent && status === 'running') {
     return <SpinnerText />;
   }
@@ -90,13 +94,18 @@ function TestStatusIcon({ status, isCurrent }: { status: ATITerminalDisplayedSta
   return <Text color={statusColor(status)}>{statusSymbol(status)}</Text>;
 }
 
-function MessageLine({ message }: { message: ATITerminalMessageLine }) {
-  const color = message.level === 'error' ? 'red' : message.level === 'warn' ? 'yellow' : 'white';
+function MessageLine({ message }: Readonly<{ message: ATITerminalMessageLine }>) {
+  let color: 'red' | 'yellow' | 'white' = 'white';
+  if (message.level === 'error') {
+    color = 'red';
+  } else if (message.level === 'warn') {
+    color = 'yellow';
+  }
 
   return <Text color={color}>{message.line}</Text>;
 }
 
-function TestLine({ test, isCurrent }: { test: ATITerminalDisplayedTest; isCurrent: boolean }) {
+function TestLine({ test, isCurrent }: Readonly<{ test: ATITerminalDisplayedTest; isCurrent: boolean }>) {
   return (
     <Box flexDirection="column">
       <Box gap={1}>
@@ -116,9 +125,9 @@ function TestLine({ test, isCurrent }: { test: ATITerminalDisplayedTest; isCurre
   );
 }
 
-function CompletedTestsStatic({ tests }: CompletedTestsStaticProps) {
+function CompletedTestsStatic({ tests }: Readonly<CompletedTestsStaticProps>) {
   const StaticComponent = Static as unknown as React.ComponentType<{
-    items: ATITerminalDisplayedTest[];
+    items: readonly ATITerminalDisplayedTest[];
     children: (test: ATITerminalDisplayedTest) => React.ReactNode;
   }>;
 
@@ -129,13 +138,7 @@ function CompletedTestsStatic({ tests }: CompletedTestsStaticProps) {
   );
 }
 
-function ReporterApp({
-  state,
-  completedTests,
-}: {
-  state: ATITerminalState;
-  completedTests: ATITerminalDisplayedTest[];
-}) {
+function ReporterApp({ state, completedTests }: ReporterAppProps) {
   return (
     <Box flexDirection="column">
       {completedTests.length > 0 && <CompletedTestsStatic key="completed" tests={completedTests} />}
@@ -147,30 +150,23 @@ function ReporterApp({
   );
 }
 
-function formatSummary(session: ATISession | undefined) {
-  const tests = [...(session?.tests.values() ?? [])];
-  const total = tests.length;
-  const passed = tests.filter((test) => test.result?.success).length;
-  const skipped = tests.filter((test) => test.result?.skipped).length;
-  const failed = tests.filter((test) => test.result && !test.result.success && !test.result.skipped).length;
-  return `ATI summary: ${passed} passed, ${failed} failed, ${skipped} skipped, ${total} total`;
-}
-
 export class ATITerminalReporter {
-  private readonly isTTY: boolean;
   private readonly writeLog: TerminalLineWriter;
   private readonly writeWarn: TerminalLineWriter;
   private readonly writeError: TerminalLineWriter;
   private readonly unsubscribe;
-  private inkEnabled: boolean;
   private inkApp?: ReturnType<typeof render>;
   private state = createATITerminalState();
   private completedTests: ATITerminalDisplayedTest[] = [];
   private stopped = false;
 
   constructor(private readonly options: ATITerminalReporterOptions) {
-    this.isTTY = options.isTTY ?? process.stdout.isTTY;
-    this.inkEnabled = options.forceRender ?? this.isTTY;
+    const isTTY =
+      options.isTTY ?? (process.stdin.isTTY === true && process.stdout.isTTY === true && process.stderr.isTTY === true);
+    if (!isTTY) {
+      throw new Error('[ATI] ATITerminalReporter requires an interactive terminal');
+    }
+
     this.writeLog = (line) => {
       writeWithFallback(options.writeLog, console.log, line);
     };
@@ -193,27 +189,17 @@ export class ATITerminalReporter {
     });
   }
 
-  canRender() {
-    return this.inkEnabled;
-  }
-
   start() {
-    if (!this.inkEnabled || this.inkApp) {
-      if (!this.inkEnabled && !this.inkApp) {
-        this.writeWarn(
-          '[ATI] Default terminal UI requires an interactive terminal; falling back to basic terminal output',
-        );
-      }
+    if (this.inkApp) {
       return;
     }
 
+    process.env.FORCE_COLOR ??= '1';
     try {
-      process.env.FORCE_COLOR ??= '1';
       this.inkApp = render(<ReporterApp state={this.state} completedTests={this.completedTests} />);
     } catch (error) {
-      this.inkEnabled = false;
-      this.writeWarn(
-        `[ATI] Failed to start Ink terminal UI; falling back to buffered terminal output: ${error instanceof Error ? error.message : String(error)}`,
+      throw new Error(
+        `[ATI] Failed to start Ink terminal UI: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
@@ -229,7 +215,7 @@ export class ATITerminalReporter {
       this.inkApp = undefined;
     }
 
-    this.writeLog(formatSummary(this.options.reporter.getSession()));
+    this.writeLog(formatATITerminalSessionSummary(this.options.reporter.getSession()));
   }
 
   dispose() {
@@ -238,10 +224,6 @@ export class ATITerminalReporter {
   }
 
   private rerender() {
-    if (!this.inkEnabled) {
-      return;
-    }
-
     if (!this.inkApp) {
       this.start();
       return;

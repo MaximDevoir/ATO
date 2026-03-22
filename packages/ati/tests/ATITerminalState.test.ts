@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { ATCEvent } from '../src';
-import { ATISimpleReporter } from '../src';
-import { createATITerminalState, updateATITerminalState } from '../src/terminal/ATITerminalState';
+import {
+  ATISimpleReporter,
+  createATITerminalState,
+  formatATITerminalDisplayedTestSummary,
+  updateATITerminalState,
+} from '../src';
 
 function applyEvent(state: ReturnType<typeof createATITerminalState>, reporter: ATISimpleReporter, event: ATCEvent) {
   reporter.addEvent(event);
@@ -51,5 +55,28 @@ describe('ATITerminalState', () => {
     expect(finishedUpdate.flushedTest?.simpleName).toBe('IMMEDIATE_FLUSH');
     expect(finishedUpdate.flushedTest?.status).toBe('passed');
     expect(finishedUpdate.flushedTest?.phase).toBe('Completed');
+  });
+
+  it('formats end-of-run summaries using the displayed test structure', () => {
+    const lines = formatATITerminalDisplayedTestSummary({
+      key: 'ATC.Sample.TEST::0',
+      testPath: 'ATC.Sample.TEST.',
+      simpleName: 'TEST',
+      coordinatorMode: 'Standalone',
+      phase: 'Completed',
+      runLabel: '[2/2]',
+      status: 'failed',
+      messages: [
+        { id: 'warn-1', level: 'warn', line: 'warning text (Source/Test.cpp:12)' },
+        { id: 'error-1', level: 'error', line: 'error text (Source/Test.cpp:18)' },
+        { id: 'log-1', level: 'log', line: 'debug text' },
+      ],
+    });
+
+    expect(lines).toEqual([
+      { level: 'log', line: 'X TEST Standalone | Completed | [2/2]' },
+      { level: 'warn', line: '  warning text (Source/Test.cpp:12)' },
+      { level: 'error', line: '  error text (Source/Test.cpp:18)' },
+    ]);
   });
 });

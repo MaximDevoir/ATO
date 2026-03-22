@@ -2,6 +2,15 @@ import type { IATIConsumer } from '../ATIConsumer';
 import type { ATCEvent } from '../ATIEvents';
 import { ATISimpleReporter } from '../ATISimpleReporter';
 import { ATITerminalReporter } from '../terminal/ATITerminalReporter';
+import {
+  type ATITerminalDisplayedTest,
+  type ATITerminalFormattedLine,
+  createATITerminalState,
+  flushATITerminalState,
+  formatATITerminalDisplayedTestSummary,
+  formatATITerminalSessionSummary,
+  updateATITerminalState,
+} from '../terminal/ATITerminalState';
 
 export type ATITerminalReporterMode = 'default' | 'basic';
 
@@ -16,20 +25,10 @@ function writeTerminalLine(writer: TerminalLineWriter | undefined, line: string)
   console.log(line);
 }
 
-function formatTaskResultLine(event: ATCEvent) {
-  const candidate = event as Record<string, unknown>;
-  const planName = typeof candidate.planName === 'string' ? candidate.planName : '<Plan>';
-  const taskName = typeof candidate.taskName === 'string' ? candidate.taskName : '<Task>';
-  const passed = typeof candidate.success === 'boolean' ? candidate.success : false;
-  return `${planName}.${taskName} ${passed ? 'PASS' : 'FAIL'}`;
-}
-
 export type TerminalConsumerOptions = {
   reporter?: ATISimpleReporter;
   mode?: ATITerminalReporterMode;
-  echoToConsole?: boolean;
   isTTY?: boolean;
-  forceRender?: boolean;
   writeLog?: TerminalLineWriter;
   writeWarn?: TerminalLineWriter;
   writeError?: TerminalLineWriter;
@@ -40,6 +39,9 @@ export class TerminalConsumer implements IATIConsumer {
   readonly reporter: ATISimpleReporter;
   private readonly mode: ATITerminalReporterMode;
   private readonly terminalReporter?: ATITerminalReporter;
+  private state = createATITerminalState();
+  private completedTests: ATITerminalDisplayedTest[] = [];
+  private ended = false;
 
   constructor(private readonly options: TerminalConsumerOptions = {}) {
     this.reporter = options.reporter ?? new ATISimpleReporter();
@@ -48,7 +50,6 @@ export class TerminalConsumer implements IATIConsumer {
       this.terminalReporter = new ATITerminalReporter({
         reporter: this.reporter,
         isTTY: options.isTTY,
-        forceRender: options.forceRender,
         writeLog: options.writeLog,
         writeWarn: options.writeWarn,
         writeError: options.writeError,
@@ -63,35 +64,72 @@ export class TerminalConsumer implements IATIConsumer {
   onEvent(event: ATCEvent) {
     this.reporter.addEvent(event);
 
-    if (this.mode === 'default' && this.terminalReporter?.canRender()) {
+    if (this.mode === 'default') {
       return;
     }
 
-    if (this.mode !== 'default' && this.options.echoToConsole !== true) {
-      return;
-    }
-
-    const scope = event.testPath ? ` ${event.testPath}` : '';
-    switch (event.type) {
-      case 'TaskResult':
-        writeTerminalLine(this.options.writeLog, `[ATI][TaskResult]${scope} ${formatTaskResultLine(event)}`);
-        return;
-      case 'Message':
-        writeTerminalLine(
-          this.options.writeLog,
-          `[ATI][Message]${scope} ${String(event.kind)}: ${String(event.message)}`,
-        );
-        return;
-      default:
-        writeTerminalLine(this.options.writeLog, `[ATI][${event.type}]${scope}`);
+    const update = updateATITerminalState(this.state, this.reporter, event);
+    this.state = update.state;
+    if (update.flushedTest) {
+      this.appendCompletedTest(update.flushedTest);
     }
   }
 
   onEnd() {
+    if (this.ended) {
+      return;
+    }
+
+    this.ended = true;
     this.terminalReporter?.stop();
+    if (this.mode === 'basic') {
+      const flushed = flushATITerminalState(this.state, this.reporter);
+      this.state = flushed.state;
+      if (flushed.flushedTest) {
+        this.appendCompletedTest(flushed.flushedTest);
+      }
+
+      for (const test of this.completedTests) {
+        if (test.status !== 'passed' && test.status !== 'skipped') {
+          this.writeFormattedLines(formatATITerminalDisplayedTestSummary(test));
+        }
+      }
+
+      writeTerminalLine(this.options.writeLog, formatATITerminalSessionSummary(this.reporter.getSession()));
+    }
   }
 
   dispose() {
     this.terminalReporter?.dispose();
+    this.onEnd();
+  }
+
+  private writeFormattedLines(lines: ATITerminalFormattedLine[]) {
+    for (const line of lines) {
+      switch (line.level) {
+        case 'error':
+          writeTerminalLine(this.options.writeError, line.line);
+          break;
+        case 'warn':
+          writeTerminalLine(this.options.writeWarn, line.line);
+          break;
+        default:
+          writeTerminalLine(this.options.writeLog, line.line);
+      }
+    }
+  }
+
+  private appendCompletedTest(test: ATITerminalDisplayedTest) {
+    const previous = this.completedTests.at(-1);
+    if (
+      previous?.key === test.key &&
+      previous.runLabel === test.runLabel &&
+      previous.status === test.status &&
+      previous.phase === test.phase
+    ) {
+      return;
+    }
+
+    this.completedTests = [...this.completedTests, test];
   }
 }

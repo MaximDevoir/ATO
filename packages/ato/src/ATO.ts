@@ -1345,7 +1345,8 @@ export class ATO {
       .option('reporter', {
         choices: ['default', 'basic'] as const,
         default: 'default',
-        description: 'Terminal reporter mode. Use basic for CI-style line output or default for the Ink terminal UI.',
+        description:
+          'Terminal reporter mode. Use basic for raw process lines plus an end-of-run ATI summary, or default to use the Ink UI when the terminal supports it.',
       })
       .help()
       .parseSync() as unknown as ParsedCommandLineArguments;
@@ -1378,6 +1379,7 @@ export class ATO {
   private runtimeOptions: E2ERuntimeOptions;
   private atiOptions: ATIRuntimeOptions;
   private currentOutput?: Awaited<ReturnType<typeof createATORunOutput>>;
+  private reportedBasicReporterFallback = false;
   public readonly commandLineContext?: E2ECommandLineContext;
 
   constructor(init: ATOInit = {}) {
@@ -1402,11 +1404,16 @@ export class ATO {
     return this.runtimeOptions.dryRun === true;
   }
 
+  private get requestedReporterMode(): ATOReporterMode {
+    return this.runtimeOptions.reporter ?? 'default';
+  }
+
   get reporterMode(): ATOReporterMode {
-    if (!isInteractive()) {
+    if (this.requestedReporterMode === 'basic') {
       return 'basic';
     }
-    return this.runtimeOptions.reporter ?? 'default';
+
+    return this.canUseInteractiveReporter() ? 'default' : 'basic';
   }
 
   get output() {
@@ -1502,6 +1509,24 @@ export class ATO {
     console.error(...args);
   }
 
+  private canUseInteractiveReporter() {
+    const term = (process.env.TERM ?? '').trim().toLowerCase();
+    return isInteractive() && process.stdin.isTTY && process.stdout.isTTY && process.stderr.isTTY && term !== 'dumb';
+  }
+
+  private warnIfReporterModeWasDowngraded() {
+    if (
+      this.reportedBasicReporterFallback ||
+      this.requestedReporterMode !== 'default' ||
+      this.reporterMode !== 'basic'
+    ) {
+      return;
+    }
+
+    this.reportedBasicReporterFallback = true;
+    this.warn('[ATO] Interactive ATI terminal UI is unavailable in this environment; using basic reporter mode');
+  }
+
   preview() {
     if (this.coordinators.length === 0) {
       return [];
@@ -1527,6 +1552,7 @@ export class ATO {
     let finalExitCode = 0;
     for (const plan of plans) {
       await this.ensureOutput(resolveCoordinatorProcessLabel(plan.atcCoordinatorMode));
+      this.warnIfReporterModeWasDowngraded();
 
       if (plan.dryRun) {
         this.printDryRunPreview(plan.preview, plan.atcCoordinatorMode);
@@ -1867,7 +1893,7 @@ export class ATO {
         validateSchema: service.validateSchema ?? true,
         maxEventSizeBytes: service.maxEventSizeBytes ?? 1024 * 1024,
         ndjson,
-        terminal: service.terminal ?? this.reporterMode === 'default',
+        terminal: service.terminal ?? true,
       } satisfies ResolvedATIServiceOptions;
     });
   }
@@ -1908,7 +1934,7 @@ export class ATO {
           service.addConsumer(
             new TerminalConsumer({
               mode: this.reporterMode,
-              echoToConsole: this.reporterMode === 'basic',
+              isTTY: this.canUseInteractiveReporter(),
               writeLog: (line) => this.log(line),
               writeWarn: (line) => this.warn(line),
               writeError: (line) => this.error(line),
