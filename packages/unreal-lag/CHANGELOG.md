@@ -1,5 +1,15 @@
 # @maximdevoir/unreal-lag
 
+## 1.1.0
+
+### Minor Changes
+
+- [`a677976`](https://github.com/MaximDevoir/ATO/commit/a677976f46169e190c768c6ee3fe9e9de5d0771c) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - change bump
+
+- [`b37b5f5`](https://github.com/MaximDevoir/ATO/commit/b37b5f5ed11b956191a62705730185353a51cbce) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - Add scoped plans test suite
+
+  Introduced test suites to validate reusable plans within different scopes (A, B, and C) in standalone mode. Ensured proper isolation and no plan collisions between scopes, with detailed assertions and logging for task execution. Updated orchestrator and validation logic to include scoped plan tests.
+
 ## 1.0.3
 
 ### Patch Changes
