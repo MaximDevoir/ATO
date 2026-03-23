@@ -152,8 +152,6 @@ function ReporterApp({ state, completedTests }: ReporterAppProps) {
 
 export class ATITerminalReporter {
   private readonly writeLog: TerminalLineWriter;
-  private readonly writeWarn: TerminalLineWriter;
-  private readonly writeError: TerminalLineWriter;
   private readonly unsubscribe;
   private inkApp?: ReturnType<typeof render>;
   private state = createATITerminalState();
@@ -170,12 +168,6 @@ export class ATITerminalReporter {
     this.writeLog = (line) => {
       writeWithFallback(options.writeLog, console.log, line);
     };
-    this.writeWarn = (line) => {
-      writeWithFallback(options.writeWarn, console.warn, line);
-    };
-    this.writeError = (line) => {
-      writeWithFallback(options.writeError, console.error, line);
-    };
     this.unsubscribe = options.reporter.subscribe((event) => {
       const update = updateATITerminalState(this.state, this.options.reporter, event);
       this.state = update.state;
@@ -183,9 +175,6 @@ export class ATITerminalReporter {
         this.appendCompletedTest(update.flushedTest);
       }
       this.rerender();
-      if (update.flushedTest) {
-        this.flushMessages(update.flushedTest.messages);
-      }
     });
   }
 
@@ -230,21 +219,6 @@ export class ATITerminalReporter {
     }
 
     this.inkApp.rerender(<ReporterApp state={this.state} completedTests={this.completedTests} />);
-  }
-
-  private flushMessages(messages: ATITerminalMessageLine[]) {
-    for (const message of messages) {
-      switch (message.level) {
-        case 'error':
-          this.writeError(message.line);
-          break;
-        case 'warn':
-          this.writeWarn(message.line);
-          break;
-        default:
-          this.writeLog(message.line);
-      }
-    }
   }
 
   private appendCompletedTest(test: ATITerminalDisplayedTest) {
