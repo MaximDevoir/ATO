@@ -59,7 +59,7 @@ export interface UnrealLagOptions {
   autoCreateClients?: boolean;
   randomSeed?: number;
   logger?: UnrealLagLogger;
-  verboseDebug: boolean;
+  verboseDebug?: boolean;
 }
 
 export interface PeerEndpoint {

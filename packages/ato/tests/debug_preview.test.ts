@@ -8,6 +8,7 @@ describe('debug preview', () => {
         ueRoot: 'D:/uei/UE5.7.3/Engine',
         projectPath: 'D:/ue-projects/proj/proj.uproject',
         projectRoot: 'D:/ue-projects/proj',
+        verboseDebug: false,
       },
     });
     const coordinator = new Coordinator(CoordinatorMode.DedicatedServer)

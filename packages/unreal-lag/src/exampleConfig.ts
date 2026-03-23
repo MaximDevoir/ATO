@@ -15,6 +15,7 @@ const exampleConfig: UnrealLagOptions = {
   },
   randomSeed: 1337,
   autoCreateClients: true,
+  verboseDebug: false,
 };
 
 export function getExampleConfig(): UnrealLagOptions {

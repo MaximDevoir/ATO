@@ -22,6 +22,7 @@ function createPreview() {
       ueRoot: 'D:/uei/UE5.7.3/Engine',
       projectPath: 'D:/ue-projects/inv/inv.uproject',
       projectRoot: 'D:/ue-projects/inv',
+      verboseDebug: false,
     },
   });
   const coordinator = new Coordinator(CoordinatorMode.DedicatedServer)
@@ -198,6 +199,7 @@ describe('ATO', () => {
         ueRoot: 'D:/uei/UE5.7.3/Engine',
         projectPath: 'D:/ue-projects/inv/inv.uproject',
         projectRoot: 'D:/ue-projects/inv',
+        verboseDebug: false,
       },
     });
     const coordinator = new Coordinator(CoordinatorMode.DedicatedServer)
@@ -220,6 +222,7 @@ describe('ATO', () => {
         ueRoot: 'D:/uei/UE5.7.3/Engine',
         projectPath: 'D:/ue-projects/inv/inv.uproject',
         projectRoot: 'D:/ue-projects/inv',
+        verboseDebug: false,
       },
     });
     const coordinator = new Coordinator(CoordinatorMode.DedicatedServer)
@@ -250,6 +253,7 @@ describe('ATO', () => {
         ueRoot: 'D:/uei/UE5.7.3/Engine',
         projectPath: 'D:/ue-projects/inv/inv.uproject',
         projectRoot: 'D:/ue-projects/inv',
+        verboseDebug: false,
       },
     });
     const coordinator = new Coordinator(CoordinatorMode.DedicatedServer)
@@ -309,6 +313,7 @@ describe('ATO', () => {
         ueRoot: 'D:/uei/UE5.7.3/Engine',
         projectPath: 'D:/ue-projects/inv/inv.uproject',
         projectRoot: 'D:/ue-projects/inv',
+        verboseDebug: false,
       },
     });
     const coordinator = new Coordinator(CoordinatorMode.Standalone)
@@ -331,6 +336,7 @@ describe('ATO', () => {
         ueRoot: 'D:/uei/UE5.7.3/Engine',
         projectPath: 'D:/ue-projects/inv/inv.uproject',
         projectRoot: 'D:/ue-projects/inv',
+        verboseDebug: false,
       },
     });
     const coordinator = new Coordinator(CoordinatorMode.Standalone)
@@ -354,6 +360,7 @@ describe('ATO', () => {
         ueRoot: 'D:/uei/UE5.7.3/Engine',
         projectPath: 'D:/ue-projects/inv/inv.uproject',
         projectRoot: 'D:/ue-projects/inv',
+        verboseDebug: false,
       },
     });
     const coordinator = new Coordinator(CoordinatorMode.ListenServer)
@@ -388,6 +395,7 @@ describe('ATO', () => {
         ueRoot: 'D:/uei/UE5.7.3/Engine',
         projectPath: 'D:/ue-projects/inv/inv.uproject',
         projectRoot: 'D:/ue-projects/inv',
+        verboseDebug: false,
       },
     });
     const coordinator = new Coordinator(CoordinatorMode.ListenServer)
@@ -455,6 +463,7 @@ describe('ATO', () => {
         ueRoot: 'D:/uei/UE5.7.3/Engine',
         projectPath: 'D:/ue-projects/inv/inv.uproject',
         projectRoot: 'D:/ue-projects/inv',
+        verboseDebug: false,
       },
     });
     const coordinator = new Coordinator(CoordinatorMode.ListenServer)
@@ -478,6 +487,7 @@ describe('ATO', () => {
         ueRoot: 'D:/uei/UE5.7.3/Engine',
         projectPath: 'D:/ue-projects/inv/inv.uproject',
         projectRoot: 'D:/ue-projects/inv',
+        verboseDebug: false,
       },
     });
     const coordinator = new Coordinator(CoordinatorMode.DedicatedServer)
@@ -498,6 +508,7 @@ describe('ATO', () => {
         ueRoot: 'D:/uei/UE5.7.3/Engine',
         projectPath: 'D:/ue-projects/inv/inv.uproject',
         projectRoot: 'D:/ue-projects/inv',
+        verboseDebug: false,
       },
     });
 
