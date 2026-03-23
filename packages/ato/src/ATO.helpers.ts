@@ -1,4 +1,5 @@
-import { spawn } from 'node:child_process';
+import type { ChildProcess } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 
 const unrealLogPrefixPattern = /^\[(\d{4})\.(\d{2})\.(\d{2})-(\d{2})\.(\d{2})\.(\d{2})(?::\d+)?]\[\s*\d+](.*)$/;
 export interface SpawnProcessOptions {
@@ -73,6 +74,79 @@ async function isUdpPortBoundViaGetNetUDPEndpoint(pid: number, port: number) {
     return false;
   }
 }
+
+async function getTrackedProcessIds(rootPid: number, includeDescendants: boolean) {
+  if (!includeDescendants) {
+    return new Set([rootPid]);
+  }
+
+  try {
+    const cmd = [
+      `$root = ${rootPid}`,
+      '$processes = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Select-Object ProcessId, ParentProcessId',
+      '$childrenByParent = @{}',
+      'foreach ($process in $processes) {',
+      '  $parentId = [int]$process.ParentProcessId',
+      '  if (-not $childrenByParent.ContainsKey($parentId)) { $childrenByParent[$parentId] = @() }',
+      '  $childrenByParent[$parentId] += [int]$process.ProcessId',
+      '}',
+      '$pending = [System.Collections.Generic.Queue[int]]::new()',
+      '$pending.Enqueue($root)',
+      '$seen = [System.Collections.Generic.HashSet[int]]::new()',
+      '$seen.Add($root) | Out-Null',
+      'while ($pending.Count -gt 0) {',
+      '  $current = $pending.Dequeue()',
+      '  if (-not $childrenByParent.ContainsKey($current)) { continue }',
+      '  foreach ($child in $childrenByParent[$current]) {',
+      '    if ($seen.Add($child)) { $pending.Enqueue($child) }',
+      '  }',
+      '}',
+      '$seen | ForEach-Object { Write-Output $_ }',
+    ].join('; ');
+    const check = spawn('powershell', ['-NoProfile', '-Command', cmd], { windowsHide: true });
+    let out = '';
+    if (check.stdout) {
+      for await (const chunk of check.stdout) {
+        out += chunk.toString();
+      }
+    }
+    await new Promise<void>((res) => check.on('close', () => res()));
+
+    const trackedIds = out
+      .split(/\r?\n/)
+      .map((line) => Number.parseInt(line.trim(), 10))
+      .filter((value) => Number.isInteger(value) && value > 0);
+
+    return new Set(trackedIds.length > 0 ? trackedIds : [rootPid]);
+  } catch {
+    return new Set([rootPid]);
+  }
+}
+
+async function isAnyTrackedUdpPortBound(port: number, trackedProcessIds: Set<number>) {
+  if (trackedProcessIds.size === 0) {
+    return false;
+  }
+
+  try {
+    const cmd = `try { $e = Get-NetUDPEndpoint -LocalPort ${port} -ErrorAction SilentlyContinue; if ($e) { $e | ForEach-Object { Write-Output $_.OwningProcess } } } catch { }`;
+    const check = spawn('powershell', ['-NoProfile', '-Command', cmd], { windowsHide: true });
+    let out = '';
+    if (check.stdout) {
+      for await (const chunk of check.stdout) {
+        out += chunk.toString();
+      }
+    }
+    await new Promise<void>((res) => check.on('close', () => res()));
+
+    return out
+      .split(/\r?\n/)
+      .map((line) => Number.parseInt(line.trim(), 10))
+      .some((value) => trackedProcessIds.has(value));
+  } catch {
+    return false;
+  }
+}
 async function isUdpPortBoundViaNetstat(pid: number, port: number) {
   try {
     const net = spawn('netstat', ['-ano', '-p', 'udp'], { windowsHide: true });
@@ -107,6 +181,75 @@ export async function waitForUdpPort(pid: number, port: number, timeoutSeconds: 
     await new Promise((r) => setTimeout(r, 200));
   }
 }
+
+export async function waitForUdpPortFromProcessTree(
+  pid: number,
+  port: number,
+  timeoutSeconds: number,
+  includeDescendants = false,
+): Promise<void> {
+  const start = Date.now();
+  while (true) {
+    const trackedProcessIds = await getTrackedProcessIds(pid, includeDescendants);
+    if (await isAnyTrackedUdpPortBound(port, trackedProcessIds)) return;
+
+    if (!includeDescendants) {
+      if (await isUdpPortBoundViaGetNetUDPEndpoint(pid, port)) return;
+      if (await isUdpPortBoundViaNetstat(pid, port)) return;
+    } else if (await isUdpPortBoundViaNetstat(pid, port)) {
+      const net = spawn('netstat', ['-ano', '-p', 'udp'], { windowsHide: true });
+      let out = '';
+      if (net.stdout) {
+        for await (const chunk of net.stdout) {
+          out += chunk.toString();
+        }
+      }
+      await new Promise<void>((res) => net.on('close', () => res()));
+      const lines = out.split(/\r?\n/);
+      for (const line of lines) {
+        if (!line.includes(`:${port}`)) continue;
+        const parts = line.trim().split(/\s+/);
+        const pidStr = parts.at(-1);
+        const num = Number.parseInt(pidStr ?? '', 10);
+        if (trackedProcessIds.has(num)) return;
+      }
+    }
+
+    if ((Date.now() - start) / 1000 > timeoutSeconds) {
+      throw new Error(`Timeout waiting for UDP port ${port} from PID ${pid}`);
+    }
+    await new Promise((r) => setTimeout(r, 200));
+  }
+}
+
+export function commandExistsSync(command: string) {
+  try {
+    return spawnSync('where', [command], { windowsHide: true, stdio: 'ignore' }).status === 0;
+  } catch {
+    return false;
+  }
+}
+
+export function killProcessTree(processHandle: ChildProcess | undefined) {
+  if (!processHandle?.pid || processHandle.exitCode !== null || processHandle.signalCode !== null) {
+    return;
+  }
+
+  try {
+    const result = spawnSync('taskkill', ['/PID', String(processHandle.pid), '/T', '/F'], {
+      windowsHide: true,
+      stdio: 'ignore',
+    });
+    if (result.status === 0) {
+      return;
+    }
+  } catch {}
+
+  try {
+    processHandle.kill();
+  } catch {}
+}
+
 export function spawnProcess(exe: string, args: string[], prefix: string, options: SpawnProcessOptions = {}) {
   const p = spawn(exe, args, { windowsHide: true, detached: false, stdio: ['ignore', 'pipe', 'pipe'] });
   prefixStream(prefix, p.stdout, options.onStdoutLine, options.emitLine, 'stdout');

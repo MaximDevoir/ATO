@@ -36,4 +36,10 @@ describe('ATO reporter mode', () => {
 
     expect(Reflect.get(ato, 'reporterMode')).toBe('basic');
   });
+
+  it('accepts the codecov flag from the command line runtime options', () => {
+    const ato = createATO(['--codecov']);
+
+    expect(Reflect.get(ato, 'runtimeOptions')).toMatchObject({ codecov: true });
+  });
 });

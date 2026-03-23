@@ -93,6 +93,7 @@ export interface E2ERuntimeOptions {
   serverExe?: string;
   clientExe?: string;
   dryRun?: boolean;
+  codecov?: boolean;
   updateSnapshots?: boolean;
   reporter?: ATOReporterMode;
 }

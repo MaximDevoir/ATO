@@ -2,7 +2,7 @@
 import type { ChildProcess } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
 import * as path from 'node:path';
-import { ATIService, NDJSONConsumer, TerminalConsumer } from '@maximdevoir/ati';
+import { type ATCEvent, ATIService, type IATIConsumer, NDJSONConsumer, TerminalConsumer } from '@maximdevoir/ati';
 import { logWarningIfNetworkProfileUnstable, UnrealLagProfiles } from '@maximdevoir/unreal-lag/profiles';
 import type { BindInfo } from '@maximdevoir/unreal-lag/types';
 import { UnrealLag } from '@maximdevoir/unreal-lag/UnrealLag';
@@ -11,7 +11,12 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { ATC_CLIENT_REQUEST_LOG_PREFIX, ATC_RUN_TESTS_COMMAND } from './ATCAutomationNames';
 import { checkExistsSync } from './ATO._helpers';
-import { spawnProcess, waitForUdpPort } from './ATO.helpers';
+import {
+  buildCoverageWrappedLaunch,
+  isCodeCoverageExecutableAvailable,
+  resolveCodeCoverageExecutable,
+} from './ATO.codecov';
+import { killProcessTree, spawnProcess, waitForUdpPortFromProcessTree } from './ATO.helpers';
 import type {
   ATIEndpointOptions,
   ATINDJSONConsumerOptions,
@@ -62,6 +67,11 @@ interface ResolvedPreviewCommand {
   command: string;
 }
 
+interface PreparedProcessLaunch extends ResolvedPreviewCommand {
+  reportFilePath?: string;
+  waitForDescendantProcessPortBinding?: boolean;
+}
+
 interface ResolvedPreview {
   server: ResolvedPreviewCommand;
   clients: ResolvedPreviewCommand[];
@@ -88,6 +98,7 @@ interface ResolvedLaunchPlan {
   maxExternalClients?: number;
   preview: ResolvedPreview;
   dryRun: boolean;
+  codecovEnabled: boolean;
   unrealLagOptions?: UnrealLagProxyOptions;
 }
 
@@ -118,6 +129,7 @@ interface ParsedCommandLineArguments {
   serverExe?: string;
   clientExe?: string;
   dryRun: boolean;
+  codecov: boolean;
   updateSnapshots: boolean;
   reporter: ATOReporterMode;
 }
@@ -129,6 +141,43 @@ export interface ATCClientRequestMetadata {
 
 interface ATCObservationState {
   requestedRemoteClients: number;
+}
+
+function applyATCRequestedRemoteClients(state: ATCObservationState, requiredClients: number) {
+  state.requestedRemoteClients = Math.max(state.requestedRemoteClients, requiredClients);
+}
+
+export function observeATCSpawnRequestEvent(
+  state: Pick<ATCObservationState, 'requestedRemoteClients'>,
+  event: Pick<ATCEvent, 'type' | 'requiredClients' | 'processRole'>,
+) {
+  if (event.type !== 'TestStarted') {
+    return;
+  }
+
+  if (event.processRole && event.processRole !== 'Coordinator') {
+    return;
+  }
+
+  if (
+    typeof event.requiredClients !== 'number' ||
+    !Number.isInteger(event.requiredClients) ||
+    event.requiredClients < 0
+  ) {
+    return;
+  }
+
+  state.requestedRemoteClients = Math.max(state.requestedRemoteClients, event.requiredClients);
+}
+
+class ATOSpawnControlConsumer implements IATIConsumer {
+  readonly id = 'ato-spawn-control';
+
+  constructor(private readonly state: ATCObservationState) {}
+
+  onEvent(event: ATCEvent) {
+    observeATCSpawnRequestEvent(this.state, event);
+  }
 }
 
 const FAILURE_EXIT_CODE = 1;
@@ -163,6 +212,7 @@ interface MonitoredProcess {
   automation: AutomationObservationState;
   atc: ATCObservationState;
   exitPromise: Promise<ProcessExitResult>;
+  waitForDescendantProcessPortBinding?: boolean;
 }
 
 interface ProcessOutcome {
@@ -1338,6 +1388,12 @@ export class ATO {
         default: false,
         description: 'Print planned actions and exit without spawning processes (useful for CI validation)',
       })
+      .option('codecov', {
+        type: 'boolean',
+        default: false,
+        description:
+          'Wrap spawned Unreal processes with OpenCppCoverage and emit per-coordinator / per-client LCOV files under coverage/atc',
+      })
       .option('updateSnapshots', {
         type: 'boolean',
         default: false,
@@ -1372,6 +1428,7 @@ export class ATO {
         serverExe: argv.serverExe ?? options.serverExe,
         clientExe: argv.clientExe ?? options.clientExe,
         dryRun: argv.dryRun ?? options.dryRun,
+        codecov: argv.codecov ?? options.codecov,
         updateSnapshots: argv.updateSnapshots ?? options.updateSnapshots,
         reporter: argv.reporter ?? options.reporter,
       },
@@ -1611,9 +1668,11 @@ export class ATO {
         effectivePort,
         effectiveTimeout,
         atcCoordinatorMode,
+        effectiveRuntimeOptions.codecov ?? false,
         coordinator.unrealLagOptions,
       ),
       dryRun: effectiveRuntimeOptions.dryRun ?? false,
+      codecovEnabled: effectiveRuntimeOptions.codecov ?? false,
       unrealLagOptions: coordinator.unrealLagOptions,
     };
   }
@@ -1776,6 +1835,7 @@ export class ATO {
     port: number,
     timeoutSeconds: number,
     atcCoordinatorMode: CoordinatorMode,
+    codecovEnabled: boolean,
     unrealLagOptions: UnrealLagProxyOptions | undefined,
   ): ResolvedPreview {
     const serverArgs = buildServerArgs(
@@ -1788,21 +1848,25 @@ export class ATO {
       ? this.formatProxyHost(unrealLagPreview.bindAddress, unrealLagPreview.bindPort)
       : undefined;
 
-    const serverPreview = {
-      exe: serverOptions.exe,
-      args: serverArgs,
-      command: formatCommand(serverOptions.exe, serverArgs),
-    };
+    const serverPreview = this.resolvePreparedProcessLaunch(
+      atcCoordinatorMode,
+      resolveCoordinatorProcessLabel(atcCoordinatorMode),
+      serverOptions.exe,
+      serverArgs,
+      codecovEnabled,
+    );
 
     const clientTemplatePreview = clientTemplate
       ? (() => {
           const client = resolveClientLaunchOptions(clientTemplate, 0);
           const args = buildClientArgs(client, proxyHost, atcCoordinatorMode);
-          return {
-            exe: client.exe,
+          return this.resolvePreparedProcessLaunch(
+            atcCoordinatorMode,
+            `CLIENT ${client.clientIndex}`,
+            client.exe,
             args,
-            command: formatCommand(client.exe, args),
-          } satisfies ResolvedPreviewCommand;
+            codecovEnabled,
+          );
         })()
       : undefined;
 
@@ -1811,11 +1875,13 @@ export class ATO {
         ? Array.from({ length: maxExternalClients }, (_, clientIndex) => {
             const client = resolveClientLaunchOptions(clientTemplate, clientIndex);
             const args = buildClientArgs(client, proxyHost, atcCoordinatorMode);
-            return {
-              exe: client.exe,
+            return this.resolvePreparedProcessLaunch(
+              atcCoordinatorMode,
+              `CLIENT ${client.clientIndex}`,
+              client.exe,
               args,
-              command: formatCommand(client.exe, args),
-            } satisfies ResolvedPreviewCommand;
+              codecovEnabled,
+            );
           })
         : [];
 
@@ -1905,8 +1971,40 @@ export class ATO {
     });
   }
 
-  private async startATIForPlan(plan: ResolvedLaunchPlan): Promise<StartedATIService[]> {
+  private async startATIForPlan(
+    plan: ResolvedLaunchPlan,
+    spawnControlState?: ATCObservationState,
+  ): Promise<StartedATIService[]> {
     const startedServices: StartedATIService[] = [];
+
+    if (spawnControlState) {
+      try {
+        const service = new ATIService({
+          host: '127.0.0.1',
+          port: 0,
+          validateSchema: true,
+          maxEventSizeBytes: 1024 * 1024,
+        });
+        service.addConsumer(new ATOSpawnControlConsumer(spawnControlState));
+        await service.start();
+        const endpoint = service.getEndpoint();
+        this.log(`[ATI] ATO spawn control listening on ${endpoint.host}:${endpoint.port}`);
+        startedServices.push({
+          label: 'ATO Spawn Control',
+          service,
+          endpoint: {
+            host: endpoint.host,
+            port: endpoint.port,
+            connectTimeoutSeconds: 0.25,
+          },
+        });
+      } catch (error) {
+        this.warn(
+          `[ATI] Failed to start internal spawn-control service: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    }
+
     for (const serviceOptions of this.resolveATIServiceOptions(plan)) {
       if (serviceOptions.ndjson === false && !serviceOptions.terminal) {
         this.warn(`[ATI] ${serviceOptions.label} has no consumers configured; skipping managed ATI service`);
@@ -1994,7 +2092,50 @@ export class ATO {
       return false;
     }
 
+    if (plan.codecovEnabled) {
+      const coverageExecutable = resolveCodeCoverageExecutable(path.dirname(this.projectPath));
+      if (!isCodeCoverageExecutableAvailable(coverageExecutable)) {
+        this.error(
+          `OpenCppCoverage executable not found: ${coverageExecutable}. Install OpenCppCoverage, place OpenCppCoverage.exe in the project root, or set OPENCPPCOVERAGE_PATH.`,
+        );
+        return false;
+      }
+    }
+
     return true;
+  }
+
+  private resolvePreparedProcessLaunch(
+    coordinatorMode: CoordinatorMode,
+    processLabel: string,
+    exe: string,
+    args: string[],
+    codecovEnabled: boolean,
+  ): PreparedProcessLaunch {
+    if (!codecovEnabled) {
+      return {
+        exe,
+        args,
+        command: formatCommand(exe, args),
+      };
+    }
+
+    const wrapped = buildCoverageWrappedLaunch({
+      projectRoot: path.dirname(this.projectPath),
+      ueRoot: this.ueRoot,
+      coordinatorMode,
+      processLabel,
+      executable: exe,
+      args,
+    });
+
+    return {
+      exe: wrapped.exe,
+      args: wrapped.args,
+      command: formatCommand(wrapped.exe, wrapped.args),
+      reportFilePath: wrapped.reportFilePath,
+      waitForDescendantProcessPortBinding: wrapped.waitForDescendantProcessPortBinding,
+    };
   }
 
   private createMonitoredProcess(
@@ -2003,17 +2144,17 @@ export class ATO {
     label: string,
     timeoutSeconds: number,
     expectAutomation: boolean,
+    waitForDescendantProcessPortBinding = false,
+    atcState?: ATCObservationState,
   ) {
     const automation = createAutomationObservationState(expectAutomation);
-    const atc: ATCObservationState = {
-      requestedRemoteClients: 0,
-    };
+    const atc = atcState ?? { requestedRemoteClients: 0 };
     const observeLine = (line: string) => {
       observeAutomationLogLine(automation, line);
       ATO.FrameworkValidationReporter.observeProcessLine(label, line);
       const metadata = parseATCClientRequestMetadataLine(line);
       if (metadata) {
-        atc.requestedRemoteClients = Math.max(atc.requestedRemoteClients, metadata.requiredClients);
+        applyATCRequestedRemoteClients(atc, metadata.requiredClients);
       }
     };
     const process = spawnProcess(exe, args, label, {
@@ -2029,9 +2170,7 @@ export class ATO {
       timeoutSeconds,
       () => {
         this.error(`${label} exceeded maxLifetime (${timeoutSeconds}s); killing process`);
-        try {
-          if (process && !process.killed) process.kill();
-        } catch {}
+        killProcessTree(process);
       },
       (error) => this.error('Process error', error),
     );
@@ -2042,6 +2181,7 @@ export class ATO {
       automation,
       atc,
       exitPromise,
+      waitForDescendantProcessPortBinding,
     } satisfies MonitoredProcess;
   }
 
@@ -2059,10 +2199,11 @@ export class ATO {
         plan.atcCoordinatorMode,
       );
       const serverMaxLifetime = plan.server.maxLifetime ?? 600;
+      const serverATCState: ATCObservationState = { requestedRemoteClients: 0 };
       const proxyClientHost = requiresNetworkServer(plan.atcCoordinatorMode)
         ? await this.startUnrealLag(plan.effectivePort, plan.unrealLagOptions)
         : undefined;
-      startedATI = await this.startATIForPlan(plan);
+      startedATI = await this.startATIForPlan(plan, bootstrapOrchestration ? serverATCState : undefined);
 
       const serverArgs = appendResolvedExtraArgs(
         buildServerArgs(
@@ -2072,14 +2213,26 @@ export class ATO {
         ),
         buildATIReporterArgs(startedATI.map((startedService) => startedService.endpoint)),
       );
-      this.log(`[SPAWN] ${coordinatorLabel} -> ${formatCommand(plan.server.exe, serverArgs)}`);
-      this.log(`[SPAWN-ARGS] ${coordinatorLabel} ARGS:`, JSON.stringify(serverArgs), '\n');
-      serverMonitor = this.createMonitoredProcess(
+      const serverLaunch = this.resolvePreparedProcessLaunch(
+        plan.atcCoordinatorMode,
+        coordinatorLabel,
         plan.server.exe,
         serverArgs,
+        plan.codecovEnabled,
+      );
+      if (serverLaunch.reportFilePath) {
+        this.log(`[CODECOV] ${coordinatorLabel} -> ${serverLaunch.reportFilePath}`);
+      }
+      this.log(`[SPAWN] ${coordinatorLabel} -> ${serverLaunch.command}`);
+      this.log(`[SPAWN-ARGS] ${coordinatorLabel} ARGS:`, JSON.stringify(serverLaunch.args), '\n');
+      serverMonitor = this.createMonitoredProcess(
+        serverLaunch.exe,
+        serverLaunch.args,
         coordinatorLabel,
         serverMaxLifetime,
         hasAutomationCommands(plan.server),
+        serverLaunch.waitForDescendantProcessPortBinding,
+        serverATCState,
       );
       this.serverProc = serverMonitor.process;
 
@@ -2102,11 +2255,10 @@ export class ATO {
           plan.effectivePort,
           plan.effectiveTimeout,
           serverMonitor.exitPromise,
+          serverMonitor.waitForDescendantProcessPortBinding,
         );
         if (serverStatus !== 'bound') {
-          try {
-            if (this.serverProc && !this.serverProc.killed) this.serverProc.kill();
-          } catch {}
+          killProcessTree(this.serverProc);
           const finalServerExit = await serverMonitor.exitPromise;
           outcomes.push(
             summarizeStartupFailureOutcome(coordinatorLabel, finalServerExit, serverMonitor.automation, serverStatus),
@@ -2127,6 +2279,7 @@ export class ATO {
             clientMonitors.length,
             plan.maxExternalClients,
             plan.atcCoordinatorMode,
+            plan.codecovEnabled,
             proxyClientHost,
             clientMonitors,
           );
@@ -2136,6 +2289,7 @@ export class ATO {
           plan.clientTemplate,
           plan.maxExternalClients,
           plan.atcCoordinatorMode,
+          plan.codecovEnabled,
           proxyClientHost,
           clientMonitors,
           serverMonitor,
@@ -2145,17 +2299,11 @@ export class ATO {
         await this.waitForClientAutomationTerminalState(clientMonitors, 15);
 
         try {
-          if (this.serverProc && !this.serverProc.killed) {
-            this.serverProc.kill();
-          }
+          killProcessTree(this.serverProc);
         } catch {}
 
         for (const monitor of clientMonitors) {
-          try {
-            if (!monitor.process.killed) {
-              monitor.process.kill();
-            }
-          } catch {}
+          killProcessTree(monitor.process);
         }
 
         const finalServerExit = await serverMonitor.exitPromise;
@@ -2184,6 +2332,7 @@ export class ATO {
           clientMonitors.length,
           eagerClientCount,
           plan.atcCoordinatorMode,
+          plan.codecovEnabled,
           proxyClientHost,
           clientMonitors,
         );
@@ -2193,7 +2342,7 @@ export class ATO {
       outcomes.push(...clientOutcomes);
 
       try {
-        if (this.serverProc && !this.serverProc.killed) this.serverProc.kill();
+        killProcessTree(this.serverProc);
       } catch {}
 
       const finalServerExit = await serverMonitor.exitPromise;
@@ -2201,7 +2350,7 @@ export class ATO {
       return outcomes.some((outcome) => outcome.effectiveExitCode !== 0) ? FAILURE_EXIT_CODE : 0;
     } finally {
       try {
-        if (this.serverProc && !this.serverProc.killed) this.serverProc.kill();
+        killProcessTree(this.serverProc);
       } catch {}
       await this.stopATIForPlan(startedATI);
       await this.stopUnrealLag();
@@ -2260,10 +2409,11 @@ export class ATO {
     port: number,
     timeoutSeconds: number,
     serverExitPromise: Promise<ProcessExitResult>,
+    waitForDescendantProcessPortBinding = false,
   ) {
     const serverBindPromise = (async () => {
       try {
-        await waitForUdpPort(serverPid, port, timeoutSeconds);
+        await waitForUdpPortFromProcessTree(serverPid, port, timeoutSeconds, waitForDescendantProcessPortBinding);
         this.log('Server bound UDP port', port);
         return 'bound' as const;
       } catch (error) {
@@ -2282,7 +2432,7 @@ export class ATO {
       this.error('Server exited before binding the expected UDP port', status);
     }
     try {
-      if (this.serverProc && !this.serverProc.killed) this.serverProc.kill();
+      killProcessTree(this.serverProc);
     } catch {}
     await this.stopUnrealLag();
     return FAILURE_EXIT_CODE;
@@ -2293,6 +2443,7 @@ export class ATO {
     fromIndex: number,
     toExclusiveIndex: number,
     atcCoordinatorMode: CoordinatorMode,
+    codecovEnabled: boolean,
     proxyClientHost: string | undefined,
     clientMonitors: MonitoredProcess[],
   ) {
@@ -2300,15 +2451,26 @@ export class ATO {
       const client = resolveClientLaunchOptions(clientTemplate, clientIndex);
       const args = buildClientArgs(client, proxyClientHost, atcCoordinatorMode);
       const prefix = `CLIENT ${client.clientIndex}`;
-      this.log(`[SPAWN] ${prefix} -> ${formatCommand(client.exe, args)}`);
-      this.log(`[SPAWN-ARGS] ${prefix} ARGS:`, JSON.stringify(args), '\n');
+      const clientLaunch = this.resolvePreparedProcessLaunch(
+        atcCoordinatorMode,
+        prefix,
+        client.exe,
+        args,
+        codecovEnabled,
+      );
+      if (clientLaunch.reportFilePath) {
+        this.log(`[CODECOV] ${prefix} -> ${clientLaunch.reportFilePath}`);
+      }
+      this.log(`[SPAWN] ${prefix} -> ${clientLaunch.command}`);
+      this.log(`[SPAWN-ARGS] ${prefix} ARGS:`, JSON.stringify(clientLaunch.args), '\n');
       clientMonitors.push(
         this.createMonitoredProcess(
-          client.exe,
-          args,
+          clientLaunch.exe,
+          clientLaunch.args,
           prefix,
           client.maxLifetime ?? 300,
           (client.execTests?.length ?? 0) > 0,
+          clientLaunch.waitForDescendantProcessPortBinding,
         ),
       );
     }
@@ -2318,6 +2480,7 @@ export class ATO {
     clientTemplate: ResolvedClientTemplate | undefined,
     maxExternalClients: number | undefined,
     atcCoordinatorMode: CoordinatorMode,
+    codecovEnabled: boolean,
     proxyClientHost: string | undefined,
     clientMonitors: MonitoredProcess[],
     serverMonitor: MonitoredProcess,
@@ -2332,9 +2495,7 @@ export class ATO {
           `[ATO] ATC requested ${requestedRemoteClients} remote client(s), but this coordinator mode does not provide external clients`,
         );
         try {
-          if (!serverMonitor.process.killed) {
-            serverMonitor.process.kill();
-          }
+          killProcessTree(serverMonitor.process);
         } catch {}
         await serverMonitor.exitPromise;
         return false;
@@ -2345,9 +2506,7 @@ export class ATO {
           `[ATO] ATC requested ${requestedRemoteClients} remote client(s), but the configured maximum is ${maxExternalClients}`,
         );
         try {
-          if (!serverMonitor.process.killed) {
-            serverMonitor.process.kill();
-          }
+          killProcessTree(serverMonitor.process);
         } catch {}
         await serverMonitor.exitPromise;
         return false;
@@ -2359,6 +2518,7 @@ export class ATO {
           clientMonitors.length,
           requestedRemoteClients,
           atcCoordinatorMode,
+          codecovEnabled,
           proxyClientHost,
           clientMonitors,
         );
@@ -2379,9 +2539,7 @@ export class ATO {
 
     this.error(`[ATO] Timed out waiting for ${serverMonitor.label} automation to reach a terminal state`);
     try {
-      if (!serverMonitor.process.killed) {
-        serverMonitor.process.kill();
-      }
+      killProcessTree(serverMonitor.process);
     } catch {}
     await serverMonitor.exitPromise;
     return false;
@@ -2422,9 +2580,7 @@ export class ATO {
           );
         }
         for (const monitor of pendingClients) {
-          try {
-            monitor.process.kill();
-          } catch {}
+          killProcessTree(monitor.process);
         }
       }
     }

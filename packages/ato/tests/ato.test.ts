@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   ATC_CLIENT_BOOTSTRAP_TEST,
@@ -10,6 +11,7 @@ import {
   formatAutomationSummaryLine,
   getATCIndexedClientBootstrapTest,
   getAutomationTotals,
+  observeATCSpawnRequestEvent,
   observeAutomationLogLine,
   parseATCClientRequestMetadataLine,
   resolveProcessExitCode,
@@ -104,6 +106,65 @@ describe('ATO', () => {
       '--help',
       '-testexit=Automation Test Queue Empty',
     ]);
+  });
+  it('wraps coordinator and client launches with OpenCppCoverage when codecov is enabled', () => {
+    const session = new ATO({
+      commandLineContext: {
+        ueRoot: 'D:/uei/UE5.7.3/Engine',
+        projectPath: 'D:/ue-projects/inv/inv.uproject',
+        projectRoot: 'D:/ue-projects/inv',
+        verboseDebug: false,
+      },
+      runtimeOptions: {
+        codecov: true,
+      },
+    });
+    const coordinator = new Coordinator(CoordinatorMode.DedicatedServer)
+      .configureServer({
+        exe: 'D:/fake/invServer.exe',
+        automaticallyApplyBootstrapTestsCmds: false,
+        testExit: 'Automation Test Queue Empty',
+      })
+      .configureClient({
+        exe: 'D:/fake/inv.exe',
+        automaticallyApplyBootstrapTestsCmds: false,
+      })
+      .configureRuntime({ clientCount: 1 });
+    session.addCoordinator(coordinator);
+
+    const preview = getPreview(session);
+
+    expect(preview.server.exe).toBe('OpenCppCoverage');
+    expect(preview.server.args).toContain('--cover_children');
+    expect(preview.server.args).toContain('--');
+    expect(preview.server.args).toContain('--modules');
+    expect(preview.server.args).toContain(path.join('D:/ue-projects/inv', 'Binaries', 'Win64', '*.dll'));
+    expect(preview.server.args).toContain('--sources');
+    expect(preview.server.args).toContain(path.join('D:/ue-projects/inv', 'Source'));
+    expect(preview.server.args).toContain('--excluded_modules');
+    expect(preview.server.args).toContain(path.join('D:/uei/UE5.7.3/Engine', 'Binaries', 'Win64', '*.dll'));
+    expect(
+      preview.server.args.some((arg) =>
+        arg.includes(path.join('D:/ue-projects/inv', 'coverage', 'atc', 'dedicated.lcov.info')),
+      ),
+    ).toBe(true);
+    const serverSeparatorIndex = preview.server.args.indexOf('--');
+    expect(serverSeparatorIndex).toBeGreaterThanOrEqual(0);
+    expect(preview.server.args[serverSeparatorIndex + 1]).toMatch(/invServer\.exe$/i);
+    expect(preview.server.args[serverSeparatorIndex + 2]).toBe('D:/ue-projects/inv/inv.uproject');
+
+    expect(preview.clients).toHaveLength(1);
+    expect(preview.clients[0].exe).toBe('OpenCppCoverage');
+    expect(
+      preview.clients[0].args.some((arg) =>
+        arg.includes(path.join('D:/ue-projects/inv', 'coverage', 'atc', 'dedicated-client-0.lcov.info')),
+      ),
+    ).toBe(true);
+    const clientSeparatorIndex = preview.clients[0].args.indexOf('--');
+    expect(clientSeparatorIndex).toBeGreaterThanOrEqual(0);
+    expect(preview.clients[0].args[clientSeparatorIndex + 1]).toMatch(/inv\.exe$/i);
+    expect(preview.clients[0].args[clientSeparatorIndex + 2]).toBe('D:/ue-projects/inv/inv.uproject');
+    expect(preview.clients[0].args[clientSeparatorIndex + 3]).toBe('127.0.0.1');
   });
   it('keeps the last named extra arg across different representations', () => {
     const { session, coordinator } = createPreview();
@@ -456,6 +517,43 @@ describe('ATO', () => {
       parseATCClientRequestMetadataLine(`${ATC_CLIENT_REQUEST_LOG_PREFIX}{"testPath":"Test","requiredClients":-1}`),
     ).toBeUndefined();
     expect(parseATCClientRequestMetadataLine(`${ATC_CLIENT_REQUEST_LOG_PREFIX}not-json`)).toBeUndefined();
+  });
+  it('observes ATC spawn requests from ATI TestStarted events', () => {
+    const state = { requestedRemoteClients: 0 };
+
+    observeATCSpawnRequestEvent(state, {
+      type: 'TestStarted',
+      requiredClients: 2,
+      processRole: 'Coordinator',
+    });
+    observeATCSpawnRequestEvent(state, {
+      type: 'TestStarted',
+      requiredClients: 1,
+      processRole: 'Coordinator',
+    });
+
+    expect(state.requestedRemoteClients).toBe(2);
+  });
+  it('ignores ATI events that should not trigger external client spawning', () => {
+    const state = { requestedRemoteClients: 0 };
+
+    observeATCSpawnRequestEvent(state, {
+      type: 'ClientReady',
+      requiredClients: 3,
+      processRole: 'Coordinator',
+    });
+    observeATCSpawnRequestEvent(state, {
+      type: 'TestStarted',
+      requiredClients: 3,
+      processRole: 'ExternalClient',
+    });
+    observeATCSpawnRequestEvent(state, {
+      type: 'TestStarted',
+      requiredClients: -1,
+      processRole: 'Coordinator',
+    });
+
+    expect(state.requestedRemoteClients).toBe(0);
   });
   it('uses Unreal travel-style separators when appending listen to startup maps with existing options', () => {
     const session = new ATO({
