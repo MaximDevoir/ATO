@@ -461,12 +461,20 @@ export class ATISimpleReporter {
       case 'RunStart':
         run.status = 'Running';
         test.currentRunIndex = runIndex;
+        test.phase = 'Queued';
+        test.result = undefined;
         this.currentRunIndexByTestKey.set(test.key, runIndex);
         break;
       case 'RunEnd': {
         const skipped = getBooleanField(event, 'skipped') ?? false;
         const failed = getBooleanField(event, 'failed') ?? false;
-        run.status = skipped ? 'Skipped' : failed ? 'Failed' : 'Passed';
+        if (skipped) {
+          run.status = 'Skipped';
+        } else if (failed) {
+          run.status = 'Failed';
+        } else {
+          run.status = 'Passed';
+        }
         break;
       }
       case 'RunsSkipped':
@@ -485,6 +493,11 @@ export class ATISimpleReporter {
   private handleTestStarted(event: ReporterEvent) {
     const test = this.ensureTest(event);
     const run = this.ensureRun(test, this.resolveRunIndex(event, test));
+    test.result = undefined;
+    if (test.phase === 'Completed') {
+      test.phase = 'Queued';
+    }
+    run.status = 'Running';
     const execution = this.ensureExecution(run, test, event);
     execution.startedAt = event.timestamp;
     execution.phase = test.phase;

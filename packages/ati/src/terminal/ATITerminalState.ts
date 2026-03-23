@@ -69,7 +69,7 @@ function resolveRunLabel(test: ATITest | undefined) {
 }
 
 function resolveStatus(test: ATITest | undefined, fallback: ATITerminalDisplayedStatus) {
-  if (!test?.result) {
+  if (!test?.result || test.phase !== 'Completed') {
     return fallback;
   }
 
@@ -180,11 +180,11 @@ function flushCurrentTest(state: ATITerminalState, reporter: ATISimpleReporter) 
 function statusSymbol(status: ATITerminalDisplayedStatus) {
   switch (status) {
     case 'passed':
-      return 'OK';
+      return '√';
     case 'failed':
       return 'X';
     case 'skipped':
-      return '!';
+      return '-';
     default:
       return '>';
   }

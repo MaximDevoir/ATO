@@ -643,4 +643,105 @@ describe('ATISimpleReporter', () => {
     expect(session?.testsByEffectiveCoordinatorMode.get('Dedicated')?.get('ATC.PIE.Sample::2')).toBe(test);
     expect(session?.testsByEffectiveCoordinatorMode.get('ListenServer')?.get('ATC.PIE.Sample::2')).toBe(test);
   });
+
+  it('clears the previous run result when a repeated run starts', () => {
+    const reporter = new ATISimpleReporter();
+
+    addEvents(reporter, [
+      {
+        version: 1,
+        sessionId: 'session-repeat-reset',
+        sequence: 0,
+        timestamp: 0,
+        type: 'SessionStarted',
+        coordinatorMode: 'Dedicated',
+      },
+      {
+        version: 1,
+        sessionId: 'session-repeat-reset',
+        sequence: 1,
+        timestamp: 1,
+        type: 'TestRepeat',
+        testId: 'ATC.Repeat.Sample|Invocation=0|Run=1',
+        testPath: 'ATC.Repeat.Sample',
+        coordinatorMode: 'Dedicated',
+        effectiveCoordinatorMode: 'Dedicated',
+        invocationIndex: 0,
+        state: 'RunStart',
+        currentRun: 1,
+        totalRuns: 2,
+        repeatMode: 'Count',
+      },
+      {
+        version: 1,
+        sessionId: 'session-repeat-reset',
+        sequence: 2,
+        timestamp: 2,
+        type: 'TestStarted',
+        testId: 'travel-repeat-1',
+        testPath: 'ATC.Repeat.Sample',
+        travelSessionId: 'travel-repeat-1',
+        coordinatorMode: 'Dedicated',
+        effectiveCoordinatorMode: 'Dedicated',
+        invocationIndex: 0,
+        requiredClients: 1,
+      },
+      {
+        version: 1,
+        sessionId: 'session-repeat-reset',
+        sequence: 3,
+        timestamp: 3,
+        type: 'TestFinished',
+        testId: 'travel-repeat-1',
+        testPath: 'ATC.Repeat.Sample',
+        travelSessionId: 'travel-repeat-1',
+        coordinatorMode: 'Dedicated',
+        effectiveCoordinatorMode: 'Dedicated',
+        success: true,
+        skipped: false,
+        durationSeconds: 1,
+        message: 'first run complete',
+      },
+      {
+        version: 1,
+        sessionId: 'session-repeat-reset',
+        sequence: 4,
+        timestamp: 4,
+        type: 'TestRepeat',
+        testId: 'ATC.Repeat.Sample|Invocation=0|Run=1',
+        testPath: 'ATC.Repeat.Sample',
+        coordinatorMode: 'Dedicated',
+        effectiveCoordinatorMode: 'Dedicated',
+        invocationIndex: 0,
+        state: 'RunEnd',
+        currentRun: 1,
+        totalRuns: 2,
+        repeatMode: 'Count',
+        failed: false,
+        skipped: false,
+      },
+      {
+        version: 1,
+        sessionId: 'session-repeat-reset',
+        sequence: 5,
+        timestamp: 5,
+        type: 'TestRepeat',
+        testId: 'ATC.Repeat.Sample|Invocation=0|Run=2',
+        testPath: 'ATC.Repeat.Sample',
+        coordinatorMode: 'Dedicated',
+        effectiveCoordinatorMode: 'Dedicated',
+        invocationIndex: 0,
+        state: 'RunStart',
+        currentRun: 2,
+        totalRuns: 2,
+        repeatMode: 'Count',
+      },
+    ]);
+
+    const test = reporter.getSession()?.tests.get('ATC.Repeat.Sample::0');
+    expect(test?.currentRunIndex).toBe(2);
+    expect(test?.phase).toBe('Queued');
+    expect(test?.result).toBeUndefined();
+    expect(test?.runs[1]?.status).toBe('Running');
+  });
 });
