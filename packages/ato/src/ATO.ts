@@ -11,6 +11,7 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { ATC_CLIENT_REQUEST_LOG_PREFIX, ATC_RUN_TESTS_COMMAND } from './ATCAutomationNames';
 import { checkExistsSync } from './ATO._helpers';
+import { mergeCoverageReports as mergeCoverageReportsInDirectory } from './ATO.CoverageMerger';
 import {
   buildCoverageWrappedLaunch,
   isCodeCoverageExecutableAvailable,
@@ -1614,26 +1615,54 @@ export class ATO {
     }
 
     let finalExitCode = 0;
-    for (const plan of plans) {
-      await this.ensureOutput(resolveCoordinatorProcessLabel(plan.atcCoordinatorMode));
-      this.warnIfReporterModeWasDowngraded();
+    const shouldMergeCoverageReports = plans.some((plan) => plan.codecovEnabled && !plan.dryRun);
 
-      if (plan.dryRun) {
-        this.printDryRunPreview(plan.preview, plan.atcCoordinatorMode);
-        continue;
+    try {
+      for (const plan of plans) {
+        await this.ensureOutput(resolveCoordinatorProcessLabel(plan.atcCoordinatorMode));
+        this.warnIfReporterModeWasDowngraded();
+
+        if (plan.dryRun) {
+          this.printDryRunPreview(plan.preview, plan.atcCoordinatorMode);
+          continue;
+        }
+
+        if (!this.validateExecutables(plan)) {
+          return 2;
+        }
+
+        const exitCode = await this.startResolvedPlan(plan);
+        if (exitCode !== 0) {
+          finalExitCode = exitCode;
+        }
       }
-
-      if (!this.validateExecutables(plan)) {
-        return 2;
-      }
-
-      const exitCode = await this.startResolvedPlan(plan);
-      if (exitCode !== 0) {
-        finalExitCode = exitCode;
+    } finally {
+      if (shouldMergeCoverageReports) {
+        finalExitCode = await this.mergeCoverageReports(finalExitCode);
       }
     }
 
     return finalExitCode;
+  }
+
+  private async mergeCoverageReports(currentExitCode: number) {
+    try {
+      const result = await mergeCoverageReportsInDirectory({
+        projectRoot: path.dirname(this.projectPath),
+      });
+      if (!result) {
+        this.warn('[CODECOV] No LCOV reports were found under coverage/atc to merge');
+        return currentExitCode;
+      }
+
+      this.log(
+        `[CODECOV] Merged ${result.inputFileCount} LCOV file(s) across ${result.sourceFileCount} source file(s) -> ${result.outputFilePath}`,
+      );
+      return currentExitCode;
+    } catch (error) {
+      this.error(`[CODECOV] Failed to merge LCOV files: ${error instanceof Error ? error.message : String(error)}`);
+      return currentExitCode === 0 ? FAILURE_EXIT_CODE : currentExitCode;
+    }
   }
 
   private resolveLaunchPlans() {

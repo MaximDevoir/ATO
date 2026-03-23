@@ -42,10 +42,19 @@ process.exit(code);
 For native dedicated/listen coordinators, omitting `--clients` allows ATO to spawn external clients on demand as the
 server requests them.
 When `--codecov` is enabled, ATO wraps each spawned Unreal process with OpenCppCoverage, writes LCOV output to
-`coverage/atc/<coordinator-or-client>.lcov.info`, and defaults coverage collection to project-owned modules/sources
+`coverage/atc/<coordinator-or-client>-<randomDigits>.lcov.info`, and defaults coverage collection to project-owned
+modules/sources
 instead of Unreal Engine modules.
+At the end of the session, ATO folds every `coverage/atc/**/*.info` file except `coverage/atc/merged.info` into a fresh
+combined report, writing the result back to `coverage/atc/merged.info` while leaving the
+individual reports in place.
 For coordinator-driven external client spin-up, ATO now listens for direct ATI `TestStarted.requiredClients` events and
 keeps the legacy stdout metadata parsing as a compatibility fallback, so client orchestration still works when stdout is
 wrapped by tools such as OpenCppCoverage.
 You can call `addOrchestrator(...)` multiple times to run several native coordinators sequentially from one top-level
 ATO session.
+
+## Code Coverage
+
+Code coverage is available only on Windows. It requires OpenCppCoverage and the `lcov` exporter
+from [covlcov](https://github.com/MaximDevoir/covlcov).

@@ -143,11 +143,9 @@ describe('ATO', () => {
     expect(preview.server.args).toContain(path.join('D:/ue-projects/inv', 'Source'));
     expect(preview.server.args).toContain('--excluded_modules');
     expect(preview.server.args).toContain(path.join('D:/uei/UE5.7.3/Engine', 'Binaries', 'Win64', '*.dll'));
-    expect(
-      preview.server.args.some((arg) =>
-        arg.includes(path.join('D:/ue-projects/inv', 'coverage', 'atc', 'dedicated.lcov.info')),
-      ),
-    ).toBe(true);
+    const serverExportArg = preview.server.args.find((arg) => arg.startsWith('--export_type=lcov:'));
+    expect(serverExportArg).toBeTruthy();
+    expect(serverExportArg).toMatch(/dedicated-\d{6}\.lcov\.info$/i);
     const serverSeparatorIndex = preview.server.args.indexOf('--');
     expect(serverSeparatorIndex).toBeGreaterThanOrEqual(0);
     expect(preview.server.args[serverSeparatorIndex + 1]).toMatch(/invServer\.exe$/i);
@@ -155,11 +153,9 @@ describe('ATO', () => {
 
     expect(preview.clients).toHaveLength(1);
     expect(preview.clients[0].exe).toBe('OpenCppCoverage');
-    expect(
-      preview.clients[0].args.some((arg) =>
-        arg.includes(path.join('D:/ue-projects/inv', 'coverage', 'atc', 'dedicated-client-0.lcov.info')),
-      ),
-    ).toBe(true);
+    const clientExportArg = preview.clients[0].args.find((arg) => arg.startsWith('--export_type=lcov:'));
+    expect(clientExportArg).toBeTruthy();
+    expect(clientExportArg).toMatch(/dedicated-client-0-\d{6}\.lcov\.info$/i);
     const clientSeparatorIndex = preview.clients[0].args.indexOf('--');
     expect(clientSeparatorIndex).toBeGreaterThanOrEqual(0);
     expect(preview.clients[0].args[clientSeparatorIndex + 1]).toMatch(/inv\.exe$/i);

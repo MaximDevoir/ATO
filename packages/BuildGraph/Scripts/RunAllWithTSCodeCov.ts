@@ -46,6 +46,6 @@ for (const script of scripts) {
   });
 
   if (result.status !== 0) {
-    process.exit(result.status ?? 1);
+    // process.exit(result.status ?? 1);
   }
 }

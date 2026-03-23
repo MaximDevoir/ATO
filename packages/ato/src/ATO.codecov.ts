@@ -1,4 +1,5 @@
-import { mkdirSync, readdirSync, rmSync } from 'node:fs';
+import { randomInt } from 'node:crypto';
+import { mkdirSync, readdirSync } from 'node:fs';
 import * as path from 'node:path';
 import { checkExistsSync } from './ATO._helpers';
 import { commandExistsSync } from './ATO.helpers';
@@ -40,6 +41,18 @@ function resolveCoverageReportBaseName(coordinatorMode: CoordinatorMode, process
   }
 
   return sanitizeFileName(resolveCoordinatorCoverageLabel(coordinatorMode));
+}
+
+function resolveCoverageReportFilePath(projectRoot: string, coordinatorMode: CoordinatorMode, processLabel: string) {
+  const coverageDirectory = resolveCoverageDirectory(projectRoot);
+  const baseName = resolveCoverageReportBaseName(coordinatorMode, processLabel);
+
+  let reportFilePath = '';
+  do {
+    reportFilePath = path.join(coverageDirectory, `${baseName}-${randomInt(100000, 1000000)}.lcov.info`);
+  } while (checkExistsSync(reportFilePath));
+
+  return reportFilePath;
 }
 
 function uniquePaths(values: string[]) {
@@ -170,10 +183,12 @@ export function buildCoverageWrappedLaunch(options: {
   args: string[];
 }): CoverageWrappedLaunch {
   const coverageDirectory = resolveCoverageDirectory(options.projectRoot);
-  const baseName = resolveCoverageReportBaseName(options.coordinatorMode, options.processLabel);
-  const reportFilePath = path.join(coverageDirectory, `${baseName}.lcov.info`);
+  const reportFilePath = resolveCoverageReportFilePath(
+    options.projectRoot,
+    options.coordinatorMode,
+    options.processLabel,
+  );
   mkdirSync(coverageDirectory, { recursive: true });
-  rmSync(reportFilePath, { force: true });
 
   const coverageArgs = [
     ...buildProjectModulePatterns(options.projectRoot, options.executable).flatMap((modulePattern) => [
