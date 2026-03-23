@@ -89,9 +89,6 @@ if (files.length === 0) {
 const output = path.join(ROOT, 'coverage', 'merged.coverage-final.json');
 
 function stage(file: string) {
-  // const dir = path.join(stagingDir, String(index++));
-  // fs.mkdirSync(dir, {recursive: true});
-
   const dest = path.join(stagingDir, `${String(index++)}-coverage-final.json`);
   fs.copyFileSync(file, dest);
 
@@ -124,7 +121,9 @@ fs.copyFileSync(mergedJson, path.join(nycOutputDir, 'out.json'));
 // Generate LCOV
 execSync(`npx nyc report --reporter=lcov --temp-dir coverage --report-dir coverage/merged`, { stdio: 'inherit' });
 
-const stats = fs.statSync(output);
+normalizeLCOV('coverage/merged/lcov.info');
+
+const stats = fs.statSync(path.join(ROOT, 'coverage', 'merged', 'lcov.info'));
 
 if (stats.size === 0) {
   console.error('[Coverage] ❌ Merged LCOV is empty (0 bytes)');
