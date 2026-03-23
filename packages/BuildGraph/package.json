@@ -4,5 +4,10 @@
   "type": "module",
   "dependencies": {
     "@maximdevoir/ato": "workspace:*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MaximDevoir/ATO.git",
+    "directory": "packages/buildgraph"
   }
 }
