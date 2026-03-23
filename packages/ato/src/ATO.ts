@@ -2073,7 +2073,7 @@ export class ATO {
         buildATIReporterArgs(startedATI.map((startedService) => startedService.endpoint)),
       );
       this.log(`[SPAWN] ${coordinatorLabel} -> ${formatCommand(plan.server.exe, serverArgs)}`);
-      this.log(`[SPAWN-ARGS] ${coordinatorLabel} ARGS:`, JSON.stringify(serverArgs));
+      this.log(`[SPAWN-ARGS] ${coordinatorLabel} ARGS:`, JSON.stringify(serverArgs), '\n');
       serverMonitor = this.createMonitoredProcess(
         plan.server.exe,
         serverArgs,
@@ -2301,7 +2301,7 @@ export class ATO {
       const args = buildClientArgs(client, proxyClientHost, atcCoordinatorMode);
       const prefix = `CLIENT ${client.clientIndex}`;
       this.log(`[SPAWN] ${prefix} -> ${formatCommand(client.exe, args)}`);
-      this.log(`[SPAWN-ARGS] ${prefix} ARGS:`, JSON.stringify(args));
+      this.log(`[SPAWN-ARGS] ${prefix} ARGS:`, JSON.stringify(args), '\n');
       clientMonitors.push(
         this.createMonitoredProcess(
           client.exe,
