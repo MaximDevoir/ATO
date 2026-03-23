@@ -115,15 +115,21 @@ export class UnrealLag extends EventEmitter {
   }
 
   private log(message: string, ...args: unknown[]) {
-    this.logger.log(`[UnrealLag] ${message}`, ...args);
+    if (this.options.verboseDebug) {
+      this.logger.log(`[UnrealLag] ${message}`, ...args);
+    }
   }
 
   private warn(message: string, ...args: unknown[]) {
-    this.logger.warn(`[UnrealLag] ${message}`, ...args);
+    if (this.options.verboseDebug) {
+      this.logger.warn(`[UnrealLag] ${message}`, ...args);
+    }
   }
 
   private error(message: string, ...args: unknown[]) {
-    this.logger.error(`[UnrealLag] ${message}`, ...args);
+    if (this.options.verboseDebug) {
+      this.logger.error(`[UnrealLag] ${message}`, ...args);
+    }
   }
 
   private formatEndpoint(endpoint?: PeerEndpoint | BindInfo) {

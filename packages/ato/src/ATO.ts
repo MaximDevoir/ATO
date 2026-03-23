@@ -109,6 +109,7 @@ interface StartedATIService {
 }
 
 interface ParsedCommandLineArguments {
+  ATODebug: boolean;
   UERoot: string;
   Project: string;
   clients?: number;
@@ -1348,6 +1349,11 @@ export class ATO {
         description:
           'Terminal reporter mode. Use basic for raw process lines plus an end-of-run ATI summary, or default to use the Ink UI when the terminal supports it.',
       })
+      .option('ATODebug', {
+        type: 'boolean',
+        default: false,
+        description: 'Enable debug logging for ATO internals',
+      })
       .help()
       .parseSync() as unknown as ParsedCommandLineArguments;
 
@@ -1357,6 +1363,7 @@ export class ATO {
         ueRoot: argv.UERoot,
         projectPath,
         projectRoot: path.dirname(projectPath),
+        verboseDebug: argv.ATODebug ?? false,
       },
       runtimeOptions: {
         clientCount: argv.clients ?? options.clientCount,
@@ -2223,6 +2230,7 @@ export class ATO {
       },
       defaultClient: { profile: clientProfileName },
       autoCreateClients: true,
+      verboseDebug: this.commandLineContext?.verboseDebug ?? false,
     });
     this.unrealLagBindInfo = await this.unrealLag.start();
 

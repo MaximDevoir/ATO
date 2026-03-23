@@ -101,6 +101,7 @@ export interface E2ECommandLineContext {
   ueRoot: string;
   projectPath: string;
   projectRoot: string;
+  verboseDebug: boolean;
 }
 
 export interface E2ECommandLineOptions extends E2ERuntimeOptions {
