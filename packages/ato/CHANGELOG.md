@@ -1,5 +1,15 @@
 # @maximdevoir/ato
 
+## 1.1.2
+
+### Patch Changes
+
+- [`82dd28d`](https://github.com/MaximDevoir/ATO/commit/82dd28da0d4a7ec72ad3ad698a614d1d853af530) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - bump changes
+
+- Updated dependencies [[`82dd28d`](https://github.com/MaximDevoir/ATO/commit/82dd28da0d4a7ec72ad3ad698a614d1d853af530)]:
+  - @maximdevoir/ati@1.1.2
+  - @maximdevoir/unreal-lag@1.1.2
+
 ## 1.1.1
 
 ### Patch Changes
