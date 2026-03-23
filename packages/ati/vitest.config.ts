@@ -9,7 +9,7 @@ export default defineConfig({
       provider: 'v8',
       include: ['src/**/*.ts'],
       exclude: ['**/*.test.ts', '**/tests/**', 'node_modules/'],
-      reporter: ['text', 'lcov', 'html'],
+      reporter: ['text', 'lcov', 'json', 'html'],
     },
   },
 });
