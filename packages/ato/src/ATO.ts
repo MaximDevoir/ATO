@@ -2331,8 +2331,8 @@ export class ATO {
           killProcessTree(this.serverProc);
         } catch {}
 
-        const GRACE_SECONDS = 5;
-        await new Promise((resolve) => setTimeout(resolve, GRACE_SECONDS * 1000));
+        const GRACE_SECONDS = 10;
+        await new Promise((resolve) => setTimeout(resolve, GRACE_SECONDS * 500));
         this.log(`[ATO] Waiting ${GRACE_SECONDS}s before killing clients...`);
         await new Promise((resolve) => setTimeout(resolve, GRACE_SECONDS * 1000));
 
