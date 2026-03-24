@@ -2331,8 +2331,16 @@ export class ATO {
           killProcessTree(this.serverProc);
         } catch {}
 
+        const GRACE_SECONDS = 5;
+        await new Promise((resolve) => setTimeout(resolve, GRACE_SECONDS * 1000));
+        this.log(`[ATO] Waiting ${GRACE_SECONDS}s before killing clients...`);
+        await new Promise((resolve) => setTimeout(resolve, GRACE_SECONDS * 1000));
+
         for (const monitor of clientMonitors) {
-          killProcessTree(monitor.process);
+          if (!monitor.process.killed) {
+            this.log(`[ATO] Force-killing ${monitor.label}`);
+            killProcessTree(monitor.process);
+          }
         }
 
         const finalServerExit = await serverMonitor.exitPromise;
