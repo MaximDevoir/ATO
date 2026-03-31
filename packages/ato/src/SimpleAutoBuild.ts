@@ -77,6 +77,7 @@ export class SimpleAutoBuildService {
     const schemaLocation = resolveBuildGraphSchemaLocation(engineDir);
 
     const xml = `<?xml version="1.0"?>
+<!-- This file is auto-generated. Any changes will be ignored and automatically overwritten. -->
 <BuildGraph xmlns="http://www.epicgames.com/BuildGraph"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="${schemaLocation}">
