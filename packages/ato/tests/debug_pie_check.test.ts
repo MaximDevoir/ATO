@@ -20,7 +20,8 @@ describe('debug pie check', () => {
     expect(preview).toBeTruthy();
     if (!preview) throw new Error('Expected preview to be available');
 
-    const expected = path.join('D:/dummy/Engine', 'Binaries', 'Win64', 'UnrealEditor');
-    expect(preview.server.exe).toBeOneOf([expected, `${expected}.exe`]);
+    const expectedWindows = path.join('D:/dummy/Engine', 'Binaries', 'Win64', 'UnrealEditor.exe');
+    const expectedLinux = path.join('D:/dummy/Engine', 'Binaries', 'Linux', 'UnrealEditor');
+    expect(preview.server.exe).toBeOneOf([expectedWindows, expectedLinux]);
   });
 });
