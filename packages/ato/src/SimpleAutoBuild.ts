@@ -4,7 +4,6 @@ import * as path from 'node:path';
 import { CoordinatorMode } from './ATO.options';
 import { normalizePathSlashes, resolveBuildGraphSchemaLocation, resolveUnrealHostPlatform } from './UnrealPlatform';
 
-const DEFAULT_COOK_MAPS = '/Engine/Maps/Templates/OpenWorld+/Engine/Maps/Templates/Template_Default';
 const SIMPLE_AUTO_BUILD_TARGET = 'SimpleAutoBuild';
 
 export interface SimpleAutoBuildSessionOptions {
@@ -88,7 +87,6 @@ export class SimpleAutoBuildService {
   <Option Name="CompilePlatform" DefaultValue="${hostPlatform.compilePlatform}" Description="Compile target platform"/>
   <Option Name="CookPlatformStandalone" DefaultValue="${hostPlatform.cookPlatformStandalone}" Description="Cook platform for standalone/listen tests"/>
   <Option Name="CookPlatformDedicated" DefaultValue="${hostPlatform.cookPlatformDedicated}" Description="Cook platform for dedicated server tests"/>
-  <Option Name="CookMaps" DefaultValue="${DEFAULT_COOK_MAPS}" Description="The maps to cook"/>
   <Agent Name="Default" Type="$(CompilePlatform)">
     <Node Name="CompileEditor">
       <Compile Target="$(ProjectName)Editor"
@@ -111,13 +109,11 @@ export class SimpleAutoBuildService {
     <Node Name="CookGame" Requires="CompileEditor">
       <Cook Project="$(ProjectFile)"
             Platform="$(CookPlatformStandalone)"
-            Maps="$(CookMaps)"
             Arguments="-iterate -unversioned"/>
     </Node>
     <Node Name="CookServer" Requires="CompileEditor">
       <Cook Project="$(ProjectFile)"
             Platform="$(CookPlatformDedicated)"
-            Maps="$(CookMaps)"
             Arguments="-iterate -unversioned"/>
     </Node>
   </Agent>
