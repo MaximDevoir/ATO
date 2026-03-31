@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { simplifyUnrealLogLine } from '../src/ATO.helpers';
+import { hasProcessExited, simplifyUnrealLogLine } from '../src/ATO.helpers';
 
 describe('simplifyUnrealLogLine', () => {
   it('simplifies Unreal timestamps and removes the batch field', () => {
@@ -20,5 +20,19 @@ describe('simplifyUnrealLogLine', () => {
     const input = '[2026.03.10-13.27.05:222][ 12]LogSomething: Display: Nested [[Tag]] content';
     const output = simplifyUnrealLogLine(input);
     expect(output).toBe('[1:27:05 PM] LogSomething: Display: Nested [[Tag]] content');
+  });
+});
+
+describe('hasProcessExited', () => {
+  it('returns false while a child process is still running', () => {
+    expect(hasProcessExited({ exitCode: null, signalCode: null } as never)).toBe(false);
+  });
+
+  it('returns true when a child process exited cleanly without being killed by ATO', () => {
+    expect(hasProcessExited({ exitCode: 0, signalCode: null, killed: false } as never)).toBe(true);
+  });
+
+  it('returns true when a child process exited because of a signal', () => {
+    expect(hasProcessExited({ exitCode: null, signalCode: 'SIGTERM' } as never)).toBe(true);
   });
 });

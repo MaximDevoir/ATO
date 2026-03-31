@@ -16,7 +16,7 @@ import {
   isCodeCoverageExecutableAvailable,
   resolveCodeCoverageExecutable,
 } from './ATO.codecov';
-import { killProcessTree, spawnProcess, waitForUdpPortFromProcessTree } from './ATO.helpers';
+import { hasProcessExited, killProcessTree, spawnProcess, waitForUdpPortFromProcessTree } from './ATO.helpers';
 import type {
   ATIEndpointOptions,
   ATINDJSONConsumerOptions,
@@ -2412,17 +2412,7 @@ export class ATO {
           killProcessTree(this.serverProc);
         } catch {}
 
-        const GRACE_SECONDS = 10;
-        await new Promise((resolve) => setTimeout(resolve, GRACE_SECONDS * 500));
-        this.log(`[ATO] Waiting ${GRACE_SECONDS}s before killing clients...`);
-        await new Promise((resolve) => setTimeout(resolve, GRACE_SECONDS * 1000));
-
-        for (const monitor of clientMonitors) {
-          if (!monitor.process.killed) {
-            this.log(`[ATO] Force-killing ${monitor.label}`);
-            killProcessTree(monitor.process);
-          }
-        }
+        await this.shutdownRemainingClientsAfterCoordinatorExit(clientMonitors);
 
         const finalServerExit = await serverMonitor.exitPromise;
         outcomes.unshift(summarizeProcessOutcome(coordinatorLabel, finalServerExit, serverMonitor.automation));
@@ -2678,6 +2668,34 @@ export class ATO {
     }
   }
 
+  private async shutdownRemainingClientsAfterCoordinatorExit(clientMonitors: MonitoredProcess[], graceSeconds = 10) {
+    const clientsStillRunning = clientMonitors.filter((monitor) => !hasProcessExited(monitor.process));
+    if (clientsStillRunning.length === 0) {
+      return;
+    }
+
+    const allClientsExitedWithinGrace = await Promise.race([
+      Promise.all(clientsStillRunning.map((monitor) => monitor.exitPromise)).then(() => true),
+      new Promise<false>((resolve) => setTimeout(() => resolve(false), graceSeconds * 1000)),
+    ]);
+
+    if (allClientsExitedWithinGrace) {
+      return;
+    }
+
+    const lingeringClients = clientMonitors.filter((monitor) => !hasProcessExited(monitor.process));
+    if (lingeringClients.length > 0) {
+      this.log(
+        `[ATO] ${lingeringClients.length} client(s) did not exit within ${graceSeconds}s after coordinator shutdown; force-killing remaining clients...`,
+      );
+    }
+
+    for (const monitor of lingeringClients) {
+      this.log(`[ATO] Force-killing ${monitor.label}`);
+      killProcessTree(monitor.process);
+    }
+  }
+
   private async waitForClientMonitors(clientMonitors: MonitoredProcess[], serverMonitor?: MonitoredProcess) {
     if (clientMonitors.length === 0) {
       return [];
@@ -2691,7 +2709,7 @@ export class ATO {
       ]);
 
       if (completion.kind === 'server') {
-        const pendingClients = clientMonitors.filter((monitor) => !monitor.process.killed);
+        const pendingClients = clientMonitors.filter((monitor) => !hasProcessExited(monitor.process));
         if (pendingClients.length > 0) {
           this.error(
             `${serverMonitor.label} exited before all clients completed (${completion.serverExit}); terminating remaining clients`,

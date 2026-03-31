@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   ATC_CLIENT_BOOTSTRAP_TEST,
   ATC_CLIENT_REQUEST_LOG_PREFIX,
@@ -64,6 +64,26 @@ function expectArgMissingByPrefix(args: string[], expectedMissingPrefix: string)
     `did not expect an arg starting with ${expectedMissingPrefix} in ${JSON.stringify(args)}`,
   ).toBe(false);
 }
+
+function createFakeMonitoredProcess(options: {
+  label: string;
+  exitPromise?: Promise<number | 'timeout'>;
+  exitCode?: number | null;
+  signalCode?: NodeJS.Signals | null;
+}) {
+  return {
+    label: options.label,
+    process: {
+      exitCode: options.exitCode ?? null,
+      signalCode: options.signalCode ?? null,
+      killed: false,
+    },
+    automation: createAutomationObservationState(false),
+    atc: { requestedRemoteClients: 0 },
+    exitPromise: options.exitPromise ?? Promise.resolve(0),
+  };
+}
+
 describe('ATO', () => {
   it('removes excluded option names case-insensitively', () => {
     const { session, coordinator } = createPreview();
@@ -765,5 +785,91 @@ describe('ATO', () => {
     expect(resolveProcessExitReason(5, automation)).toBe('process exited with code 5');
     expect(resolveProcessExitCode('timeout', automation)).toBe(1);
     expect(resolveProcessExitReason('timeout', automation)).toBe('process timed out');
+  });
+  it('does not report pending clients when they already exited cleanly before server-shutdown handling', async () => {
+    const session = new ATO({
+      commandLineContext: {
+        ueRoot: 'D:/uei/UE5.7.3/Engine',
+        projectPath: 'D:/ue-projects/inv/inv.uproject',
+        projectRoot: 'D:/ue-projects/inv',
+        verboseDebug: false,
+      },
+    });
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    try {
+      const outcomes = await Reflect.get(session, 'waitForClientMonitors').call(
+        session,
+        [
+          createFakeMonitoredProcess({ label: 'CLIENT 0', exitCode: 0 }),
+          createFakeMonitoredProcess({ label: 'CLIENT 1', exitCode: 0 }),
+        ],
+        createFakeMonitoredProcess({ label: 'LISTEN', exitPromise: Promise.resolve(0), exitCode: 0 }),
+      );
+
+      expect(outcomes).toHaveLength(2);
+      expect(consoleError).not.toHaveBeenCalled();
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
+  it('suppresses coordinator-shutdown force-kill logs when all clients are already exited', async () => {
+    const session = new ATO({
+      commandLineContext: {
+        ueRoot: 'D:/uei/UE5.7.3/Engine',
+        projectPath: 'D:/ue-projects/inv/inv.uproject',
+        projectRoot: 'D:/ue-projects/inv',
+        verboseDebug: false,
+      },
+    });
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    try {
+      await Reflect.get(session, 'shutdownRemainingClientsAfterCoordinatorExit').call(
+        session,
+        [
+          createFakeMonitoredProcess({ label: 'CLIENT 0', exitCode: 0 }),
+          createFakeMonitoredProcess({ label: 'CLIENT 1', exitCode: 0 }),
+        ],
+        0,
+      );
+
+      expect(consoleLog).not.toHaveBeenCalledWith(expect.stringContaining('force-killing remaining clients'));
+      expect(consoleLog).not.toHaveBeenCalledWith(expect.stringContaining('Force-killing CLIENT'));
+    } finally {
+      consoleLog.mockRestore();
+    }
+  });
+
+  it('still reports genuinely pending clients when the server exits first', async () => {
+    const session = new ATO({
+      commandLineContext: {
+        ueRoot: 'D:/uei/UE5.7.3/Engine',
+        projectPath: 'D:/ue-projects/inv/inv.uproject',
+        projectRoot: 'D:/ue-projects/inv',
+        verboseDebug: false,
+      },
+    });
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    try {
+      await Reflect.get(session, 'waitForClientMonitors').call(
+        session,
+        [
+          createFakeMonitoredProcess({
+            label: 'CLIENT 0',
+            exitPromise: new Promise((resolve) => setTimeout(() => resolve(0), 20)),
+          }),
+        ],
+        createFakeMonitoredProcess({ label: 'DEDICATED', exitPromise: Promise.resolve(0), exitCode: 0 }),
+      );
+
+      expect(consoleError).toHaveBeenCalledWith(
+        expect.stringContaining('DEDICATED exited before all clients completed (0); terminating remaining clients'),
+      );
+    } finally {
+      consoleError.mockRestore();
+    }
   });
 });

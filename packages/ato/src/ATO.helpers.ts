@@ -230,8 +230,16 @@ export function commandExistsSync(command: string) {
   }
 }
 
+export function hasProcessExited(processHandle: ChildProcess | undefined) {
+  if (!processHandle) {
+    return true;
+  }
+
+  return processHandle.exitCode !== null || processHandle.signalCode !== null;
+}
+
 export function killProcessTree(processHandle: ChildProcess | undefined) {
-  if (!processHandle?.pid || processHandle.exitCode !== null || processHandle.signalCode !== null) {
+  if (!processHandle?.pid || hasProcessExited(processHandle)) {
     return;
   }
 
