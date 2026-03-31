@@ -88,6 +88,7 @@ export interface E2ERuntimeOptions {
   // When omitted, ATO will spawn as many external clients as the native coordinator requests.
   // Standalone and PIE ignore this and run with zero external ATC clients.
   clientCount?: number;
+  simpleAutoBuild?: boolean;
   port?: number;
   timeoutSeconds?: number;
   serverExe?: string;

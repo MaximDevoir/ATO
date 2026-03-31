@@ -1,22 +1,16 @@
 #!/usr/bin/env node
 
-import 'dotenv/config';
-
 import { spawnSync } from 'node:child_process';
 import os from 'node:os';
 import path from 'node:path';
+import { resolveAutomationContext } from '@maximdevoir/ato';
 
-function fail(msg: string): never {
-  console.error(`[run-uat] ${msg}`);
-  process.exit(1);
-}
-
-const engineDir = process.env.ENGINE_DIR;
-if (!engineDir) {
-  fail('ENGINE_DIR is not set (check your .env file)');
-}
-
-const resolvedEngineDir = path.resolve(engineDir);
+const resolvedContext = resolveAutomationContext({
+  rawArgv: process.argv,
+  cwd: process.cwd(),
+  env: process.env,
+});
+const resolvedEngineDir = path.resolve(resolvedContext.ueRoot);
 const userArgs = process.argv.slice(2);
 
 let cmd: string;
@@ -38,6 +32,7 @@ console.log(`[run-uat] cmd: ${cmd}`);
 console.log(`[run-uat] args: ${args.join(' ')}`);
 
 const result = spawnSync(cmd, args, {
+  cwd: resolvedContext.projectRoot,
   stdio: 'inherit',
   shell: true,
 });

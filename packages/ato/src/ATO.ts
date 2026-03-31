@@ -1,4 +1,3 @@
-// TODO: Support Linux/macOS. Right now Win64 and .exe is hardcoded a lot.
 import type { ChildProcess } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
 import * as path from 'node:path';
@@ -34,7 +33,10 @@ import type {
 } from './ATO.options';
 import { CoordinatorMode, RuntimePresets } from './ATO.options';
 import { createATORunOutput } from './ATORunOutput';
+import { resolveAutomationContext } from './AutomationContextResolver';
 import { FrameworkValidationReporter, formatFrameworkValidationSummaryLines } from './FrameworkValidationReporter';
+import { SimpleAutoBuildService } from './SimpleAutoBuild';
+import { resolveEngineEditorCandidates, resolveProjectBinaryCandidates } from './UnrealPlatform';
 
 export * from './ATCAutomationNames';
 export { ATC_RUN_TESTS_COMMAND } from './ATCAutomationNames';
@@ -45,6 +47,17 @@ interface ATOInit {
   runtimeOptions?: E2ERuntimeOptions;
   commandLineContext?: E2ECommandLineContext;
   atiOptions?: ATIRuntimeOptions;
+  resolutionHints?: CommandLineResolutionHints;
+  simpleAutoBuildService?: SimpleAutoBuildService;
+}
+
+interface CommandLineResolutionHints {
+  explicitEngineDir?: string;
+  explicitProjectPath?: string;
+  rawArgv?: string[];
+  cwd?: string;
+  env?: NodeJS.ProcessEnv;
+  verboseDebug?: boolean;
 }
 
 interface ResolvedServerOptions extends ServerOptions {
@@ -122,8 +135,9 @@ interface StartedATIService {
 
 interface ParsedCommandLineArguments {
   ATODebug: boolean;
-  UERoot: string;
-  Project: string;
+  UERoot?: string;
+  Project?: string;
+  SimpleAutoBuild: boolean;
   clients?: number;
   port?: number;
   timeout?: number;
@@ -1347,19 +1361,24 @@ export class ATO {
    * Imports and applies options supplied from the CLI
    */
   static fromCommandLine(options: E2ECommandLineOptions = {}) {
-    const cli = yargs(hideBin(options.argv ?? process.argv));
+    const rawArgv = options.argv ?? process.argv;
+    const cli = yargs(hideBin(rawArgv));
 
     const argv = cli
       .option('UERoot', {
         type: 'string',
-        demandOption: true,
         description: 'Path to the Unreal Engine installation root (Engine directory). Example: D:/uei/UE5.7.3/Engine',
       })
       .option('Project', {
         type: 'string',
-        demandOption: true,
         description:
           'Path to the .uproject to run tests against. Example: D:/ue-projects/TemplateProject/TemplateProject.uproject',
+      })
+      .option('SimpleAutoBuild', {
+        type: 'boolean',
+        default: options.simpleAutoBuild ?? false,
+        description:
+          'Opt in to a minimal pre-test build/cook pass driven by coordinator mode. When omitted, ATO still auto-discovers Project/UERoot but skips autobuilding.',
       })
       .option('clients', {
         type: 'number',
@@ -1415,15 +1434,28 @@ export class ATO {
       .parseSync() as unknown as ParsedCommandLineArguments;
 
     const projectPath = argv.Project;
+    const ueRoot = argv.UERoot;
     return new ATO({
-      commandLineContext: {
-        ueRoot: argv.UERoot,
-        projectPath,
-        projectRoot: path.dirname(projectPath),
+      commandLineContext:
+        projectPath && ueRoot
+          ? {
+              ueRoot,
+              projectPath,
+              projectRoot: path.dirname(projectPath),
+              verboseDebug: argv.ATODebug ?? false,
+            }
+          : undefined,
+      resolutionHints: {
+        explicitEngineDir: ueRoot,
+        explicitProjectPath: projectPath,
+        rawArgv,
+        cwd: process.cwd(),
+        env: process.env,
         verboseDebug: argv.ATODebug ?? false,
       },
       runtimeOptions: {
         clientCount: argv.clients ?? options.clientCount,
+        simpleAutoBuild: argv.SimpleAutoBuild ?? options.simpleAutoBuild,
         port: argv.port ?? options.port,
         timeoutSeconds: argv.timeout ?? options.timeoutSeconds,
         serverExe: argv.serverExe ?? options.serverExe,
@@ -1445,20 +1477,31 @@ export class ATO {
   private atiOptions: ATIRuntimeOptions;
   private currentOutput?: Awaited<ReturnType<typeof createATORunOutput>>;
   private reportedBasicReporterFallback = false;
-  public readonly commandLineContext?: E2ECommandLineContext;
+  private readonly resolutionHints: CommandLineResolutionHints;
+  private readonly simpleAutoBuildService: SimpleAutoBuildService;
+  private simpleAutoBuildPrepared = false;
+  public commandLineContext?: E2ECommandLineContext;
 
   constructor(init: ATOInit = {}) {
     this.runtimeOptions = { ...init.runtimeOptions };
     this.atiOptions = mergeATIRuntimeOptions({ enabled: true }, init.atiOptions);
     this.commandLineContext = init.commandLineContext;
+    this.resolutionHints = {
+      rawArgv: process.argv,
+      cwd: process.cwd(),
+      env: process.env,
+      verboseDebug: init.commandLineContext?.verboseDebug ?? false,
+      ...init.resolutionHints,
+    };
+    this.simpleAutoBuildService = init.simpleAutoBuildService ?? new SimpleAutoBuildService();
   }
 
   get ueRoot() {
-    return this.commandLineContext?.ueRoot ?? '';
+    return this.ensureCommandLineContext().ueRoot;
   }
 
   get projectPath() {
-    return this.commandLineContext?.projectPath ?? '';
+    return this.ensureCommandLineContext().projectPath;
   }
 
   get shouldUpdateSnapshots() {
@@ -1479,6 +1522,41 @@ export class ATO {
     }
 
     return this.canUseInteractiveReporter() ? 'default' : 'basic';
+  }
+
+  private ensureCommandLineContext() {
+    if (this.commandLineContext) {
+      return this.commandLineContext;
+    }
+
+    this.commandLineContext = resolveAutomationContext({
+      explicitEngineDir: this.resolutionHints.explicitEngineDir,
+      explicitProjectPath: this.resolutionHints.explicitProjectPath,
+      rawArgv: this.resolutionHints.rawArgv,
+      cwd: this.resolutionHints.cwd,
+      env: this.resolutionHints.env,
+      verboseDebug: this.resolutionHints.verboseDebug,
+    });
+
+    return this.commandLineContext;
+  }
+
+  private async prepareSimpleAutoBuildIfNeeded() {
+    if (this.runtimeOptions.simpleAutoBuild !== true || this.simpleAutoBuildPrepared) {
+      return;
+    }
+
+    const context = this.ensureCommandLineContext();
+    await this.simpleAutoBuildService.prepare({
+      engineDir: context.ueRoot,
+      projectPath: context.projectPath,
+      projectRoot: context.projectRoot,
+      coordinatorModes: this.coordinators.map((coordinator) => coordinator.mode),
+      log: (...args: unknown[]) => this.log(...args),
+      warn: (...args: unknown[]) => this.warn(...args),
+    });
+
+    this.simpleAutoBuildPrepared = true;
   }
 
   get output() {
@@ -1597,6 +1675,7 @@ export class ATO {
       return [];
     }
 
+    this.ensureCommandLineContext();
     return this.resolveLaunchPlans().map((plan) => plan.preview);
   }
 
@@ -1608,6 +1687,8 @@ export class ATO {
 
     let plans: ResolvedLaunchPlan[];
     try {
+      this.ensureCommandLineContext();
+      await this.prepareSimpleAutoBuildIfNeeded();
       plans = this.resolveLaunchPlans();
     } catch (error) {
       this.error(error instanceof Error ? error.message : error);
@@ -1717,7 +1798,7 @@ export class ATO {
     if (atcCoordinatorMode === CoordinatorMode.PIE) {
       // If the user provided an Engine root, always use the engine's UnrealEditor executable for PIE.
       if (this.ueRoot) {
-        const engineEditor = path.join(this.ueRoot, 'Binaries', 'Win64', 'UnrealEditor.exe');
+        const engineEditor = findFirstExisting(resolveEngineEditorCandidates(this.ueRoot));
         return {
           ...serverOptions,
           execTests: [...(serverOptions.execTests ?? [])],
@@ -1726,7 +1807,7 @@ export class ATO {
       }
       // Otherwise fall back to probing common candidates (including project editor locations)
       const projectRoot = path.dirname(serverOptions.project);
-      const projectEditor = path.join(projectRoot, 'Binaries', 'Win64', 'UnrealEditor.exe');
+      const projectEditor = findFirstExisting(resolveProjectBinaryCandidates(projectRoot, 'UnrealEditor'));
       const primaryCandidates = [
         serverOptions.exe ?? '',
         runtimeOptions.serverExe ?? '',
@@ -1794,7 +1875,7 @@ export class ATO {
     return [
       runtimeOptions.serverExe ?? '',
       serverOptions.exe ?? '',
-      path.join(projectRoot, 'Binaries', 'Win64', `${path.basename(projectRoot)}Server.exe`),
+      ...resolveProjectBinaryCandidates(projectRoot, `${path.basename(projectRoot)}Server`),
     ];
   }
 
@@ -1808,7 +1889,7 @@ export class ATO {
     return [
       serverOptions.exe ?? '',
       runtimeOptions.serverExe ?? '',
-      path.join(projectRoot, 'Binaries', 'Win64', `${path.basename(projectRoot)}Server.exe`),
+      ...resolveProjectBinaryCandidates(projectRoot, `${path.basename(projectRoot)}Server`),
     ];
   }
 
@@ -1823,7 +1904,7 @@ export class ATO {
       // a global client exe override is likely the desired game executable for Standalone
       runtimeOptions.clientExe ?? '',
       // fallback to the game's executable (no "Server" suffix)
-      path.join(projectRoot, 'Binaries', 'Win64', `${path.basename(projectRoot)}.exe`),
+      ...resolveProjectBinaryCandidates(projectRoot, path.basename(projectRoot)),
       // fallback to any serverExe override
       runtimeOptions.serverExe ?? '',
     ];
@@ -1841,9 +1922,9 @@ export class ATO {
       runtimeOptions.serverExe ?? '',
       runtimeOptions.clientExe ?? '',
       // typical editor binary in project Binaries
-      path.join(projectRoot, 'Binaries', 'Win64', 'UnrealEditor.exe'),
+      ...resolveProjectBinaryCandidates(projectRoot, 'UnrealEditor'),
       // fallback to project game exe (least preferred)
-      path.join(projectRoot, 'Binaries', 'Win64', `${path.basename(projectRoot)}.exe`),
+      ...resolveProjectBinaryCandidates(projectRoot, path.basename(projectRoot)),
     ];
   }
 
@@ -1853,7 +1934,7 @@ export class ATO {
     return [
       runtimeOptions.clientExe ?? '',
       clientOptions.exe ?? '',
-      path.join(projectRoot, 'Binaries', 'Win64', `${path.basename(projectRoot)}.exe`),
+      ...resolveProjectBinaryCandidates(projectRoot, path.basename(projectRoot)),
     ];
   }
 

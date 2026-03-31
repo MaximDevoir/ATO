@@ -42,4 +42,10 @@ describe('ATO reporter mode', () => {
 
     expect(Reflect.get(ato, 'runtimeOptions')).toMatchObject({ codecov: true });
   });
+
+  it('accepts the SimpleAutoBuild flag from the command line runtime options', () => {
+    const ato = createATO(['--SimpleAutoBuild']);
+
+    expect(Reflect.get(ato, 'runtimeOptions')).toMatchObject({ simpleAutoBuild: true });
+  });
 });
