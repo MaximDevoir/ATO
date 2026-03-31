@@ -12,8 +12,6 @@
   <Option Name="EngineDir" DefaultValue="{{EngineDir}}"
           Description="Directory containing the Unreal Engine installation"/>
 
-  <Option Name="ScriptsDir" DefaultValue="$(ProjectDir)/BuildGraph/Scripts"
-          Description="Directory containing custom scripts for the build graph"/>
   <Option Name="CompilePlatform" DefaultValue="{{CompilePlatform}}"
           Description="Compile target platform (e.g. Win64, Linux, LinuxArm64, Mac)"/>
   <!-- Per-mode cook platforms: standalone/listen use non-server cooks, dedicated uses server cooks -->
