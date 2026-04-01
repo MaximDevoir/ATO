@@ -8,6 +8,15 @@ import type { FileSystem } from '../src/services/FileSystem';
 import { OutputDirectoryGuard } from '../src/services/OutputDirectoryGuard';
 import type { LiveStatusModelLike } from '../src/ui/LiveStatusModel';
 
+const isWindows = process.platform === 'win32';
+const isMac = process.platform === 'darwin';
+const isLinux = process.platform === 'linux';
+
+// Helper to conditionally run describe blocks
+function describeIf(condition: boolean) {
+  return condition ? describe : describe.skip;
+}
+
 describe('ATC manifest validation', () => {
   it('accepts plugin manifests with harness', () => {
     const manifest = parseAndValidateATCManifest(
@@ -30,23 +39,55 @@ describe('ATC manifest validation', () => {
 });
 
 describe('OutputDirectoryGuard', () => {
-  it('rejects directories inside Unreal plugin trees', () => {
-    const fakeFs: FileSystem = {
-      exists: (filePath) =>
-        filePath === 'C:\\Workspace\\PluginRoot' || filePath === 'C:\\Workspace\\PluginRoot\\Harness',
+  function createFakeFs(root: string, harness: string, pluginFile: string): FileSystem {
+    return {
+      exists: (filePath) => filePath === root || filePath === harness,
       isDirectory: () => true,
       readText: () => '',
       writeText: () => {},
       ensureDirectory: () => {},
-      listFiles: (directoryPath) => (directoryPath === 'C:\\Workspace\\PluginRoot' ? ['MyPlugin.uplugin'] : []),
+      listFiles: (directoryPath) => (directoryPath === root ? [pluginFile] : []),
       listEntries: () => [],
       copyDirectory: () => {},
       removeDirectory: () => {},
-      createTemporaryDirectory: () => 'C:\\tmp\\atc',
+      createTemporaryDirectory: () => '/tmp/atc',
     };
+  }
 
-    const guard = new OutputDirectoryGuard(fakeFs);
-    expect(() => guard.validate('C:\\Workspace\\PluginRoot\\Harness')).toThrow(/inside unreal project\/plugin tree/i);
+  describeIf(isWindows)('Windows paths', () => {
+    it('rejects directories inside Unreal plugin trees (Windows)', () => {
+      const root = 'C:\\Workspace\\PluginRoot';
+      const harness = 'C:\\Workspace\\PluginRoot\\Harness';
+
+      const fakeFs = createFakeFs(root, harness, 'MyPlugin.uplugin');
+      const guard = new OutputDirectoryGuard(fakeFs);
+
+      expect(() => guard.validate(harness)).toThrow(/inside unreal project\/plugin tree/i);
+    });
+  });
+
+  describeIf(isMac)('macOS paths', () => {
+    it('rejects directories inside Unreal plugin trees (macOS)', () => {
+      const root = '/Users/dev/Workspace/PluginRoot';
+      const harness = '/Users/dev/Workspace/PluginRoot/Harness';
+
+      const fakeFs = createFakeFs(root, harness, 'MyPlugin.uplugin');
+      const guard = new OutputDirectoryGuard(fakeFs);
+
+      expect(() => guard.validate(harness)).toThrow(/inside unreal project\/plugin tree/i);
+    });
+  });
+
+  describeIf(isLinux)('Linux paths', () => {
+    it('rejects directories inside Unreal plugin trees (Linux)', () => {
+      const root = '/home/dev/workspace/PluginRoot';
+      const harness = '/home/dev/workspace/PluginRoot/Harness';
+
+      const fakeFs = createFakeFs(root, harness, 'MyPlugin.uplugin');
+      const guard = new OutputDirectoryGuard(fakeFs);
+
+      expect(() => guard.validate(harness)).toThrow(/inside unreal project\/plugin tree/i);
+    });
   });
 });
 
