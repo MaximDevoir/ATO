@@ -5,7 +5,7 @@ import type { FileSystem } from './FileSystem';
 
 export interface GitService {
   isGitAvailable(): boolean;
-  clone(repository: string, destinationDirectory: string): Promise<void>;
+  clone(repository: string, destinationDirectory: string, ref?: string): Promise<void>;
   hasLfsTracking(repositoryDirectory: string): boolean;
   isGitLfsAvailable(): boolean;
   pullLfs(repositoryDirectory: string): Promise<void>;
@@ -18,8 +18,12 @@ export class SimpleGitService implements GitService {
     return spawnSync('git', ['--version'], { windowsHide: true }).status === 0;
   }
 
-  async clone(repository: string, destinationDirectory: string) {
-    await simpleGit().clone(repository, destinationDirectory, ['--depth', '1']);
+  async clone(repository: string, destinationDirectory: string, ref?: string) {
+    const cloneArgs = ['--depth', '1'];
+    if (ref) {
+      cloneArgs.push('--branch', ref);
+    }
+    await simpleGit().clone(repository, destinationDirectory, cloneArgs);
   }
 
   hasLfsTracking(repositoryDirectory: string) {

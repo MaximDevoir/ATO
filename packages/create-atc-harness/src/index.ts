@@ -18,5 +18,6 @@ export { EngineDirectoryResolver, type ResolvedEngineContext } from './services/
 export type { FileSystem } from './services/FileSystem';
 export type { GitService } from './services/GitService';
 export { SimpleGitService } from './services/GitService';
+export { isGitLikeReference, type ParsedGitReference, parseGitReference } from './services/GitUrl';
 export { NodeFileSystem } from './services/NodeFileSystem';
 export { OutputDirectoryGuard } from './services/OutputDirectoryGuard';

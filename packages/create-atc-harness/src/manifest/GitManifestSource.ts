@@ -4,7 +4,7 @@ import type { HarnessCreationSettings } from '../domain/HarnessCreationSettings'
 import type { LiveStatusHandle } from '../domain/LiveStatusHandle';
 import type { FileSystem } from '../services/FileSystem';
 import type { GitService } from '../services/GitService';
-import { isGitLikeReference } from '../services/GitUrl';
+import { isGitLikeReference, parseGitReference } from '../services/GitUrl';
 import type { ManifestResolutionContext, ManifestSource } from './ManifestSource';
 import { readManifestAtPath, resolvePluginRootFromManifestFolder } from './manifestHelpers';
 
@@ -26,8 +26,10 @@ export class GitManifestSource implements ManifestSource {
     liveStatus: LiveStatusHandle,
   ) {
     const tempDirectory = this.fileSystem.createTemporaryDirectory('atc-manifest-');
-    liveStatus.setStatus(`[Manifest] Cloning manifest repository ${context.manifestString}`);
-    await this.gitService.clone(context.manifestString, tempDirectory);
+    const gitReference = parseGitReference(context.manifestString);
+    const refInfo = gitReference.ref ? ` @ ${gitReference.ref}` : '';
+    liveStatus.setStatus(`[Manifest] Cloning plugin manifest repository ${gitReference.repositoryUrl}${refInfo}`);
+    await this.gitService.clone(gitReference.repositoryUrl, tempDirectory, gitReference.ref);
 
     const manifestPath = path.join(tempDirectory, 'atc.json');
     if (!this.fileSystem.exists(manifestPath)) {

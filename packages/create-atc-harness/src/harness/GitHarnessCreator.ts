@@ -2,7 +2,7 @@ import type { HarnessCreationResult } from '../domain/HarnessCreationResult';
 import type { HarnessCreationSettings } from '../domain/HarnessCreationSettings';
 import type { LiveStatusHandle } from '../domain/LiveStatusHandle';
 import type { GitService } from '../services/GitService';
-import { isGitLikeReference } from '../services/GitUrl';
+import { isGitLikeReference, parseGitReference } from '../services/GitUrl';
 import type { HarnessCreator } from './HarnessCreator';
 
 export class GitHarnessCreator implements HarnessCreator {
@@ -19,8 +19,10 @@ export class GitHarnessCreator implements HarnessCreator {
     result: HarnessCreationResult,
     liveStatus: LiveStatusHandle,
   ) {
-    liveStatus.setStatus(`[Harness/Git] Cloning ${settings.harnessString}`);
-    await this.gitService.clone(settings.harnessString, settings.rootFolder);
+    const gitReference = parseGitReference(settings.harnessString);
+    const refInfo = gitReference.ref ? ` @ ${gitReference.ref}` : '';
+    liveStatus.setStatus(`[Harness/Git] Cloning ${gitReference.repositoryUrl}${refInfo}`);
+    await this.gitService.clone(gitReference.repositoryUrl, settings.rootFolder, gitReference.ref);
 
     if (!this.gitService.hasLfsTracking(settings.rootFolder)) {
       result.addLog('[Harness/Git] No Git LFS tracking detected');
