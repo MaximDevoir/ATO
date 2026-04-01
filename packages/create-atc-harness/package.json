@@ -3,6 +3,9 @@
   "version": "1.1.2",
   "type": "module",
   "sideEffects": false,
+  "bin": {
+    "create-atc-harness": "./src/cli.ts"
+  },
   "files": [
     "src"
   ],
@@ -28,6 +31,7 @@
     "@types/react": "19.2.2"
   },
   "scripts": {
+    "create-atc-harness": "tsx src/cli.ts",
     "lint": "biome lint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --config vitest.config.ts",
