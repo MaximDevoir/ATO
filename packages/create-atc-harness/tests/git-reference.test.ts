@@ -111,6 +111,126 @@ describe('git clone with tag/ref', () => {
       },
     ]);
   });
+
+  it('installs plugin into Plugins/<manifest.name> when name exists', async () => {
+    const copyCalls: Array<{ from: string; to: string }> = [];
+    const gitService: GitService = {
+      isGitAvailable: () => true,
+      clone: async () => {},
+      hasLfsTracking: () => false,
+      isGitLfsAvailable: () => true,
+      pullLfs: async () => {},
+    };
+
+    const fakeFs: FileSystem = {
+      exists: (filePath) => filePath.endsWith('atc.json'),
+      isDirectory: () => false,
+      readText: () => JSON.stringify({ type: 'plugin', harness: 'EngineTemplate', name: 'AwesomeInventory' }),
+      writeText: () => {},
+      ensureDirectory: () => {},
+      listFiles: () => [],
+      listEntries: (directoryPath) =>
+        path.normalize(directoryPath) === path.normalize('/tmp/manifest-repo')
+          ? [path.normalize('/tmp/manifest-repo/AwesomeInventory.uplugin')]
+          : [],
+      copyDirectory: (from, to) => {
+        copyCalls.push({ from, to });
+      },
+      removeDirectory: () => {},
+      createTemporaryDirectory: () => '/tmp/manifest-repo',
+    };
+
+    const source = new GitManifestSource(fakeFs, gitService);
+    const resolution = await source.resolveManifest(
+      {
+        manifestString: 'https://github.com/org/plugin.git@release-5.7.3',
+        outputRootDirectory: '/tmp/out',
+      },
+      new HarnessCreationResult(),
+      createNoopLiveStatusHandle(),
+    );
+
+    resolution.installPlugin(
+      new HarnessCreationSettings({
+        rootFolder: '/tmp/host',
+        pluginManifestFolder: '/tmp/manifest-repo',
+        harnessString: 'EngineTemplate',
+        commandLineOptions: {
+          manifestString: '/tmp/manifest-repo/atc.json',
+          outputRootDirectory: '/tmp/host',
+          argv: {},
+          rawArgv: [],
+        },
+      }),
+    );
+
+    expect(copyCalls).toEqual([
+      {
+        from: path.normalize('/tmp/manifest-repo'),
+        to: path.join(path.resolve('/tmp/host'), 'Plugins', 'AwesomeInventory'),
+      },
+    ]);
+  });
+
+  it('falls back to uplugin filename when manifest.name is missing', async () => {
+    const copyCalls: Array<{ from: string; to: string }> = [];
+    const gitService: GitService = {
+      isGitAvailable: () => true,
+      clone: async () => {},
+      hasLfsTracking: () => false,
+      isGitLfsAvailable: () => true,
+      pullLfs: async () => {},
+    };
+
+    const fakeFs: FileSystem = {
+      exists: (filePath) => filePath.endsWith('atc.json'),
+      isDirectory: () => false,
+      readText: () => JSON.stringify({ type: 'plugin', harness: 'EngineTemplate' }),
+      writeText: () => {},
+      ensureDirectory: () => {},
+      listFiles: () => [],
+      listEntries: (directoryPath) =>
+        path.normalize(directoryPath) === path.normalize('/tmp/manifest-repo')
+          ? [path.normalize('/tmp/manifest-repo/AwesomeInventory.uplugin')]
+          : [],
+      copyDirectory: (from, to) => {
+        copyCalls.push({ from, to });
+      },
+      removeDirectory: () => {},
+      createTemporaryDirectory: () => '/tmp/manifest-repo',
+    };
+
+    const source = new GitManifestSource(fakeFs, gitService);
+    const resolution = await source.resolveManifest(
+      {
+        manifestString: 'https://github.com/org/plugin.git@release-5.7.3',
+        outputRootDirectory: '/tmp/out',
+      },
+      new HarnessCreationResult(),
+      createNoopLiveStatusHandle(),
+    );
+
+    resolution.installPlugin(
+      new HarnessCreationSettings({
+        rootFolder: '/tmp/host',
+        pluginManifestFolder: '/tmp/manifest-repo',
+        harnessString: 'EngineTemplate',
+        commandLineOptions: {
+          manifestString: '/tmp/manifest-repo/atc.json',
+          outputRootDirectory: '/tmp/host',
+          argv: {},
+          rawArgv: [],
+        },
+      }),
+    );
+
+    expect(copyCalls).toEqual([
+      {
+        from: path.normalize('/tmp/manifest-repo'),
+        to: path.join(path.resolve('/tmp/host'), 'Plugins', 'AwesomeInventory'),
+      },
+    ]);
+  });
 });
 
 function createNoopLiveStatusHandle(): LiveStatusHandle {

@@ -4,7 +4,12 @@ import type { HarnessCreationSettings } from '../domain/HarnessCreationSettings'
 import type { LiveStatusHandle } from '../domain/LiveStatusHandle';
 import type { FileSystem } from '../services/FileSystem';
 import type { ManifestResolutionContext, ManifestSource } from './ManifestSource';
-import { readManifestAtPath, resolveManifestPath, resolvePluginRootFromManifestFolder } from './manifestHelpers';
+import {
+  readManifestAtPath,
+  resolveManifestPath,
+  resolvePluginInstallDirectoryName,
+  resolvePluginRootFromManifestFolder,
+} from './manifestHelpers';
 
 export class LocalPathManifestSource implements ManifestSource {
   readonly name = 'LocalPathManifestSource';
@@ -30,8 +35,13 @@ export class LocalPathManifestSource implements ManifestSource {
       manifest: resolvedManifest.manifest,
       installPlugin: (settings: HarnessCreationSettings) => {
         const pluginRoot = resolvePluginRootFromManifestFolder(this.fileSystem, resolvedManifest.manifestDirectory);
-        const destination = path.join(settings.getHarnessPluginsDirectory(), path.basename(pluginRoot));
-        liveStatus.setStatus(`[Plugin] Installing local plugin ${path.basename(pluginRoot)}...`);
+        const pluginInstallDirectoryName = resolvePluginInstallDirectoryName(
+          this.fileSystem,
+          resolvedManifest.manifestDirectory,
+          resolvedManifest.manifest.name,
+        );
+        const destination = path.join(settings.getHarnessPluginsDirectory(), pluginInstallDirectoryName);
+        liveStatus.setStatus(`[Plugin] Installing local plugin ${pluginInstallDirectoryName}...`);
         this.fileSystem.ensureDirectory(settings.getHarnessPluginsDirectory());
         this.fileSystem.copyDirectory(pluginRoot, destination);
         result.addLog(`Installed plugin from ${pluginRoot} to ${destination}`);

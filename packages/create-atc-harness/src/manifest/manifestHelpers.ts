@@ -66,6 +66,19 @@ export function resolvePluginFileStemFromManifestFolder(fileSystem: FileSystem, 
   return path.parse(candidatePluginFiles[0]).name;
 }
 
+export function resolvePluginInstallDirectoryName(
+  fileSystem: FileSystem,
+  manifestDirectory: string,
+  manifestName?: string,
+) {
+  const trimmedManifestName = manifestName?.trim();
+  if (trimmedManifestName) {
+    return trimmedManifestName;
+  }
+
+  return resolvePluginFileStemFromManifestFolder(fileSystem, manifestDirectory);
+}
+
 function collectPluginFiles(fileSystem: FileSystem, directoryPath: string) {
   const output: string[] = [];
   collectPluginFilesRecursive(fileSystem, directoryPath, output);

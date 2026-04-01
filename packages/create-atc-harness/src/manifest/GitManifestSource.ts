@@ -6,7 +6,11 @@ import type { FileSystem } from '../services/FileSystem';
 import type { GitService } from '../services/GitService';
 import { isGitLikeReference, parseGitReference } from '../services/GitUrl';
 import type { ManifestResolutionContext, ManifestSource } from './ManifestSource';
-import { readManifestAtPath, resolvePluginRootFromManifestFolder } from './manifestHelpers';
+import {
+  readManifestAtPath,
+  resolvePluginInstallDirectoryName,
+  resolvePluginRootFromManifestFolder,
+} from './manifestHelpers';
 
 export class GitManifestSource implements ManifestSource {
   readonly name = 'GitManifestSource';
@@ -56,8 +60,13 @@ export class GitManifestSource implements ManifestSource {
       manifest: resolvedManifest.manifest,
       installPlugin: (settings: HarnessCreationSettings) => {
         const pluginRoot = resolvePluginRootFromManifestFolder(this.fileSystem, resolvedManifest.manifestDirectory);
-        const destination = path.join(settings.getHarnessPluginsDirectory(), path.basename(pluginRoot));
-        liveStatus.setStatus(`[Plugin] Installing plugin ${path.basename(pluginRoot)} from cloned repository...`);
+        const pluginInstallDirectoryName = resolvePluginInstallDirectoryName(
+          this.fileSystem,
+          resolvedManifest.manifestDirectory,
+          resolvedManifest.manifest.name,
+        );
+        const destination = path.join(settings.getHarnessPluginsDirectory(), pluginInstallDirectoryName);
+        liveStatus.setStatus(`[Plugin] Installing plugin ${pluginInstallDirectoryName} from cloned repository...`);
         this.fileSystem.ensureDirectory(settings.getHarnessPluginsDirectory());
         this.fileSystem.copyDirectory(pluginRoot, destination);
         result.addLog(`Installed plugin from ${pluginRoot} to ${destination}`);
