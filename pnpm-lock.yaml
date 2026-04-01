@@ -61,6 +61,9 @@ importers:
       '@maximdevoir/ati':
         specifier: workspace:^
         version: link:../ati
+      '@maximdevoir/engine-association-resolver':
+        specifier: workspace:^
+        version: link:../engine-association-resolver
       '@maximdevoir/unreal-lag':
         specifier: workspace:^
         version: link:../unreal-lag
@@ -94,6 +97,8 @@ importers:
       yargs:
         specifier: 18.0.0
         version: 18.0.0
+
+  packages/engine-association-resolver: {}
 
   packages/unreal-lag: {}
 
