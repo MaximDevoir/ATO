@@ -5,7 +5,7 @@ import type { CommandLineOptions } from '../domain/CommandLineOptions';
 export async function parseCreateATCHarnessCommandLine(rawArgv = process.argv): Promise<CommandLineOptions> {
   const parser = yargs(hideBin(rawArgv))
     .scriptName('create-atc-harness')
-    .usage('$0 <manifestString> <outputRootDirectory> [options]')
+    .usage('$0 <manifestString> [outputRootDirectory] [options]')
     .parserConfiguration({
       'unknown-options-as-args': true,
       'camel-case-expansion': true,
@@ -30,7 +30,7 @@ export async function parseCreateATCHarnessCommandLine(rawArgv = process.argv): 
     })
     .positional('outputRootDirectory', {
       type: 'string',
-      describe: 'Directory where the harness host project should be created',
+      describe: 'Optional output directory',
     })
     .option('harness', {
       type: 'string',
@@ -40,14 +40,14 @@ export async function parseCreateATCHarnessCommandLine(rawArgv = process.argv): 
       type: 'string',
       describe: 'Engine association key, engine path, or "first"',
     })
-    .demandCommand(2, '[create-atc-harness] You must provide manifestString and outputRootDirectory')
+    .demandCommand(1, '[create-atc-harness] You must provide manifestString')
     .help()
     .wrap(Math.min(120, yargs().terminalWidth()));
 
   const argv = await parser.parse();
 
   const manifestString = String(argv._[0] ?? '').trim();
-  const outputRootDirectory = String(argv._[1] ?? '').trim();
+  const outputRootDirectory = String(argv._[1] ?? '').trim() || undefined;
 
   return {
     manifestString,

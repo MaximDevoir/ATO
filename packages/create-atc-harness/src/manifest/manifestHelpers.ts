@@ -34,33 +34,53 @@ export function readManifestAtPath(fileSystem: FileSystem, manifestPath: string)
 }
 
 export function resolvePluginRootFromManifestFolder(fileSystem: FileSystem, manifestDirectory: string) {
-  const candidatePluginRoots: string[] = [];
-  collectPluginRoots(fileSystem, manifestDirectory, candidatePluginRoots);
+  const candidatePluginFiles = collectPluginFiles(fileSystem, manifestDirectory);
 
-  if (candidatePluginRoots.length === 0) {
+  if (candidatePluginFiles.length === 0) {
     throw new Error(
       `[create-atc-harness] Could not find a .uplugin file under manifest directory: ${manifestDirectory}`,
     );
   }
 
-  if (candidatePluginRoots.length > 1) {
+  if (candidatePluginFiles.length > 1) {
     throw new Error(
       `[create-atc-harness] Found multiple plugins under manifest directory; expected exactly one: ${manifestDirectory}`,
     );
   }
 
-  return candidatePluginRoots[0];
+  return path.dirname(candidatePluginFiles[0]);
 }
 
-function collectPluginRoots(fileSystem: FileSystem, directoryPath: string, output: string[]) {
+export function resolvePluginFileStemFromManifestFolder(fileSystem: FileSystem, manifestDirectory: string) {
+  const candidatePluginFiles = collectPluginFiles(fileSystem, manifestDirectory);
+  if (candidatePluginFiles.length === 0) {
+    throw new Error(
+      `[create-atc-harness] Could not find a .uplugin file under manifest directory: ${manifestDirectory}`,
+    );
+  }
+  if (candidatePluginFiles.length > 1) {
+    throw new Error(
+      `[create-atc-harness] Found multiple plugins under manifest directory; expected exactly one: ${manifestDirectory}`,
+    );
+  }
+  return path.parse(candidatePluginFiles[0]).name;
+}
+
+function collectPluginFiles(fileSystem: FileSystem, directoryPath: string) {
+  const output: string[] = [];
+  collectPluginFilesRecursive(fileSystem, directoryPath, output);
+  return output;
+}
+
+function collectPluginFilesRecursive(fileSystem: FileSystem, directoryPath: string, output: string[]) {
   for (const entryPath of fileSystem.listEntries(directoryPath)) {
     if (fileSystem.isDirectory(entryPath)) {
-      collectPluginRoots(fileSystem, entryPath, output);
+      collectPluginFilesRecursive(fileSystem, entryPath, output);
       continue;
     }
 
     if (entryPath.toLowerCase().endsWith('.uplugin')) {
-      output.push(path.dirname(entryPath));
+      output.push(entryPath);
     }
   }
 }

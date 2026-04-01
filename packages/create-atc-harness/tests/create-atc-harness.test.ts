@@ -1,3 +1,4 @@
+import * as path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { CreateATCHarness } from '../src/app/CreateATCHarness';
 import { HarnessResultState } from '../src/domain/HarnessCreationResult';
@@ -144,6 +145,94 @@ describe('CreateATCHarness', () => {
     expect(result.result).toBe(HarnessResultState.Success);
     expect(calledCreators).toEqual(['EngineTemplate']);
   });
+
+  it('derives outputRootDirectory from atc.json name when omitted', async () => {
+    let createdRoot = '';
+    const manifestSource: ManifestSource = {
+      name: 'TestManifestSource',
+      canAcceptManifestString: () => true,
+      resolveManifest: async () => ({
+        manifestDirectory: 'C:\\Plugin',
+        manifestFilePath: 'C:\\Plugin\\atc.json',
+        manifest: { type: 'plugin', harness: 'Git', name: 'SamplePlugin' },
+        installPlugin: () => {},
+      }),
+    };
+
+    const gitCreator: HarnessCreator = {
+      name: 'Git',
+      canAcceptHarness: () => true,
+      executeHarnessCreation: async (settings) => {
+        createdRoot = settings.rootFolder;
+      },
+    };
+
+    const app = new CreateATCHarness(
+      {
+        manifestString: 'anything',
+        argv: {},
+        rawArgv: [],
+      },
+      {
+        manifestSources: [manifestSource],
+        harnessCreators: [gitCreator],
+        fileSystem: createPermissiveFileSystem(),
+        outputDirectoryGuard: { validate: () => {} },
+        // biome-ignore lint/suspicious/noExplicitAny: use `any` as mock
+        engineDirectoryResolver: { resolve: async () => ({}) } as any,
+        terminal: { start: () => {}, stop: () => {}, getModel: () => createFakeLiveStatusModel() },
+      },
+    );
+
+    const result = await app.run();
+    expect(result.result).toBe(HarnessResultState.Success);
+    expect(path.basename(createdRoot)).toBe('SamplePluginHarness');
+  });
+
+  it('falls back to uplugin file stem when manifest name is missing', async () => {
+    let createdRoot = '';
+    const pluginDirectory = path.resolve('PluginRoot');
+    const pluginFile = path.join(pluginDirectory, 'FallbackPlugin.uplugin');
+    const manifestSource: ManifestSource = {
+      name: 'TestManifestSource',
+      canAcceptManifestString: () => true,
+      resolveManifest: async () => ({
+        manifestDirectory: pluginDirectory,
+        manifestFilePath: path.join(pluginDirectory, 'atc.json'),
+        manifest: { type: 'plugin', harness: 'Git' },
+        installPlugin: () => {},
+      }),
+    };
+
+    const gitCreator: HarnessCreator = {
+      name: 'Git',
+      canAcceptHarness: () => true,
+      executeHarnessCreation: async (settings) => {
+        createdRoot = settings.rootFolder;
+      },
+    };
+
+    const app = new CreateATCHarness(
+      {
+        manifestString: 'anything',
+        argv: {},
+        rawArgv: [],
+      },
+      {
+        manifestSources: [manifestSource],
+        harnessCreators: [gitCreator],
+        fileSystem: createFileSystemWithPluginFile(pluginDirectory, pluginFile),
+        outputDirectoryGuard: { validate: () => {} },
+        // biome-ignore lint/suspicious/noExplicitAny: use `any` as mock
+        engineDirectoryResolver: { resolve: async () => ({}) } as any,
+        terminal: { start: () => {}, stop: () => {}, getModel: () => createFakeLiveStatusModel() },
+      },
+    );
+
+    const result = await app.run();
+    expect(result.result).toBe(HarnessResultState.Success);
+    expect(path.basename(createdRoot)).toBe('FallbackPluginHarness');
+  });
 });
 
 function createPermissiveFileSystem(): FileSystem {
@@ -155,6 +244,21 @@ function createPermissiveFileSystem(): FileSystem {
     ensureDirectory: () => {},
     listFiles: () => [],
     listEntries: () => [],
+    copyDirectory: () => {},
+    removeDirectory: () => {},
+    createTemporaryDirectory: () => 'C:\\tmp\\atc',
+  };
+}
+
+function createFileSystemWithPluginFile(pluginDirectory: string, pluginFile: string): FileSystem {
+  return {
+    exists: () => true,
+    isDirectory: (filePath) => filePath === pluginDirectory,
+    readText: () => '',
+    writeText: () => {},
+    ensureDirectory: () => {},
+    listFiles: () => [],
+    listEntries: (directoryPath) => (directoryPath === pluginDirectory ? [pluginFile] : []),
     copyDirectory: () => {},
     removeDirectory: () => {},
     createTemporaryDirectory: () => 'C:\\tmp\\atc',

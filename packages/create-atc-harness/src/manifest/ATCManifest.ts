@@ -1,6 +1,7 @@
 export interface ATCManifest {
   type: 'plugin';
   harness: string;
+  name?: string;
 }
 
 export function parseAndValidateATCManifest(rawManifest: string, sourcePath: string) {
@@ -29,5 +30,6 @@ export function parseAndValidateATCManifest(rawManifest: string, sourcePath: str
   return {
     type: 'plugin',
     harness: manifest.harness.trim(),
+    name: typeof manifest.name === 'string' && manifest.name.trim() ? manifest.name.trim() : undefined,
   } satisfies ATCManifest;
 }

@@ -13,7 +13,7 @@ Create an Unreal host project (harness) from a plugin `atc.json` manifest.
 
 ## CLI
 
-`create-atc-harness <manifestString> <outputRootDirectory> [options]`
+`create-atc-harness <manifestString> [outputRootDirectory] [options]`
 
 ### Positional args
 
@@ -21,8 +21,11 @@ Create an Unreal host project (harness) from a plugin `atc.json` manifest.
   - Path to `atc.json`
   - Path to folder containing `atc.json`
   - Git URL to repo with `atc.json` at repo root
-- `outputRootDirectory`
+- `outputRootDirectory` (optional)
   - Directory where the harness project is created
+  - If omitted, defaults to:
+    - `${atcJsonName}Harness` when `atc.json.name` is present
+    - `${upluginFileName}Harness` when `name` is missing
 
 ### Options
 
@@ -45,6 +48,12 @@ Example:
 
 ```bash
 pnpm run create-atc-harness -- "./MyPlugin/atc.json" "./HarnessProject" --harness=EngineTemplate --engineAssociation=first
+```
+
+Example (auto output directory name):
+
+```bash
+pnpm run create-atc-harness -- "./MyPlugin/atc.json"
 ```
 
 ### Direct `tsx` invocation

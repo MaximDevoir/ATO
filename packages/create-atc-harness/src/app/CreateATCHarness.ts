@@ -9,6 +9,7 @@ import type { HarnessCreator } from '../harness/HarnessCreator';
 import { GitManifestSource } from '../manifest/GitManifestSource';
 import { LocalPathManifestSource } from '../manifest/LocalPathManifestSource';
 import type { ManifestResolution, ManifestSource } from '../manifest/ManifestSource';
+import { resolvePluginFileStemFromManifestFolder } from '../manifest/manifestHelpers';
 import { EngineDirectoryResolver } from '../services/EngineDirectoryResolver';
 import type { FileSystem } from '../services/FileSystem';
 import type { GitService } from '../services/GitService';
@@ -86,19 +87,18 @@ export class CreateATCHarness {
 
     let manifestResolution: ManifestResolution | undefined;
     try {
-      const outputRoot = path.resolve(this.settings.outputRootDirectory);
-      this.outputDirectoryGuard.validate(outputRoot);
-
       const manifestSource = this.resolveManifestSource(this.settings.manifestString);
       status.setStatus(`[Manifest] Resolving manifest via ${manifestSource.name}`);
       manifestResolution = await manifestSource.resolveManifest(
         {
           manifestString: this.settings.manifestString,
-          outputRootDirectory: outputRoot,
+          outputRootDirectory: this.settings.outputRootDirectory ?? process.cwd(),
         },
         result,
         status,
       );
+      const outputRoot = this.resolveOutputRootDirectory(manifestResolution);
+      this.outputDirectoryGuard.validate(outputRoot);
 
       const harnessString = this.settings.harness?.trim() || manifestResolution.manifest.harness;
       const selectedHarnessCreator = this.resolveHarnessCreator(harnessString);
@@ -141,6 +141,23 @@ export class CreateATCHarness {
       manifestResolution?.cleanup?.();
       this.terminal.stop();
     }
+  }
+
+  private resolveOutputRootDirectory(manifestResolution: ManifestResolution) {
+    if (this.settings.outputRootDirectory?.trim()) {
+      return path.resolve(this.settings.outputRootDirectory);
+    }
+
+    const manifestName = manifestResolution.manifest.name?.trim();
+    if (manifestName) {
+      return path.resolve(`${manifestName}Harness`);
+    }
+
+    const pluginFileStem = resolvePluginFileStemFromManifestFolder(
+      this.fileSystem,
+      manifestResolution.manifestDirectory,
+    );
+    return path.resolve(`${pluginFileStem}Harness`);
   }
 
   private resolveManifestSource(manifestString: string) {
