@@ -67,6 +67,9 @@ importers:
       '@types/yargs':
         specifier: 17.0.35
         version: 17.0.35
+      dotenv:
+        specifier: 17.3.1
+        version: 17.3.1
       is-interactive:
         specifier: 2.0.0
         version: 2.0.0
@@ -79,6 +82,18 @@ importers:
       '@maximdevoir/ato':
         specifier: workspace:*
         version: link:../ato
+
+  packages/create-atc-harness:
+    dependencies:
+      '@types/yargs':
+        specifier: 17.0.35
+        version: 17.0.35
+      is-interactive:
+        specifier: 2.0.0
+        version: 2.0.0
+      yargs:
+        specifier: 18.0.0
+        version: 18.0.0
 
   packages/unreal-lag: {}
 
