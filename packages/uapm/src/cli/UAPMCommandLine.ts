@@ -1,4 +1,4 @@
-export type UAPMCommandName = 'init' | 'add' | 'install';
+export type UAPMCommandName = 'init' | 'add' | 'install' | 'update';
 
 export interface UAPMCommandLine {
   command: UAPMCommandName;
@@ -6,4 +6,5 @@ export interface UAPMCommandLine {
   args: string[];
   type?: 'project' | 'plugin' | 'harness';
   name?: string;
+  force: boolean;
 }

@@ -15,10 +15,14 @@ export class DependencyResolver {
     for (const [name, packageRequirements] of requirements.entries()) {
       const pinned = this.findPin(pins, name);
       if (pinned) {
+        const hash = await this.resolveHash(pinned.source, pinned.version);
+        const dependencies = this.resolveDependenciesForPackage(manifests, name, pinned.source);
         resolved.push({
           name,
           source: pinned.source,
           version: pinned.version,
+          hash,
+          dependencies,
         });
         continue;
       }
@@ -33,6 +37,8 @@ export class DependencyResolver {
       const source = uniqueSources[0];
       const versions = packageRequirements.map((req) => req.version).filter((value): value is string => Boolean(value));
       const chosenVersion = await this.resolveVersionForSource(name, source, versions, warnings);
+      const hash = await this.resolveHash(source, chosenVersion);
+      const dependencies = this.resolveDependenciesForPackage(manifests, name, source);
 
       if (versions.length > 1) {
         warnings.push(
@@ -40,7 +46,7 @@ export class DependencyResolver {
         );
       }
 
-      resolved.push({ name, source, version: chosenVersion });
+      resolved.push({ name, source, version: chosenVersion, hash, dependencies });
     }
 
     return { resolvedDependencies: resolved, warnings };
@@ -69,7 +75,7 @@ export class DependencyResolver {
 
   private async resolveVersionForSource(name: string, source: string, versions: string[], warnings: string[]) {
     if (versions.length === 0) {
-      return undefined;
+      return 'HEAD';
     }
 
     const semverVersions = versions
@@ -80,16 +86,28 @@ export class DependencyResolver {
       return semverVersions[0];
     }
 
-    // Best effort fallback when values are non-semver (hash/branch/range).
-    // Prefer the most recently discovered git tag if any requested ref looks like range.
-    if (versions.some((value) => value.includes('^') || value.includes('~') || value === '*')) {
+    const hasRangeRequest = versions.some((value) => value.includes('^') || value.includes('~') || value === '*');
+    if (hasRangeRequest) {
       const refs = await this.gitClient.listRemoteRefs(source);
-      const tags = refs
+      const tagVersions = refs
         .filter((ref) => ref.kind === 'tag')
         .map((ref) => semver.clean(ref.name))
-        .filter(Boolean) as string[];
-      if (tags.length > 0) {
-        return tags.sort(semver.rcompare)[0];
+        .filter((value): value is string => Boolean(value))
+        .sort(semver.rcompare);
+      if (tagVersions.length > 0) {
+        if (versions.includes('*')) {
+          return tagVersions[0];
+        }
+        for (const requestedVersion of versions) {
+          if (!semver.validRange(requestedVersion)) {
+            continue;
+          }
+          const match = tagVersions.find((tagVersion) => semver.satisfies(tagVersion, requestedVersion));
+          if (match) {
+            return match;
+          }
+        }
+        return tagVersions[0];
       }
     }
 
@@ -97,5 +115,19 @@ export class DependencyResolver {
       `[uapm] Could not semver-resolve versions for '${name}'. Falling back to '${versions[versions.length - 1]}'.`,
     );
     return versions[versions.length - 1];
+  }
+
+  private async resolveHash(source: string, version: string | undefined) {
+    if (source.startsWith('file:')) {
+      return 'local';
+    }
+    const resolved = await this.gitClient.resolveRef(source, version);
+    return resolved.hash;
+  }
+
+  private resolveDependenciesForPackage(manifests: UAPMManifest[], name: string, source: string) {
+    void source;
+    const selectedManifest = manifests.find((manifest) => manifest.name === name);
+    return (selectedManifest?.dependencies ?? []).map((dependency) => dependency.name);
   }
 }

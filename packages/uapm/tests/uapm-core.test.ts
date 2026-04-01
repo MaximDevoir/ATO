@@ -76,8 +76,15 @@ describe('AddCommand', () => {
       {
         cwd: 'C:\\Workspace',
         source: 'https://github.com/org/AwesomeInventory.git@v5.7.3',
+        force: false,
       },
       repository,
+      {
+        getPath: () => 'uapm.lock',
+        exists: () => false,
+        read: () => ({ package: [] }),
+        write: () => {},
+      },
       {
         resolve: (...segments: string[]) => segments.join('\\'),
         createTempDir: () => 'uapm-add-temp',
@@ -91,6 +98,10 @@ describe('AddCommand', () => {
         clone: async () => {},
         addSubmodule: async () => {},
         listRemoteRefs: async () => [],
+        resolveRef: async () => ({ version: 'v5.7.3', hash: 'abc123' }),
+        inspectRepository: async () => ({ isRepository: false, isDirty: false }),
+        checkout: async () => {},
+        fetch: async () => {},
       },
       { info: () => {}, warn: () => {}, error: () => {} },
     ).execute();

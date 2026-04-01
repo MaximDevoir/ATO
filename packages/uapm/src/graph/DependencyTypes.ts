@@ -18,6 +18,8 @@ export interface ResolvedDependency {
   name: string;
   source: string;
   version?: string;
+  hash?: string;
+  dependencies?: string[];
 }
 
 export interface ResolutionResult {

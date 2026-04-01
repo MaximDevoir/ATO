@@ -18,6 +18,7 @@ export class DependencyInstaller {
     for (const dependency of dependencies) {
       const targetDirectory = path.join(pluginsDirectory, dependency.name);
       if (this.fileSystem.exists(targetDirectory)) {
+        await this.updateExistingPackage(targetDirectory, dependency);
         continue;
       }
 
@@ -36,6 +37,32 @@ export class DependencyInstaller {
       } else {
         await this.gitClient.addSubmodule(parsed, targetDirectory, rootDirectory);
       }
+
+      if (dependency.hash && dependency.hash !== 'unknown' && dependency.hash !== 'local') {
+        await this.gitClient.checkout(targetDirectory, dependency.hash);
+      }
     }
+  }
+
+  private async updateExistingPackage(targetDirectory: string, dependency: ResolvedDependency) {
+    if (dependency.source.startsWith('file:')) {
+      return;
+    }
+
+    const currentState = await this.gitClient.inspectRepository(targetDirectory);
+    if (!currentState.isRepository) {
+      return;
+    }
+
+    if (!dependency.hash || dependency.hash === 'unknown' || dependency.hash === 'local') {
+      return;
+    }
+
+    if (currentState.commit === dependency.hash) {
+      return;
+    }
+
+    await this.gitClient.fetch(targetDirectory);
+    await this.gitClient.checkout(targetDirectory, dependency.hash);
   }
 }

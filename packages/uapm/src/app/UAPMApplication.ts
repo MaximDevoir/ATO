@@ -2,6 +2,8 @@ import type { UAPMCommandLine } from '../cli/UAPMCommandLine';
 import { AddCommand } from '../commands/AddCommand';
 import { InitCommand } from '../commands/InitCommand';
 import { InstallCommand } from '../commands/InstallCommand';
+import { UpdateCommand } from '../commands/UpdateCommand';
+import { TOMLLockfileRepository } from '../lockfile/LockfileRepository';
 import { FileManifestRepository } from '../manifest/ManifestRepository';
 import { NodeFileSystemService } from '../services/FileSystemService';
 import { SimpleGitClient } from '../services/GitClient';
@@ -12,6 +14,7 @@ import { InkPromptService } from '../ui/PromptService';
 export class UAPMApplication {
   async run(commandLine: UAPMCommandLine) {
     const manifestRepository = new FileManifestRepository();
+    const lockfileRepository = new TOMLLockfileRepository();
     const fileSystem = new NodeFileSystemService();
     const gitClient = new SimpleGitClient();
     const reporter = new ConsoleReporter();
@@ -37,8 +40,9 @@ export class UAPMApplication {
         }
 
         return await new AddCommand(
-          { cwd: commandLine.cwd, source },
+          { cwd: commandLine.cwd, source, force: commandLine.force },
           manifestRepository,
+          lockfileRepository,
           fileSystem,
           gitClient,
           reporter,
@@ -46,8 +50,19 @@ export class UAPMApplication {
       }
       case 'install': {
         return await new InstallCommand(
-          { cwd: commandLine.cwd },
+          { cwd: commandLine.cwd, force: commandLine.force },
           manifestRepository,
+          lockfileRepository,
+          fileSystem,
+          gitClient,
+          reporter,
+        ).execute();
+      }
+      case 'update': {
+        return await new UpdateCommand(
+          { cwd: commandLine.cwd, force: commandLine.force },
+          manifestRepository,
+          lockfileRepository,
           fileSystem,
           gitClient,
           reporter,

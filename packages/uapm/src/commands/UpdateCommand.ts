@@ -7,14 +7,14 @@ import type { GitClient } from '../services/GitClient';
 import type { Reporter } from '../ui/ConsoleReporter';
 import type { Command } from './Command';
 
-export interface InstallCommandOptions {
+export interface UpdateCommandOptions {
   cwd: string;
   force: boolean;
 }
 
-export class InstallCommand implements Command {
+export class UpdateCommand implements Command {
   constructor(
-    private readonly options: InstallCommandOptions,
+    private readonly options: UpdateCommandOptions,
     private readonly manifestRepository: ManifestRepository,
     private readonly lockfileRepository: LockfileRepository,
     private readonly fileSystem: FileSystemService,
@@ -34,10 +34,9 @@ export class InstallCommand implements Command {
       this.gitClient,
       this.reporter,
     );
-    const hasLockfile = this.lockfileRepository.exists(this.options.cwd);
     const synchronized = await synchronizer.synchronize(this.options.cwd, {
       force: this.options.force,
-      refresh: !hasLockfile,
+      refresh: true,
     });
 
     await new DependencyInstaller(this.fileSystem, this.gitClient).installAll(
@@ -46,7 +45,7 @@ export class InstallCommand implements Command {
       synchronized.packages,
     );
 
-    this.reporter.info(`[uapm] Installed ${synchronized.packages.length} dependency packages`);
+    this.reporter.info(`[uapm] Updated ${synchronized.packages.length} dependency packages`);
     return 0;
   }
 }

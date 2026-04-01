@@ -9,6 +9,7 @@ export async function parseUAPMCommandLine(rawArgv = process.argv): Promise<UAPM
     .command('init', 'Initialize uapm.json')
     .command('add <source>', 'Add dependency source to current uapm.json')
     .command('install', 'Install dependency graph for current manifest')
+    .command('update', 'Update dependency graph and lockfile from remote refs')
     .option('type', {
       type: 'string',
       choices: ['project', 'plugin', 'harness'] as const,
@@ -18,14 +19,19 @@ export async function parseUAPMCommandLine(rawArgv = process.argv): Promise<UAPM
       type: 'string',
       describe: 'Explicit package name for init',
     })
+    .option('force', {
+      type: 'boolean',
+      default: false,
+      describe: 'Override safety policy for local drift/branch divergence',
+    })
     .demandCommand(1)
     .help()
     .strict(false);
 
   const argv = await parser.parse();
   const command = String(argv._[0] ?? '').trim() as UAPMCommandName;
-  if (!['init', 'add', 'install'].includes(command)) {
-    throw new Error(`[uapm] Unknown command '${command}'. Supported: init, add, install`);
+  if (!['init', 'add', 'install', 'update'].includes(command)) {
+    throw new Error(`[uapm] Unknown command '${command}'. Supported: init, add, install, update`);
   }
 
   return {
@@ -34,5 +40,6 @@ export async function parseUAPMCommandLine(rawArgv = process.argv): Promise<UAPM
     args: argv._.slice(1).map((value) => String(value)),
     type: argv.type as UAPMCommandLine['type'],
     name: typeof argv.name === 'string' ? argv.name : undefined,
+    force: argv.force === true,
   };
 }

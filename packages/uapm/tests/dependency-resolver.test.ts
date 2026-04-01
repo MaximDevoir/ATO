@@ -8,6 +8,10 @@ describe('DependencyResolver', () => {
       clone: async () => {},
       addSubmodule: async () => {},
       listRemoteRefs: async () => [],
+      resolveRef: async () => ({ version: 'HEAD', hash: 'abc' }),
+      inspectRepository: async () => ({ isRepository: false, isDirty: false }),
+      checkout: async () => {},
+      fetch: async () => {},
     });
     const root: UAPMManifest = {
       name: 'Root',
@@ -36,6 +40,10 @@ describe('DependencyResolver', () => {
       clone: async () => {},
       addSubmodule: async () => {},
       listRemoteRefs: async () => [],
+      resolveRef: async () => ({ version: 'HEAD', hash: 'abc' }),
+      inspectRepository: async () => ({ isRepository: false, isDirty: false }),
+      checkout: async () => {},
+      fetch: async () => {},
     });
     const root: UAPMManifest = {
       name: 'Root',
@@ -63,6 +71,8 @@ describe('DependencyResolver', () => {
         name: 'Shared',
         source: 'https://github.com/company/shared.git',
         version: '^2.0.0',
+        hash: 'abc',
+        dependencies: [],
       },
     ]);
   });

@@ -1,4 +1,7 @@
 import type { Dependency } from '../domain/UAPMManifest';
+import { DependencyInstaller } from '../install/DependencyInstaller';
+import type { LockfileRepository } from '../lockfile/LockfileRepository';
+import { LockfileSynchronizer } from '../lockfile/LockfileSynchronizer';
 import type { ManifestRepository } from '../manifest/ManifestRepository';
 import type { FileSystemService } from '../services/FileSystemService';
 import type { GitClient } from '../services/GitClient';
@@ -10,12 +13,14 @@ import type { Command } from './Command';
 export interface AddCommandOptions {
   cwd: string;
   source: string;
+  force: boolean;
 }
 
 export class AddCommand implements Command {
   constructor(
     private readonly options: AddCommandOptions,
     private readonly manifestRepository: ManifestRepository,
+    private readonly lockfileRepository: LockfileRepository,
     private readonly fileSystem: FileSystemService,
     private readonly gitClient: GitClient,
     private readonly reporter: Reporter,
@@ -41,7 +46,28 @@ export class AddCommand implements Command {
 
     manifest.dependencies = dependencies;
     this.manifestRepository.write(this.options.cwd, manifest);
-    this.reporter.info(`[uapm] Added dependency ${dependency.name} from ${dependency.source}`);
+
+    const synchronizer = new LockfileSynchronizer(
+      this.manifestRepository,
+      this.lockfileRepository,
+      this.fileSystem,
+      this.gitClient,
+      this.reporter,
+    );
+    const synchronized = await synchronizer.synchronize(this.options.cwd, {
+      force: this.options.force,
+      refresh: true,
+    });
+
+    await new DependencyInstaller(this.fileSystem, this.gitClient).installAll(
+      synchronized.manifestType,
+      this.options.cwd,
+      synchronized.packages,
+    );
+
+    this.reporter.info(
+      `[uapm] Added dependency ${dependency.name} from ${dependency.source} and synchronized installs`,
+    );
     return 0;
   }
 
