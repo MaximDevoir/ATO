@@ -35,10 +35,10 @@ export class GitManifestSource implements ManifestSource {
     liveStatus.setStatus(`[Manifest] Cloning plugin manifest repository ${gitReference.repositoryUrl}${refInfo}`);
     await this.gitService.clone(gitReference.repositoryUrl, tempDirectory, gitReference.ref);
 
-    const manifestPath = path.join(tempDirectory, 'atc.json');
+    const manifestPath = path.join(tempDirectory, 'uapm.json');
     if (!this.fileSystem.exists(manifestPath)) {
       throw new Error(
-        `[create-atc-harness] Git manifest repositories must contain atc.json at the repository root: ${context.manifestString}`,
+        `[create-atc-harness] Git manifest repositories must contain uapm.json at the repository root: ${context.manifestString}`,
       );
     }
 

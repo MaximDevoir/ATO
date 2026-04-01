@@ -26,7 +26,7 @@ export async function parseCreateATCHarnessCommandLine(rawArgv = process.argv): 
     })
     .positional('manifestString', {
       type: 'string',
-      describe: 'Path to atc.json, folder containing atc.json, or Git repository link',
+      describe: 'Path to uapm.json, folder containing uapm.json, or Git repository link',
     })
     .positional('outputRootDirectory', {
       type: 'string',

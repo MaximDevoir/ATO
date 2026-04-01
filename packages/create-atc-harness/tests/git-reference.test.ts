@@ -49,7 +49,7 @@ describe('git clone with tag/ref', () => {
         pluginManifestFolder: '/tmp/plugin',
         harnessString: 'https://github.com/org/harness.git@5.7.3',
         commandLineOptions: {
-          manifestString: '/tmp/plugin/atc.json',
+          manifestString: '/tmp/plugin/uapm.json',
           outputRootDirectory: '/tmp/harness',
           argv: {},
           rawArgv: [],
@@ -81,7 +81,7 @@ describe('git clone with tag/ref', () => {
     };
 
     const fakeFs: FileSystem = {
-      exists: (filePath) => filePath.endsWith('atc.json'),
+      exists: (filePath) => filePath.endsWith('uapm.json'),
       isDirectory: () => true,
       readText: () => JSON.stringify({ type: 'plugin', harness: 'EngineTemplate' }),
       writeText: () => {},
@@ -123,7 +123,7 @@ describe('git clone with tag/ref', () => {
     };
 
     const fakeFs: FileSystem = {
-      exists: (filePath) => filePath.endsWith('atc.json'),
+      exists: (filePath) => filePath.endsWith('uapm.json'),
       isDirectory: () => false,
       readText: () => JSON.stringify({ type: 'plugin', harness: 'EngineTemplate', name: 'AwesomeInventory' }),
       writeText: () => {},
@@ -156,7 +156,7 @@ describe('git clone with tag/ref', () => {
         pluginManifestFolder: '/tmp/manifest-repo',
         harnessString: 'EngineTemplate',
         commandLineOptions: {
-          manifestString: '/tmp/manifest-repo/atc.json',
+          manifestString: '/tmp/manifest-repo/uapm.json',
           outputRootDirectory: '/tmp/host',
           argv: {},
           rawArgv: [],
@@ -183,7 +183,7 @@ describe('git clone with tag/ref', () => {
     };
 
     const fakeFs: FileSystem = {
-      exists: (filePath) => filePath.endsWith('atc.json'),
+      exists: (filePath) => filePath.endsWith('uapm.json'),
       isDirectory: () => false,
       readText: () => JSON.stringify({ type: 'plugin', harness: 'EngineTemplate' }),
       writeText: () => {},
@@ -216,7 +216,7 @@ describe('git clone with tag/ref', () => {
         pluginManifestFolder: '/tmp/manifest-repo',
         harnessString: 'EngineTemplate',
         commandLineOptions: {
-          manifestString: '/tmp/manifest-repo/atc.json',
+          manifestString: '/tmp/manifest-repo/uapm.json',
           outputRootDirectory: '/tmp/host',
           argv: {},
           rawArgv: [],

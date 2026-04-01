@@ -1,0 +1,13 @@
+export { UAPMApplication } from './app/UAPMApplication';
+export { parseUAPMCommandLine } from './cli/parseCommandLine';
+export { runUAPMCLI } from './cli/runUAPMCLI';
+export { AddCommand } from './commands/AddCommand';
+export { InitCommand } from './commands/InitCommand';
+export { InstallCommand } from './commands/InstallCommand';
+export type { Dependency, DependencyPin, ManifestType, UAPMManifest } from './domain/UAPMManifest';
+export { DependencyPinSchema, DependencySchema, ManifestTypeSchema, UAPMManifestSchema } from './domain/UAPMManifest';
+export { DependencyGraphBuilder } from './graph/DependencyGraphBuilder';
+export { DependencyResolver } from './graph/DependencyResolver';
+export { DependencyInstaller } from './install/DependencyInstaller';
+export { FileManifestRepository } from './manifest/ManifestRepository';
+export { parseGitReference } from './services/GitReferenceParser';

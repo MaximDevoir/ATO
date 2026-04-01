@@ -22,7 +22,7 @@ describe('ATC manifest validation', () => {
   it('accepts plugin manifests with harness', () => {
     const manifest = parseAndValidateATCManifest(
       JSON.stringify({ type: 'plugin', harness: 'EngineTemplate' }),
-      'atc.json',
+      'uapm.json',
     );
     expect(manifest.type).toBe('plugin');
     expect(manifest.harness).toBe('EngineTemplate');
@@ -30,12 +30,12 @@ describe('ATC manifest validation', () => {
 
   it('fails when type is not plugin', () => {
     expect(() =>
-      parseAndValidateATCManifest(JSON.stringify({ type: 'project', harness: 'EngineTemplate' }), 'atc.json'),
+      parseAndValidateATCManifest(JSON.stringify({ type: 'project', harness: 'EngineTemplate' }), 'uapm.json'),
     ).toThrow(/type: "plugin"/i);
   });
 
   it('fails when harness is missing', () => {
-    expect(() => parseAndValidateATCManifest(JSON.stringify({ type: 'plugin' }), 'atc.json')).toThrow(/harness/i);
+    expect(() => parseAndValidateATCManifest(JSON.stringify({ type: 'plugin' }), 'uapm.json')).toThrow(/harness/i);
   });
 });
 
@@ -100,7 +100,7 @@ describe('CreateATCHarness', () => {
       canAcceptManifestString: () => true,
       resolveManifest: async () => ({
         manifestDirectory: 'C:\\Plugin',
-        manifestFilePath: 'C:\\Plugin\\atc.json',
+        manifestFilePath: 'C:\\Plugin\\uapm.json',
         manifest: { type: 'plugin', harness: 'Git' },
         installPlugin: () => {},
       }),
@@ -146,14 +146,14 @@ describe('CreateATCHarness', () => {
     expect(calledCreators).toEqual(['EngineTemplate']);
   });
 
-  it('derives outputRootDirectory from atc.json name when omitted', async () => {
+  it('derives outputRootDirectory from uapm.json name when omitted', async () => {
     let createdRoot = '';
     const manifestSource: ManifestSource = {
       name: 'TestManifestSource',
       canAcceptManifestString: () => true,
       resolveManifest: async () => ({
         manifestDirectory: 'C:\\Plugin',
-        manifestFilePath: 'C:\\Plugin\\atc.json',
+        manifestFilePath: 'C:\\Plugin\\uapm.json',
         manifest: { type: 'plugin', harness: 'Git', name: 'SamplePlugin' },
         installPlugin: () => {},
       }),
@@ -198,7 +198,7 @@ describe('CreateATCHarness', () => {
       canAcceptManifestString: () => true,
       resolveManifest: async () => ({
         manifestDirectory: pluginDirectory,
-        manifestFilePath: path.join(pluginDirectory, 'atc.json'),
+        manifestFilePath: path.join(pluginDirectory, 'uapm.json'),
         manifest: { type: 'plugin', harness: 'Git' },
         installPlugin: () => {},
       }),

@@ -10,21 +10,21 @@ export function parseAndValidateATCManifest(rawManifest: string, sourcePath: str
     parsed = JSON.parse(rawManifest);
   } catch (error) {
     throw new Error(
-      `[create-atc-harness] Failed to parse atc.json at ${sourcePath}: ${error instanceof Error ? error.message : String(error)}`,
+      `[create-atc-harness] Failed to parse uapm.json at ${sourcePath}: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 
   if (!parsed || typeof parsed !== 'object') {
-    throw new Error(`[create-atc-harness] atc.json at ${sourcePath} must be a JSON object`);
+    throw new Error(`[create-atc-harness] uapm.json at ${sourcePath} must be a JSON object`);
   }
 
   const manifest = parsed as Partial<ATCManifest>;
   if (manifest.type !== 'plugin') {
-    throw new Error(`[create-atc-harness] atc.json at ${sourcePath} must contain type: "plugin"`);
+    throw new Error(`[create-atc-harness] uapm.json at ${sourcePath} must contain type: "plugin"`);
   }
 
   if (typeof manifest.harness !== 'string' || !manifest.harness.trim()) {
-    throw new Error(`[create-atc-harness] atc.json at ${sourcePath} must contain a non-empty string harness value`);
+    throw new Error(`[create-atc-harness] uapm.json at ${sourcePath} must contain a non-empty string harness value`);
   }
 
   return {
