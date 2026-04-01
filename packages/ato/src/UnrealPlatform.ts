@@ -1,6 +1,11 @@
 import * as path from 'node:path';
 import { checkExistsSync } from './ATO._helpers';
 
+export {
+  coerceInstalledEnginePathToEngineDirectory,
+  isValidEngineDirectory,
+} from '@maximdevoir/engine-association-resolver';
+
 export interface UnrealHostPlatformInfo {
   compilePlatform: string;
   cookPlatformStandalone: string;
@@ -79,37 +84,6 @@ export function resolveProjectBinaryCandidates(
   return host.binaryDirectories.map((binaryDirectory) => {
     return path.join(projectRoot, 'Binaries', binaryDirectory, `${executableBaseName}${host.executableExtension}`);
   });
-}
-
-export function isValidEngineDirectory(engineDir: string) {
-  if (!engineDir) {
-    return false;
-  }
-
-  const resolvedEngineDir = path.resolve(engineDir);
-  return (
-    checkExistsSync(path.join(resolvedEngineDir, 'Build', 'BatchFiles', 'RunUAT.bat')) ||
-    checkExistsSync(path.join(resolvedEngineDir, 'Build', 'BatchFiles', 'RunUAT.sh')) ||
-    checkExistsSync(path.join(resolvedEngineDir, 'Binaries', 'DotNET', 'AutomationTool', 'AutomationTool.dll'))
-  );
-}
-
-export function coerceInstalledEnginePathToEngineDirectory(engineInstallPath: string) {
-  if (!engineInstallPath) {
-    return undefined;
-  }
-
-  const resolvedPath = path.resolve(engineInstallPath.trim());
-  if (isValidEngineDirectory(resolvedPath)) {
-    return resolvedPath;
-  }
-
-  const nestedEngineDirectory = path.join(resolvedPath, 'Engine');
-  if (isValidEngineDirectory(nestedEngineDirectory)) {
-    return nestedEngineDirectory;
-  }
-
-  return undefined;
 }
 
 export function resolveBuildGraphSchemaLocation(engineDir: string) {

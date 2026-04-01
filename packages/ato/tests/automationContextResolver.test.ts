@@ -1,9 +1,9 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import * as path from 'node:path';
+import { EngineAssociationResolver } from '@maximdevoir/engine-association-resolver';
 import { afterEach, describe, expect, it } from 'vitest';
 import { AutomationContextResolver } from '../src/AutomationContextResolver';
-import { EngineAssociationResolver } from '../src/EngineAssociationResolver';
 import { ProjectResolver } from '../src/ProjectResolver';
 
 const temporaryDirectories: string[] = [];
