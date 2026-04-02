@@ -3,6 +3,7 @@ import { DependencyInstaller } from '../install/DependencyInstaller';
 import type { LockfileRepository } from '../lockfile/LockfileRepository';
 import { LockfileSynchronizer } from '../lockfile/LockfileSynchronizer';
 import type { ManifestRepository } from '../manifest/ManifestRepository';
+import { PostinstallRunner } from '../postinstall/PostinstallRunner';
 import type { FileSystemService } from '../services/FileSystemService';
 import type { GitClient } from '../services/GitClient';
 import { parseGitReference } from '../services/GitReferenceParser';
@@ -26,6 +27,7 @@ export class AddCommand implements Command {
     private readonly fileSystem: FileSystemService,
     private readonly gitClient: GitClient,
     private readonly reporter: Reporter,
+    private readonly postinstallRunner: PostinstallRunner = new PostinstallRunner(),
   ) {}
 
   async execute() {
@@ -64,6 +66,7 @@ export class AddCommand implements Command {
       this.options.cwd,
       synchronized.packages,
     );
+    await this.postinstallRunner.run(this.options.cwd, synchronized.manifestType, synchronized.packages, this.reporter);
 
     this.reporter.info(`[uapm] Added dependency ${dependency.name} from ${dependency.source}`);
     return 0;

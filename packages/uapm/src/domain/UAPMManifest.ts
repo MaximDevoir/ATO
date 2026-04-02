@@ -20,6 +20,12 @@ export const DependencyOverrideSchema = z.object({
   version: z.string().min(1).optional(),
 });
 
+export const ProjectPostinstallSchema = z
+  .object({
+    modules: z.array(z.string().min(1)).optional(),
+  })
+  .strict();
+
 export const UAPMManifestSchema = z
   .object({
     name: z.string().min(1),
@@ -28,13 +34,21 @@ export const UAPMManifestSchema = z
     dependencies: z.array(DependencySchema).optional(),
     overrides: z.array(DependencyOverrideSchema).optional(),
     harnessedPlugins: z.array(z.string().min(1)).optional(),
+    postinstall: ProjectPostinstallSchema.optional(),
   })
-  .superRefine((value: { harness?: string; type: string }, context: z.RefinementCtx) => {
+  .superRefine((value: { harness?: string; postinstall?: unknown; type: string }, context: z.RefinementCtx) => {
     if (value.harness && value.type !== 'plugin') {
       context.addIssue({
         code: 'custom',
         message: 'harness is only valid for plugin manifests',
         path: ['harness'],
+      });
+    }
+    if (value.postinstall && value.type !== 'project') {
+      context.addIssue({
+        code: 'custom',
+        message: 'postinstall is only valid for project manifests',
+        path: ['postinstall'],
       });
     }
   });

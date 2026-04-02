@@ -33,7 +33,7 @@ export async function parseUAPMCommandLine(rawArgv = process.argv): Promise<UAPM
     .option('harnessed', {
       type: 'boolean',
       default: false,
-      describe: 'Mark dependency as harnessed (local-dev, opt-out of update/install)',
+      describe: 'Mark dependency as harnessed (tracked in lockfile, but protected during updates)',
     })
     .demandCommand(1)
     .help()

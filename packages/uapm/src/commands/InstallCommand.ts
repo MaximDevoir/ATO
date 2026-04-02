@@ -2,6 +2,7 @@ import { DependencyInstaller } from '../install/DependencyInstaller';
 import type { LockfileRepository } from '../lockfile/LockfileRepository';
 import { LockfileSynchronizer } from '../lockfile/LockfileSynchronizer';
 import type { ManifestRepository } from '../manifest/ManifestRepository';
+import { PostinstallRunner } from '../postinstall/PostinstallRunner';
 import type { FileSystemService } from '../services/FileSystemService';
 import type { GitClient } from '../services/GitClient';
 import type { Reporter } from '../ui/ConsoleReporter';
@@ -20,6 +21,7 @@ export class InstallCommand implements Command {
     private readonly fileSystem: FileSystemService,
     private readonly gitClient: GitClient,
     private readonly reporter: Reporter,
+    private readonly postinstallRunner: PostinstallRunner = new PostinstallRunner(),
   ) {}
 
   async execute() {
@@ -45,6 +47,7 @@ export class InstallCommand implements Command {
       this.options.cwd,
       synchronized.packages,
     );
+    await this.postinstallRunner.run(this.options.cwd, synchronized.manifestType, synchronized.packages, this.reporter);
 
     this.reporter.info(`[uapm] Installed ${synchronized.packages.length} dependency packages`);
     return 0;

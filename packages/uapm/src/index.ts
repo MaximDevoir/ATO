@@ -20,5 +20,7 @@ export { TOMLLockfileRepository } from './lockfile/LockfileRepository';
 export { LockfileSynchronizer } from './lockfile/LockfileSynchronizer';
 export type { LockedPackage, UAPMLockfile } from './lockfile/UAPMLockfile';
 export { FileManifestRepository } from './manifest/ManifestRepository';
+export { PostinstallRunner } from './postinstall/PostinstallRunner';
+export type { LoadedPostinstallScript, PostinstallScript } from './postinstall/PostinstallTypes';
 export { SafetyPolicy } from './safety/SafetyPolicy';
 export { parseGitReference } from './services/GitReferenceParser';

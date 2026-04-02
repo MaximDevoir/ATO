@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { AddCommand } from '../src/commands/AddCommand';
 import { InitCommand } from '../src/commands/InitCommand';
 import type { UAPMManifest } from '../src/domain/UAPMManifest';
+import { UAPMManifestSchema } from '../src/domain/UAPMManifest';
 import { parseGitReference } from '../src/services/GitReferenceParser';
 
 describe('parseGitReference', () => {
@@ -115,5 +116,19 @@ describe('AddCommand', () => {
         version: '^5.7.3',
       },
     ]);
+  });
+});
+
+describe('UAPMManifestSchema', () => {
+  it('rejects postinstall for plugin manifests', () => {
+    expect(() =>
+      UAPMManifestSchema.parse({
+        name: 'AwesomeInventory',
+        type: 'plugin',
+        postinstall: {
+          modules: ['MyGame'],
+        },
+      }),
+    ).toThrow(/postinstall is only valid for project manifests/i);
   });
 });
