@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import { runUAPMCLI } from './cli/runUAPMCLI';
 
 runUAPMCLI(process.argv)

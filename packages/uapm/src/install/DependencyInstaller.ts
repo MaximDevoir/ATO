@@ -22,25 +22,28 @@ export class DependencyInstaller {
         continue;
       }
 
-      if (dependency.source.startsWith('file:')) {
-        const sourceDirectory = this.fileSystem.resolve(rootDirectory, dependency.source.slice('file:'.length));
-        this.fileSystem.copyDir(sourceDirectory, targetDirectory);
-        continue;
-      }
+      await this.installFreshDependency(rootType, rootDirectory, targetDirectory, dependency);
+    }
+  }
 
-      const parsed = parseGitReference(
-        dependency.version ? `${dependency.source}@${dependency.version}` : dependency.source,
-      );
+  private async installFreshDependency(
+    _rootType: ManifestType,
+    rootDirectory: string,
+    targetDirectory: string,
+    dependency: ResolvedDependency,
+  ) {
+    if (dependency.source.startsWith('file:')) {
+      const sourceDirectory = this.fileSystem.resolve(rootDirectory, dependency.source.slice('file:'.length));
+      this.fileSystem.copyDir(sourceDirectory, targetDirectory);
+      return;
+    }
 
-      if (rootType === 'harness') {
-        await this.gitClient.clone(parsed, targetDirectory);
-      } else {
-        await this.gitClient.addSubmodule(parsed, targetDirectory, rootDirectory);
-      }
+    const ref = toGitRefCandidate(dependency.version);
+    const parsed = parseGitReference(ref ? `${dependency.source}@${ref}` : dependency.source);
+    await this.gitClient.addSubmodule(parsed, targetDirectory, rootDirectory);
 
-      if (dependency.hash && dependency.hash !== 'unknown' && dependency.hash !== 'local') {
-        await this.gitClient.checkout(targetDirectory, dependency.hash);
-      }
+    if (dependency.hash && dependency.hash !== 'unknown' && dependency.hash !== 'local') {
+      await this.gitClient.checkout(targetDirectory, dependency.hash);
     }
   }
 
@@ -53,11 +56,9 @@ export class DependencyInstaller {
     if (!currentState.isRepository) {
       return;
     }
-
     if (!dependency.hash || dependency.hash === 'unknown' || dependency.hash === 'local') {
       return;
     }
-
     if (currentState.commit === dependency.hash) {
       return;
     }
@@ -65,4 +66,15 @@ export class DependencyInstaller {
     await this.gitClient.fetch(targetDirectory);
     await this.gitClient.checkout(targetDirectory, dependency.hash);
   }
+}
+
+function toGitRefCandidate(version: string | undefined) {
+  if (!version) {
+    return undefined;
+  }
+  const trimmed = version.trim();
+  if (!trimmed || trimmed === '*') {
+    return undefined;
+  }
+  return trimmed.replace(/^[\^~=]/, '');
 }

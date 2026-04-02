@@ -54,6 +54,7 @@ export class TOMLLockfileRepository implements LockfileRepository {
         hash: entry.hash,
         source: entry.source,
         dependencies: [...entry.dependencies].sort(),
+        ...(entry.harnessed ? { harnessed: true } : {}),
       })),
     });
     fs.writeFileSync(this.getPath(cwd), serialized, 'utf-8');
@@ -78,5 +79,6 @@ function normalizeLockedPackage(value: unknown, lockfilePath: string): LockedPac
     dependencies: Array.isArray(entry.dependencies)
       ? entry.dependencies.map((dependencyName) => String(dependencyName))
       : [],
+    ...(entry.harnessed === true ? { harnessed: true } : {}),
   };
 }

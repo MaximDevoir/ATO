@@ -26,7 +26,14 @@ export class DependencyGraphBuilder {
     graph.addNode(rootNode.id, rootNode);
     nodes.push(rootNode);
 
-    await this.expandDependencies(graph, rootNode, rootDirectory, nodes, new Set<string>());
+    await this.expandDependencies(
+      graph,
+      rootNode,
+      rootDirectory,
+      nodes,
+      new Set<string>(),
+      new Set(rootManifest.harnessedPlugins ?? []),
+    );
 
     return {
       rootManifest,
@@ -42,9 +49,13 @@ export class DependencyGraphBuilder {
     rootDirectory: string,
     nodes: PackageNode[],
     visiting: Set<string>,
+    rootHarnessedPlugins: Set<string>,
   ) {
     const dependencies = parent.manifest.dependencies ?? [];
     for (const dependency of dependencies) {
+      if (parent.id === 'root' && rootHarnessedPlugins.has(dependency.name)) {
+        continue;
+      }
       const nodeId = `${dependency.name}|${dependency.source}`;
       if (!graph.hasNode(nodeId)) {
         const resolvedManifest = await this.resolveDependencyManifest(rootDirectory, dependency);
@@ -59,7 +70,7 @@ export class DependencyGraphBuilder {
 
         if (!visiting.has(node.id)) {
           visiting.add(node.id);
-          await this.expandDependencies(graph, node, rootDirectory, nodes, visiting);
+          await this.expandDependencies(graph, node, rootDirectory, nodes, visiting, rootHarnessedPlugins);
           visiting.delete(node.id);
         }
       }

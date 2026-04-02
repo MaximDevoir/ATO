@@ -4,9 +4,15 @@ export { runUAPMCLI } from './cli/runUAPMCLI';
 export { AddCommand } from './commands/AddCommand';
 export { InitCommand } from './commands/InitCommand';
 export { InstallCommand } from './commands/InstallCommand';
+export { ProjectGetNameCommand } from './commands/ProjectGetNameCommand';
 export { UpdateCommand } from './commands/UpdateCommand';
-export type { Dependency, DependencyPin, ManifestType, UAPMManifest } from './domain/UAPMManifest';
-export { DependencyPinSchema, DependencySchema, ManifestTypeSchema, UAPMManifestSchema } from './domain/UAPMManifest';
+export type { Dependency, DependencyOverride, ManifestType, UAPMManifest } from './domain/UAPMManifest';
+export {
+  DependencyOverrideSchema,
+  DependencySchema,
+  ManifestTypeSchema,
+  UAPMManifestSchema,
+} from './domain/UAPMManifest';
 export { DependencyGraphBuilder } from './graph/DependencyGraphBuilder';
 export { DependencyResolver } from './graph/DependencyResolver';
 export { DependencyInstaller } from './install/DependencyInstaller';

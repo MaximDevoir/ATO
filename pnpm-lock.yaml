@@ -112,6 +112,9 @@ importers:
       simple-git:
         specifier: 3.30.0
         version: 3.30.0
+      uapm:
+        specifier: workspace:*
+        version: link:../uapm
       yargs:
         specifier: 18.0.0
         version: 18.0.0

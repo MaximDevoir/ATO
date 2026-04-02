@@ -2,6 +2,7 @@ import type { UAPMCommandLine } from '../cli/UAPMCommandLine';
 import { AddCommand } from '../commands/AddCommand';
 import { InitCommand } from '../commands/InitCommand';
 import { InstallCommand } from '../commands/InstallCommand';
+import { ProjectGetNameCommand } from '../commands/ProjectGetNameCommand';
 import { UpdateCommand } from '../commands/UpdateCommand';
 import { TOMLLockfileRepository } from '../lockfile/LockfileRepository';
 import { FileManifestRepository } from '../manifest/ManifestRepository';
@@ -40,7 +41,13 @@ export class UAPMApplication {
         }
 
         return await new AddCommand(
-          { cwd: commandLine.cwd, source, force: commandLine.force },
+          {
+            cwd: commandLine.cwd,
+            source,
+            force: commandLine.force,
+            pin: commandLine.pin,
+            harnessed: commandLine.harnessed,
+          },
           manifestRepository,
           lockfileRepository,
           fileSystem,
@@ -67,6 +74,9 @@ export class UAPMApplication {
           gitClient,
           reporter,
         ).execute();
+      }
+      case 'project-get-name': {
+        return await new ProjectGetNameCommand({ cwd: commandLine.cwd }, manifestRepository, reporter).execute();
       }
       default:
         throw new Error(`[uapm] Unsupported command: ${commandLine.command satisfies never}`);

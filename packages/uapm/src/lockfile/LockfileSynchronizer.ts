@@ -15,7 +15,7 @@ export interface LockfileSyncOptions {
 }
 
 export interface LockfileSyncResult {
-  manifestType: 'project' | 'plugin' | 'harness';
+  manifestType: 'project' | 'plugin';
   packages: LockedPackage[];
   warnings: string[];
 }
@@ -51,7 +51,11 @@ export class LockfileSynchronizer {
       };
     }
 
-    const desiredPackages = await this.resolveFromManifest(cwd);
+    const harnessedNames = new Set(rootManifest.harnessedPlugins ?? []);
+    const desiredPackages = (await this.resolveFromManifest(cwd)).map((pkg) => ({
+      ...pkg,
+      harnessed: harnessedNames.has(pkg.name),
+    }));
     const currentLockedPackages = hasLockfile ? this.lockfileRepository.read(cwd).package : [];
     const currentByName = new Map(currentLockedPackages.map((pkg) => [pkg.name, pkg]));
     const stateInspector = new PluginStateInspector(this.fileSystem, this.gitClient);
@@ -60,13 +64,24 @@ export class LockfileSynchronizer {
 
     for (const desiredPackage of desiredPackages) {
       const currentLockedPackage = currentByName.get(desiredPackage.name);
+      if (desiredPackage.harnessed && currentLockedPackage && !options.force) {
+        finalPackages.push({
+          ...currentLockedPackage,
+          harnessed: true,
+        });
+        continue;
+      }
+
       const currentState = await stateInspector.inspect(cwd, desiredPackage.name);
       const safetyDecision = this.safetyPolicy.canUpdatePackage(currentLockedPackage, currentState, options.force);
       if (!safetyDecision.allowed && currentLockedPackage) {
         const warning = `[uapm] Skipping update for ${desiredPackage.name}. ${safetyDecision.reason}. Use --force to override.`;
         warnings.push(warning);
         this.reporter.warn(warning);
-        finalPackages.push(currentLockedPackage);
+        finalPackages.push({
+          ...currentLockedPackage,
+          harnessed: desiredPackage.harnessed,
+        });
         continue;
       }
 

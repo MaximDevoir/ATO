@@ -33,7 +33,6 @@ export class InitCommand implements Command {
           [
             { label: 'Project', value: 'project' },
             { label: 'Plugin', value: 'plugin' },
-            { label: 'Harness', value: 'harness' },
           ],
           detected.suggestedType,
         )) as ManifestType);

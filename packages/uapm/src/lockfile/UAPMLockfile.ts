@@ -4,6 +4,7 @@ export interface LockedPackage {
   hash: string;
   source: string;
   dependencies: string[];
+  harnessed?: boolean;
 }
 
 export interface UAPMLockfile {

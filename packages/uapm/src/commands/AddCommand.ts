@@ -1,4 +1,4 @@
-import type { Dependency } from '../domain/UAPMManifest';
+import type { Dependency, DependencyOverride, UAPMManifest } from '../domain/UAPMManifest';
 import { DependencyInstaller } from '../install/DependencyInstaller';
 import type { LockfileRepository } from '../lockfile/LockfileRepository';
 import { LockfileSynchronizer } from '../lockfile/LockfileSynchronizer';
@@ -14,6 +14,8 @@ export interface AddCommandOptions {
   cwd: string;
   source: string;
   force: boolean;
+  pin: boolean;
+  harnessed: boolean;
 }
 
 export class AddCommand implements Command {
@@ -36,15 +38,14 @@ export class AddCommand implements Command {
     const dependency = await this.resolveDependencyDescriptor(source);
     const dependencies = manifest.dependencies ?? [];
     const existingIndex = dependencies.findIndex((item: Dependency) => item.name === dependency.name);
-
     if (existingIndex >= 0) {
       dependencies[existingIndex] = dependency;
       this.reporter.warn(`[uapm] Replaced existing dependency '${dependency.name}'`);
     } else {
       dependencies.push(dependency);
     }
-
     manifest.dependencies = dependencies;
+    this.applyProjectLevelFlags(manifest, dependency);
     this.manifestRepository.write(this.options.cwd, manifest);
 
     const synchronizer = new LockfileSynchronizer(
@@ -58,17 +59,46 @@ export class AddCommand implements Command {
       force: this.options.force,
       refresh: true,
     });
-
     await new DependencyInstaller(this.fileSystem, this.gitClient).installAll(
       synchronized.manifestType,
       this.options.cwd,
       synchronized.packages,
     );
 
-    this.reporter.info(
-      `[uapm] Added dependency ${dependency.name} from ${dependency.source} and synchronized installs`,
-    );
+    this.reporter.info(`[uapm] Added dependency ${dependency.name} from ${dependency.source}`);
     return 0;
+  }
+
+  private applyProjectLevelFlags(manifest: UAPMManifest, dependency: Dependency) {
+    if (this.options.pin) {
+      if (manifest.type !== 'project') {
+        this.reporter.warn('[uapm] --pin is only meaningful at project level; ignoring.');
+      } else {
+        const overrides = manifest.overrides ?? [];
+        const override: DependencyOverride = {
+          name: dependency.name,
+          source: dependency.source,
+          version: dependency.version,
+        };
+        const existingIndex = overrides.findIndex((entry) => entry.name === dependency.name);
+        if (existingIndex >= 0) {
+          overrides[existingIndex] = override;
+        } else {
+          overrides.push(override);
+        }
+        manifest.overrides = overrides;
+      }
+    }
+
+    if (this.options.harnessed) {
+      if (manifest.type !== 'project') {
+        this.reporter.warn('[uapm] --harnessed is only meaningful at project level; ignoring.');
+      } else {
+        const harnessedPlugins = new Set(manifest.harnessedPlugins ?? []);
+        harnessedPlugins.add(dependency.name);
+        manifest.harnessedPlugins = [...harnessedPlugins];
+      }
+    }
   }
 
   private async resolveDependencyDescriptor(source: string): Promise<Dependency> {

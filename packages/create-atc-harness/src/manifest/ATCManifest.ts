@@ -2,6 +2,12 @@ export interface ATCManifest {
   type: 'plugin';
   harness: string;
   name?: string;
+  dependencies?: Array<{
+    name: string;
+    source: string;
+    version?: string;
+  }>;
+  harnessedPlugins?: string[];
 }
 
 export function parseAndValidateATCManifest(rawManifest: string, sourcePath: string) {
@@ -31,5 +37,24 @@ export function parseAndValidateATCManifest(rawManifest: string, sourcePath: str
     type: 'plugin',
     harness: manifest.harness.trim(),
     name: typeof manifest.name === 'string' && manifest.name.trim() ? manifest.name.trim() : undefined,
+    dependencies: Array.isArray(manifest.dependencies)
+      ? manifest.dependencies
+          .filter((entry): entry is { name: string; source: string; version?: string } =>
+            Boolean(
+              entry &&
+                typeof entry === 'object' &&
+                typeof (entry as { name?: unknown }).name === 'string' &&
+                typeof (entry as { source?: unknown }).source === 'string',
+            ),
+          )
+          .map((entry) => ({
+            name: entry.name,
+            source: entry.source,
+            version: typeof entry.version === 'string' ? entry.version : undefined,
+          }))
+      : [],
+    harnessedPlugins: Array.isArray(manifest.harnessedPlugins)
+      ? manifest.harnessedPlugins.filter((entry): entry is string => typeof entry === 'string' && Boolean(entry.trim()))
+      : [],
   } satisfies ATCManifest;
 }

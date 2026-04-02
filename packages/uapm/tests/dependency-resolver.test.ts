@@ -49,7 +49,7 @@ describe('DependencyResolver', () => {
       name: 'Root',
       type: 'project',
       dependencies: [],
-      dependencyPins: [{ name: 'Shared', source: 'https://github.com/company/shared.git', version: '^2.0.0' }],
+      overrides: [{ name: 'Shared', source: 'https://github.com/company/shared.git', version: '^2.0.0' }],
     };
     const manifests: UAPMManifest[] = [
       root,

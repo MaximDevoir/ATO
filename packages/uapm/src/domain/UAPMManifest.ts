@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const ManifestTypeSchema = z.enum(['project', 'plugin', 'harness']);
+export const ManifestTypeSchema = z.enum(['project', 'plugin']);
 
 export const DependencySourceSchema = z.union([
   z.string().startsWith('http'),
@@ -14,7 +14,7 @@ export const DependencySchema = z.object({
   version: z.string().min(1).optional(),
 });
 
-export const DependencyPinSchema = z.object({
+export const DependencyOverrideSchema = z.object({
   name: z.string().min(1),
   source: DependencySourceSchema,
   version: z.string().min(1).optional(),
@@ -26,7 +26,8 @@ export const UAPMManifestSchema = z
     type: ManifestTypeSchema,
     harness: z.string().min(1).optional(),
     dependencies: z.array(DependencySchema).optional(),
-    dependencyPins: z.array(DependencyPinSchema).optional(),
+    overrides: z.array(DependencyOverrideSchema).optional(),
+    harnessedPlugins: z.array(z.string().min(1)).optional(),
   })
   .superRefine((value: { harness?: string; type: string }, context: z.RefinementCtx) => {
     if (value.harness && value.type !== 'plugin') {
@@ -40,5 +41,5 @@ export const UAPMManifestSchema = z
 
 export type ManifestType = z.infer<typeof ManifestTypeSchema>;
 export type Dependency = z.infer<typeof DependencySchema>;
-export type DependencyPin = z.infer<typeof DependencyPinSchema>;
+export type DependencyOverride = z.infer<typeof DependencyOverrideSchema>;
 export type UAPMManifest = z.infer<typeof UAPMManifestSchema>;

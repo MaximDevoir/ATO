@@ -32,6 +32,26 @@ describe('TOMLLockfileRepository', () => {
       },
     ]);
   });
+
+  it('persists harnessed package metadata', () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'uapm-lock-test-'));
+    const repo = new TOMLLockfileRepository();
+    repo.write(tempDir, {
+      package: [
+        {
+          name: 'AwesomeInventory',
+          version: 'main',
+          hash: 'a1b2c3',
+          source: 'https://github.com/org/AwesomeInventory.git',
+          dependencies: ['CoreUtils'],
+          harnessed: true,
+        },
+      ],
+    });
+
+    const parsed = repo.read(tempDir);
+    expect(parsed.package[0]?.harnessed).toBe(true);
+  });
 });
 
 describe('SafetyPolicy', () => {

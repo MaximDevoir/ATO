@@ -77,6 +77,8 @@ describe('AddCommand', () => {
         cwd: 'C:\\Workspace',
         source: 'https://github.com/org/AwesomeInventory.git@v5.7.3',
         force: false,
+        pin: false,
+        harnessed: false,
       },
       repository,
       {

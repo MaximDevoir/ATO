@@ -26,7 +26,7 @@ export class ProjectContextDetector {
     }
 
     return {
-      suggestedType: 'harness',
+      suggestedType: 'project',
       suggestedName: path.basename(cwd),
     };
   }

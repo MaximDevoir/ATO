@@ -1,5 +1,5 @@
 import semver from 'semver';
-import type { DependencyPin, UAPMManifest } from '../domain/UAPMManifest';
+import type { DependencyOverride, UAPMManifest } from '../domain/UAPMManifest';
 import type { GitClient } from '../services/GitClient';
 import type { DependencyRequirement, ResolutionResult, ResolvedDependency } from './DependencyTypes';
 
@@ -8,7 +8,7 @@ export class DependencyResolver {
 
   async resolve(rootManifest: UAPMManifest, manifests: UAPMManifest[]): Promise<ResolutionResult> {
     const requirements = this.collectRequirements(manifests);
-    const pins = rootManifest.dependencyPins ?? [];
+    const pins = rootManifest.type === 'project' ? (rootManifest.overrides ?? []) : [];
     const warnings: string[] = [];
     const resolved: ResolvedDependency[] = [];
 
@@ -30,7 +30,7 @@ export class DependencyResolver {
       const uniqueSources = [...new Set(packageRequirements.map((req) => req.source))];
       if (uniqueSources.length > 1) {
         throw new Error(
-          `[uapm] Dependency '${name}' was requested from multiple sources: ${uniqueSources.join(', ')}. Add dependencyPins entry in root uapm.json.`,
+          `[uapm] Dependency '${name}' was requested from multiple sources: ${uniqueSources.join(', ')}. Add overrides entry in root uapm.json.`,
         );
       }
 
@@ -69,7 +69,7 @@ export class DependencyResolver {
     return requirements;
   }
 
-  private findPin(pins: DependencyPin[], name: string) {
+  private findPin(pins: DependencyOverride[], name: string) {
     return pins.find((pin) => pin.name === name);
   }
 

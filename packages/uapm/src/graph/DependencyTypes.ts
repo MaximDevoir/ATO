@@ -1,4 +1,4 @@
-import type { DependencyPin, ManifestType, UAPMManifest } from '../domain/UAPMManifest';
+import type { ManifestType, UAPMManifest } from '../domain/UAPMManifest';
 
 export interface PackageNode {
   id: string;
@@ -31,7 +31,6 @@ export interface InstallPlan {
   rootType: ManifestType;
   rootManifest: UAPMManifest;
   rootDirectory: string;
-  rootPins: DependencyPin[];
   graphNodes: PackageNode[];
   resolution: ResolutionResult;
 }

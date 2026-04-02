@@ -9,14 +9,19 @@ import type { HarnessCreator } from '../harness/HarnessCreator';
 import { GitManifestSource } from '../manifest/GitManifestSource';
 import { LocalPathManifestSource } from '../manifest/LocalPathManifestSource';
 import type { ManifestResolution, ManifestSource } from '../manifest/ManifestSource';
-import { resolvePluginFileStemFromManifestFolder } from '../manifest/manifestHelpers';
+import {
+  resolvePluginFileStemFromManifestFolder,
+  resolvePluginRootFromManifestFolder,
+} from '../manifest/manifestHelpers';
 import { EngineDirectoryResolver } from '../services/EngineDirectoryResolver';
 import type { FileSystem } from '../services/FileSystem';
 import type { GitService } from '../services/GitService';
 import { SimpleGitService } from '../services/GitService';
+import { isGitLikeReference, parseGitReference } from '../services/GitUrl';
 import { InstalledEngineLocator } from '../services/InstalledEngineLocator';
 import { NodeFileSystem } from '../services/NodeFileSystem';
 import { OutputDirectoryGuard } from '../services/OutputDirectoryGuard';
+import { UAPMService, type UAPMServiceLike } from '../services/UAPMService';
 import { HarnessTerminal } from '../ui/HarnessTerminal';
 import type { LiveStatusModelLike } from '../ui/LiveStatusModel';
 import { ModelBackedLiveStatusHandle } from '../ui/ModelBackedLiveStatusHandle';
@@ -39,6 +44,7 @@ export interface CreateATCHarnessDependencies {
   outputDirectoryGuard?: OutputDirectoryValidator;
   engineDirectoryResolver?: EngineDirectoryResolver;
   terminal?: HarnessTerminalLike;
+  uapmService?: UAPMServiceLike;
 }
 
 export class CreateATCHarness {
@@ -48,6 +54,7 @@ export class CreateATCHarness {
   private readonly outputDirectoryGuard: OutputDirectoryValidator;
   private readonly engineDirectoryResolver: EngineDirectoryResolver;
   private readonly terminal: HarnessTerminalLike;
+  private readonly uapmService: UAPMServiceLike;
 
   constructor(
     private readonly settings: CommandLineOptions,
@@ -61,6 +68,7 @@ export class CreateATCHarness {
       dependencies.engineDirectoryResolver ??
       new EngineDirectoryResolver(this.fileSystem, new InstalledEngineLocator(this.fileSystem));
     this.terminal = dependencies.terminal ?? new HarnessTerminal();
+    this.uapmService = dependencies.uapmService ?? new UAPMService(this.fileSystem);
 
     this.manifestSources = dependencies.manifestSources ?? [
       new LocalPathManifestSource(this.fileSystem),
@@ -128,8 +136,27 @@ export class CreateATCHarness {
         return result;
       }
 
-      status.setStatus('[Plugin] Installing plugin into harness...');
-      manifestResolution.installPlugin(creationSettings, result, status);
+      status.setStatus('[UAPM] Ensuring harness project has uapm initialized...');
+      await this.uapmService.ensureProjectInitialized(outputRoot);
+
+      const rootSourceSpecifier = this.resolveRootDependencySourceSpecifier(manifestResolution);
+      status.setStatus(`[UAPM] Harnessing ${manifestResolution.manifest.name ?? 'plugin'}...`);
+      await this.uapmService.addDependency(outputRoot, rootSourceSpecifier, {
+        harnessed: true,
+      });
+
+      for (const dependencySpecifier of this.resolveDirectHarnessedDependencySourceSpecifiers(
+        manifestResolution,
+        result,
+      )) {
+        status.setStatus(`[UAPM] Harnessing direct dependency ${dependencySpecifier.name}...`);
+        await this.uapmService.addDependency(outputRoot, dependencySpecifier.sourceSpecifier, {
+          harnessed: true,
+        });
+      }
+
+      status.setStatus('[UAPM] Installing dependencies from uapm.lock...');
+      await this.uapmService.install(outputRoot);
       status.setStatus('[Done] Harness creation finished');
       result.setResult(HarnessResultState.Success);
       return result;
@@ -141,6 +168,56 @@ export class CreateATCHarness {
       manifestResolution?.cleanup?.();
       this.terminal.stop();
     }
+  }
+
+  private resolveRootDependencySourceSpecifier(manifestResolution: ManifestResolution) {
+    if (isGitLikeReference(this.settings.manifestString)) {
+      const parsed = parseGitReference(this.settings.manifestString);
+      return parsed.ref ? `${parsed.repositoryUrl}@${parsed.ref}` : parsed.repositoryUrl;
+    }
+
+    const pluginRoot = resolvePluginRootFromManifestFolder(this.fileSystem, manifestResolution.manifestDirectory);
+    return `file:${pluginRoot}`;
+  }
+
+  private resolveDirectHarnessedDependencySourceSpecifiers(
+    manifestResolution: ManifestResolution,
+    result: HarnessCreationResult,
+  ) {
+    const dependenciesByName = new Map(
+      (manifestResolution.manifest.dependencies ?? []).map((dependency) => [dependency.name, dependency]),
+    );
+
+    return (manifestResolution.manifest.harnessedPlugins ?? [])
+      .map((dependencyName) => {
+        const dependency = dependenciesByName.get(dependencyName);
+        if (!dependency) {
+          result.addWarning(
+            `[create-atc-harness] harnessedPlugins contains '${dependencyName}' but dependency was not declared in manifest.dependencies`,
+          );
+          return undefined;
+        }
+
+        return {
+          name: dependency.name,
+          sourceSpecifier: this.toSourceSpecifier(
+            manifestResolution.manifestDirectory,
+            dependency.source,
+            dependency.version,
+          ),
+        };
+      })
+      .filter((value): value is { name: string; sourceSpecifier: string } => Boolean(value));
+  }
+
+  private toSourceSpecifier(baseDirectory: string, source: string, version?: string) {
+    if (source.startsWith('file:')) {
+      const rawPath = source.slice('file:'.length);
+      const absolute = path.isAbsolute(rawPath) ? rawPath : path.resolve(baseDirectory, rawPath);
+      return `file:${absolute}`;
+    }
+
+    return version ? `${source}@${version}` : source;
   }
 
   private resolveOutputRootDirectory(manifestResolution: ManifestResolution) {

@@ -124,7 +124,7 @@ describe('CreateATCHarness', () => {
 
     const app = new CreateATCHarness(
       {
-        manifestString: 'anything',
+        manifestString: 'https://github.com/org/AwesomeInventory.git',
         outputRootDirectory: 'C:\\Harness',
         harness: 'EngineTemplate',
         argv: {},
@@ -138,6 +138,7 @@ describe('CreateATCHarness', () => {
         // biome-ignore lint/suspicious/noExplicitAny: use `any` as mock
         engineDirectoryResolver: { resolve: async () => ({}) } as any,
         terminal: { start: () => {}, stop: () => {}, getModel: () => createFakeLiveStatusModel() },
+        uapmService: createFakeUAPMService(),
       },
     );
 
@@ -169,7 +170,7 @@ describe('CreateATCHarness', () => {
 
     const app = new CreateATCHarness(
       {
-        manifestString: 'anything',
+        manifestString: 'https://github.com/org/AwesomeInventory.git',
         argv: {},
         rawArgv: [],
       },
@@ -181,6 +182,7 @@ describe('CreateATCHarness', () => {
         // biome-ignore lint/suspicious/noExplicitAny: use `any` as mock
         engineDirectoryResolver: { resolve: async () => ({}) } as any,
         terminal: { start: () => {}, stop: () => {}, getModel: () => createFakeLiveStatusModel() },
+        uapmService: createFakeUAPMService(),
       },
     );
 
@@ -214,7 +216,7 @@ describe('CreateATCHarness', () => {
 
     const app = new CreateATCHarness(
       {
-        manifestString: 'anything',
+        manifestString: 'https://github.com/org/AwesomeInventory.git',
         argv: {},
         rawArgv: [],
       },
@@ -226,6 +228,7 @@ describe('CreateATCHarness', () => {
         // biome-ignore lint/suspicious/noExplicitAny: use `any` as mock
         engineDirectoryResolver: { resolve: async () => ({}) } as any,
         terminal: { start: () => {}, stop: () => {}, getModel: () => createFakeLiveStatusModel() },
+        uapmService: createFakeUAPMService(),
       },
     );
 
@@ -274,5 +277,13 @@ function createFakeLiveStatusModel(): LiveStatusModelLike {
     addWarning: () => {},
     addError: () => {},
     setCustomElement: () => {},
+  };
+}
+
+function createFakeUAPMService() {
+  return {
+    ensureProjectInitialized: async () => {},
+    addDependency: async () => {},
+    install: async () => {},
   };
 }
