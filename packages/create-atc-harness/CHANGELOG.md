@@ -1,4 +1,4 @@
-# @maximdevoir/ati
+# @maximdevoir/create-atc-harness
 
 ## 1.1.3
 
@@ -14,11 +14,7 @@
   - Added tests for lockfile writing, safety policy, and updated commands.
   - Introduced `@iarna/toml` dependency for TOML handling.
 
-- [`cc46958`](https://github.com/MaximDevoir/ATO/commit/cc4695829dfa298dfda9faba4fed8fd351033f01) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - chore: remove unused CookMaps option from SimpleAutoBuild
-
 - [`8b12b9c`](https://github.com/MaximDevoir/ATO/commit/8b12b9c3192dff8f19998682081a9f05015292d5) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - feat: create-atc-harness
-
-- [`cb63148`](https://github.com/MaximDevoir/ATO/commit/cb631486b4e4cddf13ab4b2e2911f9fce4dc6f4d) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - Implemented the `SimpleAutoBuild` flow
 
 - [`4d5f7cd`](https://github.com/MaximDevoir/ATO/commit/4d5f7cd51f9220cbec8867051b549613a7e004b7) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - chore: rename to uapkg
 
@@ -30,26 +26,8 @@
 
 - [`ff93eb2`](https://github.com/MaximDevoir/ATO/commit/ff93eb234d4861a686bbeb525df577c0a5c1525f) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - feat: add support for Git tag references in harness creation
 
-- [`ced0752`](https://github.com/MaximDevoir/ATO/commit/ced075238a8eec8aa37740d5aef347393b21ef23) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - ato: fix process shutdown tracking
-
 - [`23d234f`](https://github.com/MaximDevoir/ATO/commit/23d234f18f7b9d7869977d2ccbe0f9d61018a514) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - feat: add `EngineAssociationResolver` module for Unreal Engine directory resolution
 
-- [`eca2115`](https://github.com/MaximDevoir/ATO/commit/eca2115e4da38632f174474f1435ec56d007736c) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - chore: add auto-generated comment to BuildGraph XML in SimpleAutoBuild
-
-## 1.1.2
-
-### Patch Changes
-
-- [`82dd28d`](https://github.com/MaximDevoir/ATO/commit/82dd28da0d4a7ec72ad3ad698a614d1d853af530) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - bump changes
-
-## 1.1.1
-
-### Patch Changes
-
-- [`5ba087c`](https://github.com/MaximDevoir/ATO/commit/5ba087ce1d856377e643b1d968e55f60f0bc4cd1) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - bump changes
-
-## 1.1.0
-
-### Minor Changes
-
-- [`a677976`](https://github.com/MaximDevoir/ATO/commit/a677976f46169e190c768c6ee3fe9e9de5d0771c) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - change bump
+- Updated dependencies [[`59a1226`](https://github.com/MaximDevoir/ATO/commit/59a1226a5a5e4d9e44495d5b8b46454a6599e001), [`8b12b9c`](https://github.com/MaximDevoir/ATO/commit/8b12b9c3192dff8f19998682081a9f05015292d5), [`4d5f7cd`](https://github.com/MaximDevoir/ATO/commit/4d5f7cd51f9220cbec8867051b549613a7e004b7), [`62953c4`](https://github.com/MaximDevoir/ATO/commit/62953c46c0fccda58a39913fe06cbae95a31f381), [`1c56e0b`](https://github.com/MaximDevoir/ATO/commit/1c56e0b0ce4ce3745c329f201d1bc3ac2fafdd00), [`467e05c`](https://github.com/MaximDevoir/ATO/commit/467e05c737aa1ff51fc3c7750f72810673369135), [`ff93eb2`](https://github.com/MaximDevoir/ATO/commit/ff93eb234d4861a686bbeb525df577c0a5c1525f), [`23d234f`](https://github.com/MaximDevoir/ATO/commit/23d234f18f7b9d7869977d2ccbe0f9d61018a514)]:
+  - uapkg@1.1.3
+  - @maximdevoir/engine-association-resolver@1.1.3
