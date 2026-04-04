@@ -7,4 +7,4 @@
 "@maximdevoir/unreal-lag": patch
 ---
 
-feat: enhance project harnessing and dependency management
+chore: rename to uapkg

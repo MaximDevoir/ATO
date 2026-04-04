@@ -22,7 +22,7 @@ describe('ATC manifest validation', () => {
   it('accepts plugin manifests with harness', () => {
     const manifest = parseAndValidateATCManifest(
       JSON.stringify({ type: 'plugin', harness: 'EngineTemplate' }),
-      'uapm.json',
+      'uapkg.json',
     );
     expect(manifest.type).toBe('plugin');
     expect(manifest.harness).toBe('EngineTemplate');
@@ -30,12 +30,12 @@ describe('ATC manifest validation', () => {
 
   it('fails when type is not plugin', () => {
     expect(() =>
-      parseAndValidateATCManifest(JSON.stringify({ type: 'project', harness: 'EngineTemplate' }), 'uapm.json'),
+      parseAndValidateATCManifest(JSON.stringify({ type: 'project', harness: 'EngineTemplate' }), 'uapkg.json'),
     ).toThrow(/type: "plugin"/i);
   });
 
   it('fails when harness is missing', () => {
-    expect(() => parseAndValidateATCManifest(JSON.stringify({ type: 'plugin' }), 'uapm.json')).toThrow(/harness/i);
+    expect(() => parseAndValidateATCManifest(JSON.stringify({ type: 'plugin' }), 'uapkg.json')).toThrow(/harness/i);
   });
 });
 
@@ -100,7 +100,7 @@ describe('CreateATCHarness', () => {
       canAcceptManifestString: () => true,
       resolveManifest: async () => ({
         manifestDirectory: 'C:\\Plugin',
-        manifestFilePath: 'C:\\Plugin\\uapm.json',
+        manifestFilePath: 'C:\\Plugin\\uapkg.json',
         manifest: { type: 'plugin', harness: 'Git' },
         installPlugin: () => {},
       }),
@@ -138,7 +138,7 @@ describe('CreateATCHarness', () => {
         // biome-ignore lint/suspicious/noExplicitAny: use `any` as mock
         engineDirectoryResolver: { resolve: async () => ({}) } as any,
         terminal: { start: () => {}, stop: () => {}, getModel: () => createFakeLiveStatusModel() },
-        uapmService: createFakeUAPMService(),
+        uapkgService: createFakeUAPKGService(),
       },
     );
 
@@ -147,14 +147,14 @@ describe('CreateATCHarness', () => {
     expect(calledCreators).toEqual(['EngineTemplate']);
   });
 
-  it('derives outputRootDirectory from uapm.json name when omitted', async () => {
+  it('derives outputRootDirectory from uapkg.json name when omitted', async () => {
     let createdRoot = '';
     const manifestSource: ManifestSource = {
       name: 'TestManifestSource',
       canAcceptManifestString: () => true,
       resolveManifest: async () => ({
         manifestDirectory: 'C:\\Plugin',
-        manifestFilePath: 'C:\\Plugin\\uapm.json',
+        manifestFilePath: 'C:\\Plugin\\uapkg.json',
         manifest: { type: 'plugin', harness: 'Git', name: 'SamplePlugin' },
         installPlugin: () => {},
       }),
@@ -182,7 +182,7 @@ describe('CreateATCHarness', () => {
         // biome-ignore lint/suspicious/noExplicitAny: use `any` as mock
         engineDirectoryResolver: { resolve: async () => ({}) } as any,
         terminal: { start: () => {}, stop: () => {}, getModel: () => createFakeLiveStatusModel() },
-        uapmService: createFakeUAPMService(),
+        uapkgService: createFakeUAPKGService(),
       },
     );
 
@@ -200,7 +200,7 @@ describe('CreateATCHarness', () => {
       canAcceptManifestString: () => true,
       resolveManifest: async () => ({
         manifestDirectory: pluginDirectory,
-        manifestFilePath: path.join(pluginDirectory, 'uapm.json'),
+        manifestFilePath: path.join(pluginDirectory, 'uapkg.json'),
         manifest: { type: 'plugin', harness: 'Git' },
         installPlugin: () => {},
       }),
@@ -228,7 +228,7 @@ describe('CreateATCHarness', () => {
         // biome-ignore lint/suspicious/noExplicitAny: use `any` as mock
         engineDirectoryResolver: { resolve: async () => ({}) } as any,
         terminal: { start: () => {}, stop: () => {}, getModel: () => createFakeLiveStatusModel() },
-        uapmService: createFakeUAPMService(),
+        uapkgService: createFakeUAPKGService(),
       },
     );
 
@@ -280,7 +280,7 @@ function createFakeLiveStatusModel(): LiveStatusModelLike {
   };
 }
 
-function createFakeUAPMService() {
+function createFakeUAPKGService() {
   return {
     ensureProjectInitialized: async () => {},
     addDependency: async () => {},

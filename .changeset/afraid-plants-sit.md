@@ -1,5 +1,5 @@
 ---
-"uapm": patch
+"uapkg": patch
 "@maximdevoir/ati": patch
 "@maximdevoir/ato": patch
 "@maximdevoir/create-atc-harness": patch

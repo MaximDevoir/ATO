@@ -21,7 +21,7 @@ import { isGitLikeReference, parseGitReference } from '../services/GitUrl';
 import { InstalledEngineLocator } from '../services/InstalledEngineLocator';
 import { NodeFileSystem } from '../services/NodeFileSystem';
 import { OutputDirectoryGuard } from '../services/OutputDirectoryGuard';
-import { UAPMService, type UAPMServiceLike } from '../services/UAPMService';
+import { UAPKGService, type UAPKGServiceLike } from '../services/UAPKGService';
 import { HarnessTerminal } from '../ui/HarnessTerminal';
 import type { LiveStatusModelLike } from '../ui/LiveStatusModel';
 import { ModelBackedLiveStatusHandle } from '../ui/ModelBackedLiveStatusHandle';
@@ -44,7 +44,7 @@ export interface CreateATCHarnessDependencies {
   outputDirectoryGuard?: OutputDirectoryValidator;
   engineDirectoryResolver?: EngineDirectoryResolver;
   terminal?: HarnessTerminalLike;
-  uapmService?: UAPMServiceLike;
+  uapkgService?: UAPKGServiceLike;
 }
 
 export class CreateATCHarness {
@@ -54,7 +54,7 @@ export class CreateATCHarness {
   private readonly outputDirectoryGuard: OutputDirectoryValidator;
   private readonly engineDirectoryResolver: EngineDirectoryResolver;
   private readonly terminal: HarnessTerminalLike;
-  private readonly uapmService: UAPMServiceLike;
+  private readonly uapkgService: UAPKGServiceLike;
 
   constructor(
     private readonly settings: CommandLineOptions,
@@ -68,7 +68,7 @@ export class CreateATCHarness {
       dependencies.engineDirectoryResolver ??
       new EngineDirectoryResolver(this.fileSystem, new InstalledEngineLocator(this.fileSystem));
     this.terminal = dependencies.terminal ?? new HarnessTerminal();
-    this.uapmService = dependencies.uapmService ?? new UAPMService(this.fileSystem);
+    this.uapkgService = dependencies.uapkgService ?? new UAPKGService(this.fileSystem);
 
     this.manifestSources = dependencies.manifestSources ?? [
       new LocalPathManifestSource(this.fileSystem),
@@ -136,12 +136,12 @@ export class CreateATCHarness {
         return result;
       }
 
-      status.setStatus('[UAPM] Ensuring harness project has uapm initialized...');
-      await this.uapmService.ensureProjectInitialized(outputRoot);
+      status.setStatus('[UAPKG] Ensuring harness project has uapkg initialized...');
+      await this.uapkgService.ensureProjectInitialized(outputRoot);
 
       const rootSourceSpecifier = this.resolveRootDependencySourceSpecifier(manifestResolution);
-      status.setStatus(`[UAPM] Harnessing ${manifestResolution.manifest.name ?? 'plugin'}...`);
-      await this.uapmService.addDependency(outputRoot, rootSourceSpecifier, {
+      status.setStatus(`[UAPKG] Harnessing ${manifestResolution.manifest.name ?? 'plugin'}...`);
+      await this.uapkgService.addDependency(outputRoot, rootSourceSpecifier, {
         harnessed: true,
       });
 
@@ -149,14 +149,14 @@ export class CreateATCHarness {
         manifestResolution,
         result,
       )) {
-        status.setStatus(`[UAPM] Harnessing direct dependency ${dependencySpecifier.name}...`);
-        await this.uapmService.addDependency(outputRoot, dependencySpecifier.sourceSpecifier, {
+        status.setStatus(`[UAPKG] Harnessing direct dependency ${dependencySpecifier.name}...`);
+        await this.uapkgService.addDependency(outputRoot, dependencySpecifier.sourceSpecifier, {
           harnessed: true,
         });
       }
 
-      status.setStatus('[UAPM] Installing dependencies from uapm.lock...');
-      await this.uapmService.install(outputRoot);
+      status.setStatus('[UAPKG] Installing dependencies from uapkg.lock...');
+      await this.uapkgService.install(outputRoot);
       status.setStatus('[Done] Harness creation finished');
       result.setResult(HarnessResultState.Success);
       return result;

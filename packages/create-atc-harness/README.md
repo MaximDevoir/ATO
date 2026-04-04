@@ -1,10 +1,10 @@
 # create-atc-harness
 
-Create an Unreal host project (harness) from a plugin `uapm.json` manifest.
+Create an Unreal host project (harness) from a plugin `uapkg.json` manifest.
 
 ## What it does
 
-- Reads `uapm.json` from a local path/folder or a Git repository.
+- Reads `uapkg.json` from a local path/folder or a Git repository.
 - Validates only the required manifest keys:
   - `type` must be `"plugin"`
   - `harness` must be a string
@@ -18,13 +18,13 @@ Create an Unreal host project (harness) from a plugin `uapm.json` manifest.
 ### Positional args
 
 - `manifestString`
-  - Path to `uapm.json`
-  - Path to folder containing `uapm.json`
-  - Git URL to repo with `uapm.json` at repo root
+  - Path to `uapkg.json`
+  - Path to folder containing `uapkg.json`
+  - Git URL to repo with `uapkg.json` at repo root
 - `outputRootDirectory` (optional)
   - Directory where the harness project is created
   - If omitted, defaults to:
-    - `${atcJsonName}Harness` when `uapm.json.name` is present
+    - `${atcJsonName}Harness` when `uapkg.json.name` is present
     - `${upluginFileName}Harness` when `name` is missing
 
 ### Options
@@ -47,13 +47,13 @@ pnpm run create-atc-harness -- "<manifestString>" "<outputRootDirectory>" [optio
 Example:
 
 ```bash
-pnpm run create-atc-harness -- "./MyPlugin/uapm.json" "./HarnessProject" --harness=EngineTemplate --engineAssociation=first
+pnpm run create-atc-harness -- "./MyPlugin/uapkg.json" "./HarnessProject" --harness=EngineTemplate --engineAssociation=first
 ```
 
 Example (auto output directory name):
 
 ```bash
-pnpm run create-atc-harness -- "./MyPlugin/uapm.json"
+pnpm run create-atc-harness -- "./MyPlugin/uapkg.json"
 ```
 
 ### Direct `tsx` invocation

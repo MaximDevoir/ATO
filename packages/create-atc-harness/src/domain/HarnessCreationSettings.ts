@@ -28,7 +28,7 @@ export class HarnessCreationSettings {
   }
 
   getPluginManifestFile() {
-    return path.join(this.pluginManifestFolder, 'uapm.json');
+    return path.join(this.pluginManifestFolder, 'uapkg.json');
   }
 
   getHarnessPluginsDirectory() {

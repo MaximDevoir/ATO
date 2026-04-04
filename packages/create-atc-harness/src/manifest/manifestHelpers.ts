@@ -9,15 +9,15 @@ export function resolveManifestPath(fileSystem: FileSystem, manifestString: stri
   }
 
   if (fileSystem.isDirectory(resolvedInput)) {
-    const manifestPath = path.join(resolvedInput, 'uapm.json');
+    const manifestPath = path.join(resolvedInput, 'uapkg.json');
     if (!fileSystem.exists(manifestPath)) {
-      throw new Error(`[create-atc-harness] Folder does not contain uapm.json: ${resolvedInput}`);
+      throw new Error(`[create-atc-harness] Folder does not contain uapkg.json: ${resolvedInput}`);
     }
     return manifestPath;
   }
 
-  if (path.basename(resolvedInput).toLowerCase() !== 'uapm.json') {
-    throw new Error(`[create-atc-harness] manifestString file must be uapm.json: ${resolvedInput}`);
+  if (path.basename(resolvedInput).toLowerCase() !== 'uapkg.json') {
+    throw new Error(`[create-atc-harness] manifestString file must be uapkg.json: ${resolvedInput}`);
   }
 
   return resolvedInput;

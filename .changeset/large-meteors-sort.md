@@ -1,5 +1,5 @@
 ---
-"uapm": patch
+"uapkg": patch
 "@maximdevoir/ati": patch
 "@maximdevoir/ato": patch
 "@maximdevoir/create-atc-harness": patch
@@ -7,4 +7,4 @@
 "@maximdevoir/unreal-lag": patch
 ---
 
-Add postinstall framework for plugin customization in uapm
+Add postinstall framework for plugin customization in uapkg
