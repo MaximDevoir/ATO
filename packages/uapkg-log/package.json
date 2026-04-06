@@ -15,7 +15,7 @@
   },
   "types": "./src/index.ts",
   "dependencies": {
-    "winston": "3.18.3"
+    "winston": "3.19.0"
   },
   "scripts": {
     "lint": "biome lint .",
