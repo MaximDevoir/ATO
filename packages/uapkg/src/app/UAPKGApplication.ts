@@ -1,5 +1,6 @@
 import type { UAPKGCommandLine } from '../cli/UAPKGCommandLine';
 import { AddCommand } from '../commands/AddCommand';
+import { ConfigCommand } from '../commands/ConfigCommand';
 import { InitCommand } from '../commands/InitCommand';
 import { InstallCommand } from '../commands/InstallCommand';
 import { ProjectGetNameCommand } from '../commands/ProjectGetNameCommand';
@@ -77,6 +78,18 @@ export class UAPKGApplication {
       }
       case 'project-get-name': {
         return await new ProjectGetNameCommand({ cwd: commandLine.cwd }, manifestRepository, reporter).execute();
+      }
+      case 'config': {
+        return await new ConfigCommand({
+          cwd: commandLine.cwd,
+          action: commandLine.configAction,
+          args: commandLine.args,
+          global: commandLine.global,
+          local: commandLine.local,
+          json: commandLine.json,
+          showOrigin: commandLine.showOrigin,
+          trace: commandLine.trace,
+        }).execute();
       }
       default:
         throw new Error(`[uapkg] Unsupported command: ${commandLine.command satisfies never}`);

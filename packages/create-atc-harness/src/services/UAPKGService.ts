@@ -31,6 +31,11 @@ export class UAPKGService implements UAPKGServiceLike {
 
     const projectName = this.resolveProjectName(projectDirectory);
     await this.application.run({
+      global: false,
+      json: false,
+      local: false,
+      showOrigin: false,
+      trace: false,
       command: 'init',
       cwd: projectDirectory,
       args: [],
@@ -44,6 +49,11 @@ export class UAPKGService implements UAPKGServiceLike {
 
   async addDependency(projectDirectory: string, source: string, options: AddDependencyOptions = {}) {
     await this.application.run({
+      global: false,
+      json: false,
+      local: false,
+      showOrigin: false,
+      trace: false,
       command: 'add',
       cwd: projectDirectory,
       args: [source],
@@ -55,6 +65,11 @@ export class UAPKGService implements UAPKGServiceLike {
 
   async install(projectDirectory: string, force = false) {
     await this.application.run({
+      global: false,
+      json: false,
+      local: false,
+      showOrigin: false,
+      trace: false,
       command: 'install',
       cwd: projectDirectory,
       args: [],

@@ -17,6 +17,8 @@
   },
   "types": "./src/index.ts",
   "dependencies": {
+    "@uapkg/config": "workspace:^",
+    "@uapkg/log": "workspace:^",
     "@amplication/csharp-ast": "0.1.0",
     "@iarna/toml": "2.2.5",
     "@types/yargs": "17.0.35",

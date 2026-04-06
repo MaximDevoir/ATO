@@ -1,3 +1,5 @@
+import { createLogger } from '@uapkg/log';
+
 export interface Reporter {
   info(message: string): void;
   warn(message: string): void;
@@ -5,15 +7,17 @@ export interface Reporter {
 }
 
 export class ConsoleReporter implements Reporter {
+  private readonly logger = createLogger();
+
   info(message: string) {
-    console.log(message);
+    this.logger.info(message);
   }
 
   warn(message: string) {
-    console.warn(message);
+    this.logger.warn(message);
   }
 
   error(message: string) {
-    console.error(message);
+    this.logger.error(message);
   }
 }
