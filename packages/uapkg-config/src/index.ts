@@ -26,10 +26,10 @@ const Config = {
 };
 
 export default Config;
-export { createConfig, ConfigInstance };
 export type {
   ConfigCreateOptions,
   ConfigTraceEntry,
   ConfigValueWithOrigin,
   ResolvedConfig,
 } from './contracts/ConfigTypes';
+export { ConfigInstance, createConfig };

@@ -1,4 +1,4 @@
-export type UAPKGCommandName = 'init' | 'add' | 'install' | 'update' | 'project-get-name' | 'config';
+export type UAPKGCommandName = 'init' | 'add' | 'install' | 'update' | 'project-get-name' | 'config' | 'pack';
 export type UAPKGConfigAction = 'get' | 'list' | 'set' | 'delete' | 'edit';
 export type UAPKGConfigScope = 'global' | 'local';
 export type UAPKGOutputFormat = 'text' | 'json';
@@ -47,13 +47,21 @@ export interface ConfigCommandLine extends BaseCommandLine {
   trace: boolean;
 }
 
+export interface PackCommandLine extends BaseCommandLine {
+  command: 'pack';
+  dryRun: boolean;
+  allowMissingLfs: boolean;
+  outFile?: string;
+}
+
 export type UAPKGCommandLine =
   | InitCommandLine
   | AddCommandLine
   | InstallCommandLine
   | UpdateCommandLine
   | ProjectGetNameCommandLine
-  | ConfigCommandLine;
+  | ConfigCommandLine
+  | PackCommandLine;
 
 export interface CommonCommandLineOptions {
   cwd?: string;
@@ -77,6 +85,12 @@ export interface ConfigCommonOptions extends CommonCommandLineOptions {
 export interface ConfigGetOptions extends ConfigCommonOptions {
   showOrigin?: boolean;
   trace?: boolean;
+}
+
+export interface PackCommandLineOptions extends CommonCommandLineOptions {
+  dryRun?: boolean;
+  allowMissingLfs?: boolean;
+  outFile?: string;
 }
 
 export class UAPKGCommandLineFactory {
@@ -186,6 +200,16 @@ export class UAPKGCommandLineFactory {
       output: options.output ?? 'text',
       showOrigin: false,
       trace: false,
+    };
+  }
+
+  createPack(options: PackCommandLineOptions = {}): PackCommandLine {
+    return {
+      command: 'pack',
+      cwd: this.resolveCwd(options.cwd),
+      dryRun: options.dryRun === true,
+      allowMissingLfs: options.allowMissingLfs === true,
+      outFile: options.outFile,
     };
   }
 

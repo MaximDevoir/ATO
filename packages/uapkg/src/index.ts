@@ -6,6 +6,7 @@ export { createUAPKGCommandLineFactory, UAPKGCommandLineFactory } from './cli/UA
 export { AddCommand } from './commands/AddCommand';
 export { InitCommand } from './commands/InitCommand';
 export { InstallCommand } from './commands/InstallCommand';
+export { PackCommand } from './commands/PackCommand';
 export { ProjectGetNameCommand } from './commands/ProjectGetNameCommand';
 export { UpdateCommand } from './commands/UpdateCommand';
 export type { Dependency, DependencyOverride, ManifestType, UAPKGManifest } from './domain/UAPKGManifest';

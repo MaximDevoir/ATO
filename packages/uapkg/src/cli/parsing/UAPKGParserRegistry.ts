@@ -5,6 +5,7 @@ import { AddCommandModule } from './modules/AddCommandModule';
 import { ConfigCommandModule } from './modules/ConfigCommandModule';
 import { InitCommandModule } from './modules/InitCommandModule';
 import { InstallCommandModule } from './modules/InstallCommandModule';
+import { PackCommandModule } from './modules/PackCommandModule';
 import { ProjectGetNameCommandModule } from './modules/ProjectGetNameCommandModule';
 import { UpdateCommandModule } from './modules/UpdateCommandModule';
 
@@ -15,6 +16,7 @@ export class UAPKGParserRegistry {
       new AddCommandModule(),
       new InstallCommandModule(),
       new UpdateCommandModule(),
+      new PackCommandModule(),
       new ProjectGetNameCommandModule(),
       new ConfigCommandModule(),
     ],

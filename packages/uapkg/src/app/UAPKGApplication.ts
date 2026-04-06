@@ -3,6 +3,7 @@ import { AddCommand } from '../commands/AddCommand';
 import { ConfigCommand } from '../commands/ConfigCommand';
 import { InitCommand } from '../commands/InitCommand';
 import { InstallCommand } from '../commands/InstallCommand';
+import { PackCommand } from '../commands/PackCommand';
 import { ProjectGetNameCommand } from '../commands/ProjectGetNameCommand';
 import { UpdateCommand } from '../commands/UpdateCommand';
 import { TOMLLockfileRepository } from '../lockfile/LockfileRepository';
@@ -73,6 +74,14 @@ export class UAPKGApplication {
       }
       case 'project-get-name': {
         return await new ProjectGetNameCommand({ cwd: commandLine.cwd }, manifestRepository, reporter).execute();
+      }
+      case 'pack': {
+        return await new PackCommand({
+          cwd: commandLine.cwd,
+          dryRun: commandLine.dryRun,
+          allowMissingLfs: commandLine.allowMissingLfs,
+          outFile: commandLine.outFile,
+        }).execute();
       }
       case 'config': {
         return await new ConfigCommand({

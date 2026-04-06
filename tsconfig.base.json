@@ -15,6 +15,7 @@
     "paths": {
       "@uapkg/config": ["./packages/uapkg-config/src/index.ts"],
       "@uapkg/log": ["./packages/uapkg-log/src/index.ts"],
+      "@uapkg/pack": ["./packages/uapkg-pack/src/index.ts"],
       "@maximdevoir/unreal-lag": ["./packages/unreal-lag/src/index.ts"],
       "@maximdevoir/ato": ["./packages/ato/src/index.ts"],
       "@maximdevoir/create-atc-harness": ["./packages/create-atc-harness/src/index.ts"],
