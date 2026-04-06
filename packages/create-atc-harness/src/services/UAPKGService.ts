@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import { FileManifestRepository, UAPKGApplication } from 'uapkg';
+import { createUAPKGCommandLineFactory, FileManifestRepository, UAPKGApplication } from 'uapkg';
 import type { FileSystem } from './FileSystem';
 
 export interface AddDependencyOptions {
@@ -17,6 +17,7 @@ export interface UAPKGServiceLike {
 export class UAPKGService implements UAPKGServiceLike {
   private readonly application = new UAPKGApplication();
   private readonly manifestRepository = new FileManifestRepository();
+  private readonly commandLineFactory = createUAPKGCommandLineFactory();
 
   constructor(private readonly fileSystem: FileSystem) {}
 
@@ -30,53 +31,33 @@ export class UAPKGService implements UAPKGServiceLike {
     }
 
     const projectName = this.resolveProjectName(projectDirectory);
-    await this.application.run({
-      global: false,
-      json: false,
-      local: false,
-      showOrigin: false,
-      trace: false,
-      command: 'init',
-      cwd: projectDirectory,
-      args: [],
-      type: 'project',
-      name: projectName,
-      force: false,
-      pin: false,
-      harnessed: false,
-    });
+    await this.application.run(
+      this.commandLineFactory.createInit({
+        cwd: projectDirectory,
+        type: 'project',
+        name: projectName,
+      }),
+    );
   }
 
   async addDependency(projectDirectory: string, source: string, options: AddDependencyOptions = {}) {
-    await this.application.run({
-      global: false,
-      json: false,
-      local: false,
-      showOrigin: false,
-      trace: false,
-      command: 'add',
-      cwd: projectDirectory,
-      args: [source],
-      force: options.force === true,
-      pin: options.pin === true,
-      harnessed: options.harnessed === true,
-    });
+    await this.application.run(
+      this.commandLineFactory.createAdd(source, {
+        cwd: projectDirectory,
+        force: options.force,
+        pin: options.pin,
+        harnessed: options.harnessed,
+      }),
+    );
   }
 
   async install(projectDirectory: string, force = false) {
-    await this.application.run({
-      global: false,
-      json: false,
-      local: false,
-      showOrigin: false,
-      trace: false,
-      command: 'install',
-      cwd: projectDirectory,
-      args: [],
-      force,
-      pin: false,
-      harnessed: false,
-    });
+    await this.application.run(
+      this.commandLineFactory.createInstall({
+        cwd: projectDirectory,
+        force,
+      }),
+    );
   }
 
   private resolveProjectName(projectDirectory: string) {

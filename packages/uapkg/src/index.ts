@@ -1,6 +1,8 @@
 export { UAPKGApplication } from './app/UAPKGApplication';
 export { parseUAPKGCommandLine } from './cli/parseCommandLine';
 export { runUAPKGCLI } from './cli/runUAPKGCLI';
+export type { UAPKGCommandLine } from './cli/UAPKGCommandLine';
+export { createUAPKGCommandLineFactory, UAPKGCommandLineFactory } from './cli/UAPKGCommandLine';
 export { AddCommand } from './commands/AddCommand';
 export { InitCommand } from './commands/InitCommand';
 export { InstallCommand } from './commands/InstallCommand';

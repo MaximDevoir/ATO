@@ -3,16 +3,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createConfig } from '@uapkg/config';
 import Log from '@uapkg/log';
-import type { UAPKGConfigAction } from '../cli/UAPKGCommandLine';
+import type { UAPKGConfigAction, UAPKGConfigScope, UAPKGOutputFormat } from '../cli/UAPKGCommandLine';
 import type { Command } from './Command';
 
 export interface ConfigCommandOptions {
   cwd: string;
-  action?: UAPKGConfigAction;
-  args: string[];
-  global: boolean;
-  local: boolean;
-  json: boolean;
+  action: UAPKGConfigAction;
+  pathToProperty?: string;
+  rawValue?: string;
+  scope?: UAPKGConfigScope;
+  output: UAPKGOutputFormat;
   showOrigin: boolean;
   trace: boolean;
 }
@@ -25,10 +25,6 @@ export class ConfigCommand implements Command {
 
     const config = createConfig({ cwd: this.options.cwd });
     const action = this.options.action;
-
-    if (!action) {
-      throw new Error('[uapkg] config requires an action: get, list, set, delete, edit');
-    }
 
     switch (action) {
       case 'get': {
@@ -53,7 +49,7 @@ export class ConfigCommand implements Command {
   }
 
   private executeGet(config: ReturnType<typeof createConfig>) {
-    const pathToProperty = this.options.args[0];
+    const pathToProperty = this.options.pathToProperty;
     if (!pathToProperty) {
       throw new Error('[uapkg] config get requires path_to_property');
     }
@@ -68,7 +64,7 @@ export class ConfigCommand implements Command {
     }
 
     if (this.options.showOrigin) {
-      if (this.options.global) {
+      if (this.options.scope === 'global') {
         const value = config.get(pathToProperty, { scope: 'global' });
         this.print({
           value,
@@ -78,7 +74,7 @@ export class ConfigCommand implements Command {
         return 0;
       }
 
-      if (this.options.local) {
+      if (this.options.scope === 'local') {
         const value = config.get(pathToProperty, { scope: 'local' });
         const localFile = config.getEditTarget({ scope: 'local' });
         this.print({
@@ -97,12 +93,12 @@ export class ConfigCommand implements Command {
       return 0;
     }
 
-    if (this.options.global) {
+    if (this.options.scope === 'global') {
       this.print(config.get(pathToProperty, { scope: 'global' }));
       return 0;
     }
 
-    if (this.options.local) {
+    if (this.options.scope === 'local') {
       this.print(config.get(pathToProperty, { scope: 'local' }));
       return 0;
     }
@@ -112,12 +108,12 @@ export class ConfigCommand implements Command {
   }
 
   private executeList(config: ReturnType<typeof createConfig>) {
-    if (this.options.global) {
+    if (this.options.scope === 'global') {
       this.print(config.getAll({ scope: 'global' }));
       return 0;
     }
 
-    if (this.options.local) {
+    if (this.options.scope === 'local') {
       this.print(config.getAll({ scope: 'local' }));
       return 0;
     }
@@ -127,16 +123,15 @@ export class ConfigCommand implements Command {
   }
 
   private executeSet(config: ReturnType<typeof createConfig>) {
-    const pathToProperty = this.options.args[0];
-    const rawValue = this.options.args[1];
+    const pathToProperty = this.options.pathToProperty;
+    const rawValue = this.options.rawValue;
 
     if (!pathToProperty || rawValue === undefined) {
       throw new Error('[uapkg] config set requires path_to_property and value');
     }
 
     const value = this.parseJsonValue(rawValue);
-    const scope = this.resolveScope();
-    const plan = config.set(pathToProperty, value, scope ? { scope } : {});
+    const plan = config.set(pathToProperty, value, this.options.scope ? { scope: this.options.scope } : {});
 
     fs.mkdirSync(path.dirname(plan.file), { recursive: true });
     fs.writeFileSync(plan.file, `${JSON.stringify(plan.values, null, 2)}\n`, 'utf8');
@@ -146,13 +141,12 @@ export class ConfigCommand implements Command {
   }
 
   private executeDelete(config: ReturnType<typeof createConfig>) {
-    const pathToProperty = this.options.args[0];
+    const pathToProperty = this.options.pathToProperty;
     if (!pathToProperty) {
       throw new Error('[uapkg] config delete requires path_to_property');
     }
 
-    const scope = this.resolveScope();
-    const plan = config.delete(pathToProperty, scope ? { scope } : {});
+    const plan = config.delete(pathToProperty, this.options.scope ? { scope: this.options.scope } : {});
 
     fs.mkdirSync(path.dirname(plan.file), { recursive: true });
     fs.writeFileSync(plan.file, `${JSON.stringify(plan.values, null, 2)}\n`, 'utf8');
@@ -162,8 +156,7 @@ export class ConfigCommand implements Command {
   }
 
   private executeEdit(config: ReturnType<typeof createConfig>) {
-    const scope = this.resolveScope();
-    const filePath = config.getEditTarget(scope ? { scope } : {});
+    const filePath = config.getEditTarget(this.options.scope ? { scope: this.options.scope } : {});
 
     if (!fs.existsSync(filePath)) {
       fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -191,25 +184,9 @@ export class ConfigCommand implements Command {
   }
 
   private validateFlags() {
-    if (this.options.global && this.options.local) {
-      throw new Error('[uapkg] --global and --local cannot be used together');
-    }
-
     if (this.options.showOrigin && this.options.trace) {
       throw new Error('[uapkg] --show-origin and --trace cannot be used together');
     }
-  }
-
-  private resolveScope() {
-    if (this.options.global) {
-      return 'global' as const;
-    }
-
-    if (this.options.local) {
-      return 'local' as const;
-    }
-
-    return undefined;
   }
 
   private parseJsonValue(rawValue: string) {
@@ -229,7 +206,7 @@ export class ConfigCommand implements Command {
   }
 
   private print(value: unknown) {
-    if (this.options.json || typeof value === 'object') {
+    if (this.options.output === 'json' || typeof value === 'object') {
       Log.info(JSON.stringify(value, null, 2));
       return;
     }

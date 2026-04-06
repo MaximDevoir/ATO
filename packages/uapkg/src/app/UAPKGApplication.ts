@@ -36,15 +36,10 @@ export class UAPKGApplication {
         ).execute();
       }
       case 'add': {
-        const source = commandLine.args[0];
-        if (!source) {
-          throw new Error('[uapkg] add requires dependency source argument');
-        }
-
         return await new AddCommand(
           {
             cwd: commandLine.cwd,
-            source,
+            source: commandLine.source,
             force: commandLine.force,
             pin: commandLine.pin,
             harnessed: commandLine.harnessed,
@@ -82,17 +77,17 @@ export class UAPKGApplication {
       case 'config': {
         return await new ConfigCommand({
           cwd: commandLine.cwd,
-          action: commandLine.configAction,
-          args: commandLine.args,
-          global: commandLine.global,
-          local: commandLine.local,
-          json: commandLine.json,
+          action: commandLine.action,
+          pathToProperty: commandLine.path,
+          rawValue: commandLine.value,
+          scope: commandLine.scope,
+          output: commandLine.output,
           showOrigin: commandLine.showOrigin,
           trace: commandLine.trace,
         }).execute();
       }
       default:
-        throw new Error(`[uapkg] Unsupported command: ${commandLine.command satisfies never}`);
+        throw new Error('[uapkg] Unsupported command');
     }
   }
 }
