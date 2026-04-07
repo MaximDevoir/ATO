@@ -47,7 +47,7 @@ importers:
     dependencies:
       ink:
         specifier: 6.8.0
-        version: 6.8.0(@types/react@19.2.14)(react@19.2.4)
+        version: 6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4)
       react:
         specifier: 19.2.4
         version: 19.2.4
@@ -99,10 +99,10 @@ importers:
         version: 17.4.1
       ink:
         specifier: 6.8.0
-        version: 6.8.0(@types/react@19.2.14)(react@19.2.4)
+        version: 6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4)
       ink-select-input:
         specifier: 6.2.0
-        version: 6.2.0(ink@6.8.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)
+        version: 6.2.0(ink@6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4))(react@19.2.4)
       is-ci:
         specifier: 4.1.0
         version: 4.1.0
@@ -150,13 +150,13 @@ importers:
         version: 1.0.0
       ink:
         specifier: 6.8.0
-        version: 6.8.0(@types/react@19.2.14)(react@19.2.4)
+        version: 6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4)
       ink-select-input:
         specifier: 6.2.0
-        version: 6.2.0(ink@6.8.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)
+        version: 6.2.0(ink@6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4))(react@19.2.4)
       ink-text-input:
         specifier: 6.0.0
-        version: 6.0.0(ink@6.8.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)
+        version: 6.0.0(ink@6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4))(react@19.2.4)
       is-ci:
         specifier: 4.1.0
         version: 4.1.0
@@ -799,11 +799,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@simple-git/args-pathspec@1.0.1':
-    resolution: {integrity: sha512-lpHyxg2BpMT17oj2kyTfQefuCi8S5SMF2QTIm9IlWCTyqAzDa5sfdL725a4QqP//ReZYyT+Ym7cE8DxFEIryOw==}
+  '@simple-git/args-pathspec@1.0.2':
+    resolution: {integrity: sha512-nEFVejViHUoL8wU8GTcwqrvqfUG40S5ts6S4fr1u1Ki5CklXlRDYThPVA/qurTmCYFGnaX3XpVUmICLHdvhLaA==}
 
-  '@simple-git/argv-parser@1.0.2':
-    resolution: {integrity: sha512-2ePPyzXESoRsPfw4IN6LEXBh3M8Y4gcz3NZ6IBsPb8hISW9rT9WgUeRjL6Xs+zK603DY/jTkQvWB9O71/9mWYg==}
+  '@simple-git/argv-parser@1.0.3':
+    resolution: {integrity: sha512-NMKv9sJcSN2VvnPT9Ja7eKfGy8Q8mMFLwPTCcuZMtv3+mYcLIZflg31S/tp2XCCyiY7YAx6cgBHQ0fwA2fWHpQ==}
 
   '@sinclair/typebox@0.34.49':
     resolution: {integrity: sha512-brySQQs7Jtn0joV8Xh9ZV/hZb9Ozb0pmazDIASBkYKCjXrXU3mpcFahmK/z4YDhGkQvP9mWJbVyahdtU5wQA+A==}
@@ -1745,6 +1745,9 @@ packages:
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
+  react-devtools-core@7.0.1:
+    resolution: {integrity: sha512-C3yNvRHaizlpiASzy7b9vbnBGLrhvdhl1CbdU6EnZgxPNbai60szdLtl+VL76UNOt5bOoVTOz5rNWZxgGt+Gsw==}
+
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
 
@@ -1826,6 +1829,10 @@ packages:
   shebang-regex@3.0.0:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
+
+  shell-quote@1.8.3:
+    resolution: {integrity: sha512-ObmnIF4hXNg1BqhnHmgbDETF8dLPCggZWBjkQfhZpbszZnYur5DUljTcCHii5LC3J5E0yeO/1LIMyH+UvHQgyw==}
+    engines: {node: '>= 0.4'}
 
   siginfo@2.0.0:
     resolution: {integrity: sha512-ybx0WO1/8bSBLEWXZvEd7gMW3Sn3JFlW3TvX1nREbDLRNQNaeNN8WK0meBwPdAaOI7TtRRRJn/Es1zhrrCHu7g==}
@@ -2114,6 +2121,18 @@ packages:
 
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
+
+  ws@7.5.10:
+    resolution: {integrity: sha512-+dbF1tHwZpXcbOJdVOkzLDxZP1ailvSxM6ZweXTegylPny803bFhA+vqBYw4s31NSAk4S2Qz+AKXK9a4wkdjcQ==}
+    engines: {node: '>=8.3.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: ^5.0.2
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
 
   ws@8.20.0:
     resolution: {integrity: sha512-sAt8BhgNbzCtgGbt2OxmpuryO63ZoDk/sqaB/znQm94T4fCEsy/yV+7CdC1kJhOU9lboAEU7R3kquuycDoibVA==}
@@ -2664,11 +2683,11 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.60.1':
     optional: true
 
-  '@simple-git/args-pathspec@1.0.1': {}
+  '@simple-git/args-pathspec@1.0.2': {}
 
-  '@simple-git/argv-parser@1.0.2':
+  '@simple-git/argv-parser@1.0.3':
     dependencies:
-      '@simple-git/args-pathspec': 1.0.1
+      '@simple-git/args-pathspec': 1.0.2
 
   '@sinclair/typebox@0.34.49': {}
 
@@ -3229,21 +3248,21 @@ snapshots:
 
   inherits@2.0.4: {}
 
-  ink-select-input@6.2.0(ink@6.8.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4):
+  ink-select-input@6.2.0(ink@6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4))(react@19.2.4):
     dependencies:
       figures: 6.1.0
-      ink: 6.8.0(@types/react@19.2.14)(react@19.2.4)
+      ink: 6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4)
       react: 19.2.4
       to-rotated: 1.0.0
 
-  ink-text-input@6.0.0(ink@6.8.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4):
+  ink-text-input@6.0.0(ink@6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4))(react@19.2.4):
     dependencies:
       chalk: 5.6.2
-      ink: 6.8.0(@types/react@19.2.14)(react@19.2.4)
+      ink: 6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4)
       react: 19.2.4
       type-fest: 4.41.0
 
-  ink@6.8.0(@types/react@19.2.14)(react@19.2.4):
+  ink@6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4):
     dependencies:
       '@alcalzone/ansi-tokenize': 0.2.5
       ansi-escapes: 7.3.0
@@ -3273,6 +3292,7 @@ snapshots:
       yoga-layout: 3.2.1
     optionalDependencies:
       '@types/react': 19.2.14
+      react-devtools-core: 7.0.1
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -3594,6 +3614,15 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
+  react-devtools-core@7.0.1:
+    dependencies:
+      shell-quote: 1.8.3
+      ws: 7.5.10
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+    optional: true
+
   react-is@18.3.1: {}
 
   react-reconciler@0.33.0(react@19.2.4):
@@ -3687,6 +3716,9 @@ snapshots:
 
   shebang-regex@3.0.0: {}
 
+  shell-quote@1.8.3:
+    optional: true
+
   siginfo@2.0.0: {}
 
   signal-exit@3.0.7: {}
@@ -3697,8 +3729,8 @@ snapshots:
     dependencies:
       '@kwsites/file-exists': 1.1.1
       '@kwsites/promise-deferred': 1.1.1
-      '@simple-git/args-pathspec': 1.0.1
-      '@simple-git/argv-parser': 1.0.2
+      '@simple-git/args-pathspec': 1.0.2
+      '@simple-git/argv-parser': 1.0.3
       debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
@@ -3940,6 +3972,9 @@ snapshots:
       strip-ansi: 7.2.0
 
   wrappy@1.0.2: {}
+
+  ws@7.5.10:
+    optional: true
 
   ws@8.20.0: {}
 
