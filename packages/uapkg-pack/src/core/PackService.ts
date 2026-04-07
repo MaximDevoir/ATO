@@ -36,9 +36,15 @@ export class PackService {
     const allFiles = this.fileCrawler.collect(roots.pluginRoot);
     const rules = this.ruleLoader.load(roots.gitRoot, roots.pluginRoot);
 
-    const filtered = allFiles.filter(
-      (file) => !this.ignoreEvaluator.shouldIgnore(file.relativePath, file.absolutePath, rules),
-    );
+    const filtered = allFiles.filter((file) => {
+      const ignored = this.ignoreEvaluator.shouldIgnore(file.relativePath, file.absolutePath, rules);
+
+      if (!ignored) {
+        return true;
+      }
+
+      return this.isEnforcedInclude(file.relativePath);
+    });
 
     const warnings: string[] = [];
     const included: string[] = [];
@@ -130,5 +136,9 @@ export class PackService {
     }
 
     return resolved;
+  }
+
+  private isEnforcedInclude(relativePath: string): boolean {
+    return relativePath === '.uapkg/postinstall.ts' || relativePath === '.uapkg/postinstall.js';
   }
 }
