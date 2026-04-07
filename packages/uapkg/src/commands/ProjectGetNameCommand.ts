@@ -1,6 +1,6 @@
-import type { ManifestRepository } from '../manifest/ManifestRepository';
-import type { Reporter } from '../ui/ConsoleReporter';
-import type { Command } from './Command';
+import type { ManifestRepository } from '../manifest/ManifestRepository.js';
+import type { Reporter } from '../ui/ConsoleReporter.js';
+import type { Command } from './Command.js';
 
 export interface ProjectGetNameCommandOptions {
   cwd: string;

@@ -7,11 +7,11 @@ import type {
   ConfigValueWithOrigin,
   ConfigWriteOptions,
   ResolvedConfig,
-} from '../contracts/ConfigTypes';
-import { validateConfigPath } from '../schema/pathSchema';
-import { ConfigLayerBuilder } from './ConfigLayerBuilder';
-import { ConfigResolver } from './ConfigResolver';
-import { ConfigWriter } from './ConfigWriter';
+} from '../contracts/ConfigTypes.js';
+import { validateConfigPath } from '../schema/pathSchema.js';
+import { ConfigLayerBuilder } from './ConfigLayerBuilder.js';
+import { ConfigResolver } from './ConfigResolver.js';
+import { ConfigWriter } from './ConfigWriter.js';
 
 export class ConfigInstance {
   private cwd: string;

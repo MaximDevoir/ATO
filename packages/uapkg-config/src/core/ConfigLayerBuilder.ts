@@ -1,7 +1,7 @@
-import type { ConfigLayer } from '../contracts/ConfigTypes';
-import { ConfigFileRepository } from '../files/ConfigFileRepository';
-import { ConfigPathResolver } from '../files/ConfigPathResolver';
-import { getDefaultConfig } from '../schema/configSchema';
+import type { ConfigLayer } from '../contracts/ConfigTypes.js';
+import { ConfigFileRepository } from '../files/ConfigFileRepository.js';
+import { ConfigPathResolver } from '../files/ConfigPathResolver.js';
+import { getDefaultConfig } from '../schema/configSchema.js';
 
 export class ConfigLayerBuilder {
   constructor(

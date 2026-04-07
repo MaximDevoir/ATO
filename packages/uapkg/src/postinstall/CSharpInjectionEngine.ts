@@ -1,5 +1,5 @@
-import type { ParsedCSharpFile } from './CSharpStructures';
-import { MarkerBlockService } from './MarkerBlockService';
+import type { ParsedCSharpFile } from './CSharpStructures.js';
+import { MarkerBlockService } from './MarkerBlockService.js';
 
 export class CSharpInjectionEngine {
   private readonly markerBlock = new MarkerBlockService();

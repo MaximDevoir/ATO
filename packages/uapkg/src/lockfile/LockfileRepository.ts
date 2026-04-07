@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import * as path from 'node:path';
 import * as toml from '@iarna/toml';
-import type { LockedPackage, UAPKGLockfile } from './UAPKGLockfile';
+import type { LockedPackage, UAPKGLockfile } from './UAPKGLockfile.js';
 
 export interface LockfileRepository {
   getPath(cwd: string): string;

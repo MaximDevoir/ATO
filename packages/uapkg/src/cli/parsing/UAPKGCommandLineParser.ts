@@ -1,7 +1,7 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import type { UAPKGCommandLine } from '../UAPKGCommandLine';
-import { UAPKGParserRegistry } from './UAPKGParserRegistry';
+import type { UAPKGCommandLine } from '../UAPKGCommandLine.js';
+import { UAPKGParserRegistry } from './UAPKGParserRegistry.js';
 
 export class UAPKGCommandLineParser {
   constructor(private readonly registry = new UAPKGParserRegistry()) {}

@@ -1,6 +1,6 @@
-import { FileManifestRepository, type ManifestRepository } from '../manifest/ManifestRepository';
-import { ProjectFileLocator } from './ProjectFileLocator';
-import { UProjectMetadataReader } from './UProjectMetadataReader';
+import { FileManifestRepository, type ManifestRepository } from '../manifest/ManifestRepository.js';
+import { ProjectFileLocator } from './ProjectFileLocator.js';
+import { UProjectMetadataReader } from './UProjectMetadataReader.js';
 
 export class PostinstallModuleSelector {
   constructor(

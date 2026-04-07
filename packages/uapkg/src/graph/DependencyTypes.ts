@@ -1,4 +1,4 @@
-import type { ManifestType, UAPKGManifest } from '../domain/UAPKGManifest';
+import type { ManifestType, UAPKGManifest } from '../domain/UAPKGManifest.js';
 
 export interface PackageNode {
   id: string;

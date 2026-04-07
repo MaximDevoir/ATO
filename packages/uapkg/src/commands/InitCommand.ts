@@ -1,9 +1,9 @@
-import type { ManifestType, UAPKGManifest } from '../domain/UAPKGManifest';
-import type { ManifestRepository } from '../manifest/ManifestRepository';
-import type { ProjectContextDetector } from '../services/ProjectContextDetector';
-import type { Reporter } from '../ui/ConsoleReporter';
-import type { PromptService } from '../ui/PromptService';
-import type { Command } from './Command';
+import type { ManifestType, UAPKGManifest } from '../domain/UAPKGManifest.js';
+import type { ManifestRepository } from '../manifest/ManifestRepository.js';
+import type { ProjectContextDetector } from '../services/ProjectContextDetector.js';
+import type { Reporter } from '../ui/ConsoleReporter.js';
+import type { PromptService } from '../ui/PromptService.js';
+import type { Command } from './Command.js';
 
 export interface InitCommandOptions {
   cwd: string;

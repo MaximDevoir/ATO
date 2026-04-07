@@ -1,13 +1,13 @@
 import type { Argv } from 'yargs';
-import type { UAPKGCommandLine } from '../UAPKGCommandLine';
-import type { UAPKGCommandModule } from './contracts/UAPKGCommandModule';
-import { AddCommandModule } from './modules/AddCommandModule';
-import { ConfigCommandModule } from './modules/ConfigCommandModule';
-import { InitCommandModule } from './modules/InitCommandModule';
-import { InstallCommandModule } from './modules/InstallCommandModule';
-import { PackCommandModule } from './modules/PackCommandModule';
-import { ProjectGetNameCommandModule } from './modules/ProjectGetNameCommandModule';
-import { UpdateCommandModule } from './modules/UpdateCommandModule';
+import type { UAPKGCommandLine } from '../UAPKGCommandLine.js';
+import type { UAPKGCommandModule } from './contracts/UAPKGCommandModule.js';
+import { AddCommandModule } from './modules/AddCommandModule.js';
+import { ConfigCommandModule } from './modules/ConfigCommandModule.js';
+import { InitCommandModule } from './modules/InitCommandModule.js';
+import { InstallCommandModule } from './modules/InstallCommandModule.js';
+import { PackCommandModule } from './modules/PackCommandModule.js';
+import { ProjectGetNameCommandModule } from './modules/ProjectGetNameCommandModule.js';
+import { UpdateCommandModule } from './modules/UpdateCommandModule.js';
 
 export class UAPKGParserRegistry {
   constructor(

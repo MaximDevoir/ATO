@@ -1,10 +1,10 @@
 import { DepGraph } from 'dependency-graph';
-import type { Dependency } from '../domain/UAPKGManifest';
-import type { ManifestRepository } from '../manifest/ManifestRepository';
-import type { FileSystemService } from '../services/FileSystemService';
-import type { GitClient } from '../services/GitClient';
-import { parseGitReference } from '../services/GitReferenceParser';
-import type { PackageNode } from './DependencyTypes';
+import type { Dependency } from '../domain/UAPKGManifest.js';
+import type { ManifestRepository } from '../manifest/ManifestRepository.js';
+import type { FileSystemService } from '../services/FileSystemService.js';
+import type { GitClient } from '../services/GitClient.js';
+import { parseGitReference } from '../services/GitReferenceParser.js';
+import type { PackageNode } from './DependencyTypes.js';
 
 export class DependencyGraphBuilder {
   constructor(

@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 import { simpleGit } from 'simple-git';
-import type { ParsedGitReference } from './GitReferenceParser';
+import type { ParsedGitReference } from './GitReferenceParser.js';
 
 export interface RemoteRefInfo {
   name: string;

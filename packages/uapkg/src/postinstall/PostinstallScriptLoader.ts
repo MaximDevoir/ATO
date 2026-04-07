@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import type { LockedPackage } from '../lockfile/UAPKGLockfile';
-import { type LoadedPostinstallScript, PostinstallScriptSchema } from './PostinstallTypes';
+import type { LockedPackage } from '../lockfile/UAPKGLockfile.js';
+import { type LoadedPostinstallScript, PostinstallScriptSchema } from './PostinstallTypes.js';
 
 export class PostinstallScriptLoader {
   async loadFromInstalledPlugins(projectRoot: string, packages: LockedPackage[]): Promise<LoadedPostinstallScript[]> {

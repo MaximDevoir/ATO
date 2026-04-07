@@ -1,9 +1,9 @@
 import path from 'node:path';
-import type { ConfigGetOptions, ConfigListOptions, ConfigScope, ConfigWriteOptions } from '../contracts/ConfigTypes';
-import { ConfigFileRepository } from '../files/ConfigFileRepository';
-import { ConfigPathResolver } from '../files/ConfigPathResolver';
-import { partialConfigSchema } from '../schema/configSchema';
-import { deleteValueByPath, setValueByPath, validateConfigPath } from '../schema/pathSchema';
+import type { ConfigGetOptions, ConfigListOptions, ConfigScope, ConfigWriteOptions } from '../contracts/ConfigTypes.js';
+import { ConfigFileRepository } from '../files/ConfigFileRepository.js';
+import { ConfigPathResolver } from '../files/ConfigPathResolver.js';
+import { partialConfigSchema } from '../schema/configSchema.js';
+import { deleteValueByPath, setValueByPath, validateConfigPath } from '../schema/pathSchema.js';
 
 export class ConfigWriter {
   constructor(

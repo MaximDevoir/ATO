@@ -1,7 +1,7 @@
-import type { ConfigLayer, ConfigTraceEntry, ConfigValueWithOrigin, ResolvedConfig } from '../contracts/ConfigTypes';
-import { ConfigMerger } from '../merge/ConfigMerger';
-import { configSchema } from '../schema/configSchema';
-import { getValueByPath } from '../schema/pathSchema';
+import type { ConfigLayer, ConfigTraceEntry, ConfigValueWithOrigin, ResolvedConfig } from '../contracts/ConfigTypes.js';
+import { ConfigMerger } from '../merge/ConfigMerger.js';
+import { configSchema } from '../schema/configSchema.js';
+import { getValueByPath } from '../schema/pathSchema.js';
 
 export class ConfigResolver {
   constructor(private readonly merger = new ConfigMerger()) {}

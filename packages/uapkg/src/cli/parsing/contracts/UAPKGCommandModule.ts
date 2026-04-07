@@ -1,5 +1,5 @@
 import type { Argv } from 'yargs';
-import type { UAPKGCommandLine } from '../../UAPKGCommandLine';
+import type { UAPKGCommandLine } from '../../UAPKGCommandLine.js';
 
 export interface CommandLineSink {
   set(commandLine: UAPKGCommandLine): void;

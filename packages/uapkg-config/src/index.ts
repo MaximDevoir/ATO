@@ -1,5 +1,5 @@
-import { ConfigInstance } from './core/ConfigInstance';
-import { createConfig } from './factory/createConfig';
+import { ConfigInstance } from './core/ConfigInstance.js';
+import { createConfig } from './factory/createConfig.js';
 
 const singleton = new ConfigInstance({ cwd: process.cwd() });
 
@@ -31,5 +31,5 @@ export type {
   ConfigTraceEntry,
   ConfigValueWithOrigin,
   ResolvedConfig,
-} from './contracts/ConfigTypes';
+} from './contracts/ConfigTypes.js';
 export { ConfigInstance, createConfig };

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { ConfigReadResult } from '../contracts/ConfigTypes';
-import { partialConfigSchema } from '../schema/configSchema';
+import type { ConfigReadResult } from '../contracts/ConfigTypes.js';
+import { partialConfigSchema } from '../schema/configSchema.js';
 
 export class ConfigFileRepository {
   read(filePath: string): ConfigReadResult {

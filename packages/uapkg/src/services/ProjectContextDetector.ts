@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import * as path from 'node:path';
-import type { ManifestType } from '../domain/UAPKGManifest';
+import type { ManifestType } from '../domain/UAPKGManifest.js';
 
 export interface ProjectContextDetection {
   suggestedType: ManifestType;

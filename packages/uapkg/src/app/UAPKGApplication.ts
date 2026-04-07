@@ -1,18 +1,18 @@
-import type { UAPKGCommandLine } from '../cli/UAPKGCommandLine';
-import { AddCommand } from '../commands/AddCommand';
-import { ConfigCommand } from '../commands/ConfigCommand';
-import { InitCommand } from '../commands/InitCommand';
-import { InstallCommand } from '../commands/InstallCommand';
-import { PackCommand } from '../commands/PackCommand';
-import { ProjectGetNameCommand } from '../commands/ProjectGetNameCommand';
-import { UpdateCommand } from '../commands/UpdateCommand';
-import { TOMLLockfileRepository } from '../lockfile/LockfileRepository';
-import { FileManifestRepository } from '../manifest/ManifestRepository';
-import { NodeFileSystemService } from '../services/FileSystemService';
-import { SimpleGitClient } from '../services/GitClient';
-import { ProjectContextDetector } from '../services/ProjectContextDetector';
-import { ConsoleReporter } from '../ui/ConsoleReporter';
-import { InkPromptService } from '../ui/PromptService';
+import type { UAPKGCommandLine } from '../cli/UAPKGCommandLine.js';
+import { AddCommand } from '../commands/AddCommand.js';
+import { ConfigCommand } from '../commands/ConfigCommand.js';
+import { InitCommand } from '../commands/InitCommand.js';
+import { InstallCommand } from '../commands/InstallCommand.js';
+import { PackCommand } from '../commands/PackCommand.js';
+import { ProjectGetNameCommand } from '../commands/ProjectGetNameCommand.js';
+import { UpdateCommand } from '../commands/UpdateCommand.js';
+import { TOMLLockfileRepository } from '../lockfile/LockfileRepository.js';
+import { FileManifestRepository } from '../manifest/ManifestRepository.js';
+import { NodeFileSystemService } from '../services/FileSystemService.js';
+import { SimpleGitClient } from '../services/GitClient.js';
+import { ProjectContextDetector } from '../services/ProjectContextDetector.js';
+import { ConsoleReporter } from '../ui/ConsoleReporter.js';
+import { InkPromptService } from '../ui/PromptService.js';
 
 export class UAPKGApplication {
   async run(commandLine: UAPKGCommandLine) {

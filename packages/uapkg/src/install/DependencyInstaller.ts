@@ -1,9 +1,9 @@
 import * as path from 'node:path';
-import type { ManifestType } from '../domain/UAPKGManifest';
-import type { ResolvedDependency } from '../graph/DependencyTypes';
-import type { FileSystemService } from '../services/FileSystemService';
-import type { GitClient } from '../services/GitClient';
-import { parseGitReference } from '../services/GitReferenceParser';
+import type { ManifestType } from '../domain/UAPKGManifest.js';
+import type { ResolvedDependency } from '../graph/DependencyTypes.js';
+import type { FileSystemService } from '../services/FileSystemService.js';
+import type { GitClient } from '../services/GitClient.js';
+import { parseGitReference } from '../services/GitReferenceParser.js';
 
 export class DependencyInstaller {
   constructor(

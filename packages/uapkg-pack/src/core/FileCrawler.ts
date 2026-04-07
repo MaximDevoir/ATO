@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { CollectedFile } from '../contracts/PackTypes';
+import type { CollectedFile } from '../contracts/PackTypes.js';
 
 export class FileCrawler {
   collect(pluginRoot: string) {

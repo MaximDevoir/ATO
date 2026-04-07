@@ -1,7 +1,7 @@
 import semver from 'semver';
-import type { DependencyOverride, UAPKGManifest } from '../domain/UAPKGManifest';
-import type { GitClient } from '../services/GitClient';
-import type { DependencyRequirement, ResolutionResult, ResolvedDependency } from './DependencyTypes';
+import type { DependencyOverride, UAPKGManifest } from '../domain/UAPKGManifest.js';
+import type { GitClient } from '../services/GitClient.js';
+import type { DependencyRequirement, ResolutionResult, ResolvedDependency } from './DependencyTypes.js';
 
 export class DependencyResolver {
   constructor(private readonly gitClient: GitClient) {}

@@ -1,13 +1,13 @@
-import { DependencyGraphBuilder } from '../graph/DependencyGraphBuilder';
-import { DependencyResolver } from '../graph/DependencyResolver';
-import type { ManifestRepository } from '../manifest/ManifestRepository';
-import { PluginStateInspector } from '../safety/PluginStateInspector';
-import { SafetyPolicy } from '../safety/SafetyPolicy';
-import type { FileSystemService } from '../services/FileSystemService';
-import type { GitClient } from '../services/GitClient';
-import type { Reporter } from '../ui/ConsoleReporter';
-import type { LockfileRepository } from './LockfileRepository';
-import type { LockedPackage } from './UAPKGLockfile';
+import { DependencyGraphBuilder } from '../graph/DependencyGraphBuilder.js';
+import { DependencyResolver } from '../graph/DependencyResolver.js';
+import type { ManifestRepository } from '../manifest/ManifestRepository.js';
+import { PluginStateInspector } from '../safety/PluginStateInspector.js';
+import { SafetyPolicy } from '../safety/SafetyPolicy.js';
+import type { FileSystemService } from '../services/FileSystemService.js';
+import type { GitClient } from '../services/GitClient.js';
+import type { Reporter } from '../ui/ConsoleReporter.js';
+import type { LockfileRepository } from './LockfileRepository.js';
+import type { LockedPackage } from './UAPKGLockfile.js';
 
 export interface LockfileSyncOptions {
   force: boolean;

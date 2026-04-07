@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import * as path from 'node:path';
 import type { z } from 'zod';
-import { type UAPKGManifest, UAPKGManifestSchema } from '../domain/UAPKGManifest';
+import { type UAPKGManifest, UAPKGManifestSchema } from '../domain/UAPKGManifest.js';
 
 export interface ManifestRepository {
   getManifestPath(cwd: string): string;

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
-import type { PackManifest } from '../contracts/PackTypes';
+import type { PackManifest } from '../contracts/PackTypes.js';
 
 const packManifestSchema = z.object({
   name: z.string().min(1),

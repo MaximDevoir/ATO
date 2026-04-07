@@ -3,8 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createConfig } from '@uapkg/config';
 import Log from '@uapkg/log';
-import type { UAPKGConfigAction, UAPKGConfigScope, UAPKGOutputFormat } from '../cli/UAPKGCommandLine';
-import type { Command } from './Command';
+import type { UAPKGConfigAction, UAPKGConfigScope, UAPKGOutputFormat } from '../cli/UAPKGCommandLine.js';
+import type { Command } from './Command.js';
 
 export interface ConfigCommandOptions {
   cwd: string;

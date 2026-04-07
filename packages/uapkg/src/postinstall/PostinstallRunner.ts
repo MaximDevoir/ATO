@@ -1,13 +1,13 @@
-import type { ManifestType } from '../domain/UAPKGManifest';
-import type { LockedPackage } from '../lockfile/UAPKGLockfile';
-import type { Reporter } from '../ui/ConsoleReporter';
-import { BuildCsInjector } from './BuildCsInjector';
-import { PostinstallModuleSelector } from './PostinstallModuleSelector';
-import { PostinstallScriptLoader } from './PostinstallScriptLoader';
-import { ProjectFileLocator } from './ProjectFileLocator';
-import { TargetCsInjector } from './TargetCsInjector';
-import { UnrealSourceCatalogBuilder } from './UnrealSourceCatalog';
-import { UProjectInjector } from './UProjectInjector';
+import type { ManifestType } from '../domain/UAPKGManifest.js';
+import type { LockedPackage } from '../lockfile/UAPKGLockfile.js';
+import type { Reporter } from '../ui/ConsoleReporter.js';
+import { BuildCsInjector } from './BuildCsInjector.js';
+import { PostinstallModuleSelector } from './PostinstallModuleSelector.js';
+import { PostinstallScriptLoader } from './PostinstallScriptLoader.js';
+import { ProjectFileLocator } from './ProjectFileLocator.js';
+import { TargetCsInjector } from './TargetCsInjector.js';
+import { UnrealSourceCatalogBuilder } from './UnrealSourceCatalog.js';
+import { UProjectInjector } from './UProjectInjector.js';
 
 export class PostinstallRunner {
   constructor(

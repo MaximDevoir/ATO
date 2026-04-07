@@ -1,6 +1,6 @@
 import * as path from 'node:path';
-import type { FileSystemService } from '../services/FileSystemService';
-import type { GitClient, GitRepositoryState } from '../services/GitClient';
+import type { FileSystemService } from '../services/FileSystemService.js';
+import type { GitClient, GitRepositoryState } from '../services/GitClient.js';
 
 export class PluginStateInspector {
   constructor(

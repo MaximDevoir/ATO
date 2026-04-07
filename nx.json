@@ -12,6 +12,10 @@
     "default": ["{projectRoot}/**/*", "sharedGlobals"]
   },
   "targetDefaults": {
+    "build": {
+      "inputs": ["default", "^default"],
+      "dependsOn": ["^build"]
+    },
     "lint": {
       "inputs": ["default", "^default"]
     },

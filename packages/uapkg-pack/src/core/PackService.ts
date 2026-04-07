@@ -1,15 +1,15 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import Log, { createLogger } from '@uapkg/log';
-import type { PackOptions, PackResult } from '../contracts/PackTypes';
-import { FileCrawler } from './FileCrawler';
-import { IgnoreEvaluator } from './IgnoreEvaluator';
-import { IgnoreRuleLoader } from './IgnoreRuleLoader';
-import { IntegrityWriter } from './IntegrityWriter';
-import { LFSPointerDetector } from './LFSPointerDetector';
-import { PackManifestReader } from './PackManifestReader';
-import { PluginRootResolver } from './PluginRootResolver';
-import { TarArchiveWriter } from './TarArchiveWriter';
+import type { PackOptions, PackResult } from '../contracts/PackTypes.js';
+import { FileCrawler } from './FileCrawler.js';
+import { IgnoreEvaluator } from './IgnoreEvaluator.js';
+import { IgnoreRuleLoader } from './IgnoreRuleLoader.js';
+import { IntegrityWriter } from './IntegrityWriter.js';
+import { LFSPointerDetector } from './LFSPointerDetector.js';
+import { PackManifestReader } from './PackManifestReader.js';
+import { PluginRootResolver } from './PluginRootResolver.js';
+import { TarArchiveWriter } from './TarArchiveWriter.js';
 
 export class PackService {
   private readonly logger = createLogger({ context: 'pack' });

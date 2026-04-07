@@ -1,12 +1,12 @@
-import { DependencyInstaller } from '../install/DependencyInstaller';
-import type { LockfileRepository } from '../lockfile/LockfileRepository';
-import { LockfileSynchronizer } from '../lockfile/LockfileSynchronizer';
-import type { ManifestRepository } from '../manifest/ManifestRepository';
-import { PostinstallRunner } from '../postinstall/PostinstallRunner';
-import type { FileSystemService } from '../services/FileSystemService';
-import type { GitClient } from '../services/GitClient';
-import type { Reporter } from '../ui/ConsoleReporter';
-import type { Command } from './Command';
+import { DependencyInstaller } from '../install/DependencyInstaller.js';
+import type { LockfileRepository } from '../lockfile/LockfileRepository.js';
+import { LockfileSynchronizer } from '../lockfile/LockfileSynchronizer.js';
+import type { ManifestRepository } from '../manifest/ManifestRepository.js';
+import { PostinstallRunner } from '../postinstall/PostinstallRunner.js';
+import type { FileSystemService } from '../services/FileSystemService.js';
+import type { GitClient } from '../services/GitClient.js';
+import type { Reporter } from '../ui/ConsoleReporter.js';
+import type { Command } from './Command.js';
 
 export interface InstallCommandOptions {
   cwd: string;

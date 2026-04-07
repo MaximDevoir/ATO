@@ -1,5 +1,5 @@
-import type { LockedPackage } from '../lockfile/UAPKGLockfile';
-import type { GitRepositoryState } from '../services/GitClient';
+import type { LockedPackage } from '../lockfile/UAPKGLockfile.js';
+import type { GitRepositoryState } from '../services/GitClient.js';
 
 export interface SafetyDecision {
   allowed: boolean;

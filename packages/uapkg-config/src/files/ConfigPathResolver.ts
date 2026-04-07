@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import type { ConfigPaths } from '../contracts/ConfigTypes';
+import type { ConfigPaths } from '../contracts/ConfigTypes.js';
 
 export class ConfigPathResolver {
   resolve(cwd: string): ConfigPaths {

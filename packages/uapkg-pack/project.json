@@ -4,6 +4,13 @@
   "sourceRoot": "packages/uapkg-pack/src",
   "projectType": "library",
   "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "pnpm run build"
+      }
+    },
     "lint": {
       "executor": "nx:run-commands",
       "options": {

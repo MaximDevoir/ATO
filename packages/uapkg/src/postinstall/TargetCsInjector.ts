@@ -1,8 +1,8 @@
 import fs from 'node:fs';
-import { CSharpInjectionEngine } from './CSharpInjectionEngine';
-import { CSharpStructureAnalyzer } from './CSharpStructureAnalyzer';
-import { CSharpWrapperFactory } from './CSharpWrapperFactory';
-import { getWrapperClassName } from './PluginHash';
+import { CSharpInjectionEngine } from './CSharpInjectionEngine.js';
+import { CSharpStructureAnalyzer } from './CSharpStructureAnalyzer.js';
+import { CSharpWrapperFactory } from './CSharpWrapperFactory.js';
+import { getWrapperClassName } from './PluginHash.js';
 
 export class TargetCsInjector {
   constructor(

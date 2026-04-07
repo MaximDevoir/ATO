@@ -1,5 +1,5 @@
 import { pack } from '@uapkg/pack';
-import type { Command } from './Command';
+import type { Command } from './Command.js';
 
 export interface PackCommandOptions {
   cwd: string;

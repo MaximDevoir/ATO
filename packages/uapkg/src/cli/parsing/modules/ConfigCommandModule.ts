@@ -1,7 +1,7 @@
 import type { Argv } from 'yargs';
-import { createUAPKGCommandLineFactory } from '../../UAPKGCommandLine';
-import type { CommandLineSink, UAPKGCommandModule } from '../contracts/UAPKGCommandModule';
-import { resolveScope, withScopeOptions } from './sharedOptions';
+import { createUAPKGCommandLineFactory } from '../../UAPKGCommandLine.js';
+import type { CommandLineSink, UAPKGCommandModule } from '../contracts/UAPKGCommandModule.js';
+import { resolveScope, withScopeOptions } from './sharedOptions.js';
 
 export class ConfigCommandModule implements UAPKGCommandModule {
   private readonly factory = createUAPKGCommandLineFactory();

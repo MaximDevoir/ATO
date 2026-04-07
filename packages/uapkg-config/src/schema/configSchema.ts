@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { ResolvedConfig } from '../contracts/ConfigTypes';
+import type { ResolvedConfig } from '../contracts/ConfigTypes.js';
 
 const registryRefSchema = z
   .object({

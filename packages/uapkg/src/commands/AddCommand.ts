@@ -1,15 +1,15 @@
-import type { Dependency, DependencyOverride, UAPKGManifest } from '../domain/UAPKGManifest';
-import { DependencyInstaller } from '../install/DependencyInstaller';
-import type { LockfileRepository } from '../lockfile/LockfileRepository';
-import { LockfileSynchronizer } from '../lockfile/LockfileSynchronizer';
-import type { ManifestRepository } from '../manifest/ManifestRepository';
-import { PostinstallRunner } from '../postinstall/PostinstallRunner';
-import type { FileSystemService } from '../services/FileSystemService';
-import type { GitClient } from '../services/GitClient';
-import { parseGitReference } from '../services/GitReferenceParser';
-import type { Reporter } from '../ui/ConsoleReporter';
-import { normalizeAddedDependencyVersion } from '../utils/VersionUtils';
-import type { Command } from './Command';
+import type { Dependency, DependencyOverride, UAPKGManifest } from '../domain/UAPKGManifest.js';
+import { DependencyInstaller } from '../install/DependencyInstaller.js';
+import type { LockfileRepository } from '../lockfile/LockfileRepository.js';
+import { LockfileSynchronizer } from '../lockfile/LockfileSynchronizer.js';
+import type { ManifestRepository } from '../manifest/ManifestRepository.js';
+import { PostinstallRunner } from '../postinstall/PostinstallRunner.js';
+import type { FileSystemService } from '../services/FileSystemService.js';
+import type { GitClient } from '../services/GitClient.js';
+import { parseGitReference } from '../services/GitReferenceParser.js';
+import type { Reporter } from '../ui/ConsoleReporter.js';
+import { normalizeAddedDependencyVersion } from '../utils/VersionUtils.js';
+import type { Command } from './Command.js';
 
 export interface AddCommandOptions {
   cwd: string;

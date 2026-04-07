@@ -1,6 +1,6 @@
 import fs from 'node:fs';
-import { CSharpStructureAnalyzer } from './CSharpStructureAnalyzer';
-import { ProjectFileLocator } from './ProjectFileLocator';
+import { CSharpStructureAnalyzer } from './CSharpStructureAnalyzer.js';
+import { ProjectFileLocator } from './ProjectFileLocator.js';
 
 export interface SourceCatalog {
   moduleFiles: Map<string, string>;
