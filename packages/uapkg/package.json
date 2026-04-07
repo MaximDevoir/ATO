@@ -4,7 +4,7 @@
   "type": "module",
   "sideEffects": false,
   "bin": {
-    "uapkg": "./src/cli.ts"
+    "uapkg": "./dist/cli.js"
   },
   "files": [
     "src"
