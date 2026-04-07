@@ -19,6 +19,6 @@
     }
   },
   "files": {
-    "includes": ["**", "!!**/__snapshots__", "!!**/coverage"]
+    "includes": ["**", "!!**/__snapshots__", "!!**/coverage", "!!**/dist"]
   }
 }
