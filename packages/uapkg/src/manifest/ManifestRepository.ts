@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import * as path from 'node:path';
-import type { z } from 'zod';
+import { z } from 'zod';
 import { type UAPKGManifest, UAPKGManifestSchema } from '../domain/UAPKGManifest.js';
 
 export interface ManifestRepository {
@@ -32,9 +32,8 @@ export class FileManifestRepository implements ManifestRepository {
 
     const validated = UAPKGManifestSchema.safeParse(parsed);
     if (!validated.success) {
-      throw new Error(
-        `[uapkg] Invalid ${manifestPath}: ${validated.error.issues.map((issue: z.ZodIssue) => issue.message).join('; ')}`,
-      );
+      const pretty = z.prettifyError(validated.error);
+      throw new Error(`[uapkg] Invalid manifest ${manifestPath}:\n${pretty}`);
     }
 
     return validated.data;

@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import Log, { createLogger } from '@uapkg/log';
+import semver from 'semver';
 import type { PackOptions, PackResult } from '../contracts/PackTypes.js';
 import { FileCrawler } from './FileCrawler.js';
 import { IgnoreEvaluator } from './IgnoreEvaluator.js';
@@ -30,7 +31,7 @@ export class PackService {
     const roots = this.rootResolver.resolve(cwd);
     const manifest = this.manifestReader.read(roots.pluginRoot);
 
-    const rootPrefix = `${manifest.name}-${manifest.version}`;
+    const rootPrefix = `${manifest.name}-${semver.clean(manifest.version)}`;
     const archivePath = this.resolveArchivePath(roots.cwd, options.outFile);
 
     const allFiles = this.fileCrawler.collect(roots.pluginRoot);

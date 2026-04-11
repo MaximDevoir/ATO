@@ -1,11 +1,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import semver from 'semver';
 import { z } from 'zod';
 import type { PackManifest } from '../contracts/PackTypes.js';
 
 const packManifestSchema = z.object({
   name: z.string().min(1),
-  version: z.string().min(1),
+  version: z
+    .string()
+    .min(1)
+    .refine((v) => semver.valid(semver.clean(v)) !== null, {
+      message: 'Invalid semver version',
+    }),
 });
 
 export class PackManifestReader {
@@ -22,9 +28,8 @@ export class PackManifestReader {
 
     const validated = packManifestSchema.safeParse(parsed);
     if (!validated.success) {
-      throw new Error(
-        `[uapkg] Invalid ${manifestPath}: ${validated.error.issues.map((issue) => issue.message).join('; ')}`,
-      );
+      const pretty = z.prettifyError(validated.error);
+      throw new Error(`[uapkg] Invalid manifest ${manifestPath}:\n${pretty}`);
     }
 
     return validated.data;
