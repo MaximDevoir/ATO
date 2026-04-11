@@ -203,12 +203,19 @@ importers:
       ignore:
         specifier: 7.0.5
         version: 7.0.5
+      semver:
+        specifier: 7.7.4
+        version: 7.7.4
       tar:
         specifier: 7.5.13
         version: 7.5.13
       zod:
         specifier: 4.3.6
         version: 4.3.6
+    devDependencies:
+      '@types/semver':
+        specifier: 7.7.1
+        version: 7.7.1
 
   packages/unreal-lag: {}
 
