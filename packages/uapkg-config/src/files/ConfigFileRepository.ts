@@ -1,17 +1,25 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import {
+  createIoErrorDiagnostic,
+  createParseErrorDiagnostic,
+  createSchemaInvalidDiagnostic,
+  fail,
+  ok,
+  type Result,
+} from '@uapkg/diagnostics';
 import type { ConfigReadResult } from '../contracts/ConfigTypes.js';
 import { partialConfigSchema } from '../schema/configSchema.js';
 
 export class ConfigFileRepository {
-  read(filePath: string): ConfigReadResult {
+  read(filePath: string): Result<ConfigReadResult> {
     if (!fs.existsSync(filePath)) {
-      return { exists: false, values: {} };
+      return ok({ exists: false, values: {} });
     }
 
     const raw = fs.readFileSync(filePath, 'utf8').trim();
     if (raw.length === 0) {
-      return { exists: true, values: {} };
+      return ok({ exists: true, values: {} });
     }
 
     let parsed: unknown;
@@ -19,24 +27,28 @@ export class ConfigFileRepository {
       parsed = JSON.parse(raw);
     } catch (error) {
       const details = error instanceof Error ? error.message : String(error);
-      throw new Error(`[uapkg] Invalid JSON in config file ${filePath}: ${details}`);
+      return fail([createParseErrorDiagnostic(`Invalid JSON in config file ${filePath}: ${details}`, filePath)]);
     }
 
     const validation = partialConfigSchema.safeParse(parsed);
     if (!validation.success) {
-      throw new Error(
-        `[uapkg] Invalid config file ${filePath}: ${validation.error.issues[0]?.message ?? 'unknown error'}`,
-      );
+      const issues = validation.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
+      return fail([createSchemaInvalidDiagnostic(filePath, issues)]);
     }
 
-    return {
+    return ok({
       exists: true,
       values: (validation.data as Record<string, unknown>) ?? {},
-    };
+    });
   }
 
-  write(filePath: string, values: Record<string, unknown>) {
-    fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fs.writeFileSync(filePath, `${JSON.stringify(values, null, 2)}\n`, 'utf8');
+  write(filePath: string, values: Record<string, unknown>): Result<void> {
+    try {
+      fs.mkdirSync(path.dirname(filePath), { recursive: true });
+      fs.writeFileSync(filePath, `${JSON.stringify(values, null, 2)}\n`, 'utf8');
+      return ok(undefined);
+    } catch (error) {
+      return fail([createIoErrorDiagnostic(filePath, String(error))]);
+    }
   }
 }

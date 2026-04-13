@@ -20,7 +20,7 @@ export class ConfigLayerBuilder {
       {
         source: 'global',
         file: paths.globalFile,
-        values: this.repository.read(paths.globalFile).values,
+        values: this.readValues(paths.globalFile),
       },
     ];
 
@@ -28,16 +28,25 @@ export class ConfigLayerBuilder {
       layers.push({
         source: 'intermediary',
         file: intermediaryFile,
-        values: this.repository.read(intermediaryFile).values,
+        values: this.readValues(intermediaryFile),
       });
     }
 
     layers.push({
       source: 'local',
       file: paths.localFile,
-      values: this.repository.read(paths.localFile).values,
+      values: this.readValues(paths.localFile),
     });
 
     return layers;
+  }
+
+  private readValues(filePath: string): Record<string, unknown> {
+    const result = this.repository.read(filePath);
+    if (!result.ok) {
+      // Gracefully degrade: skip this layer rather than halting
+      return {};
+    }
+    return result.value.values;
   }
 }

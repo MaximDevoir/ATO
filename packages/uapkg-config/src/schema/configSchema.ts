@@ -15,6 +15,7 @@ const registryConfigSchema = z
       type: 'branch',
       value: 'main',
     }),
+    ttlSeconds: z.number().optional(),
   })
   .strict();
 
@@ -32,6 +33,11 @@ export const configSchema = z
     cache: z
       .object({
         enabled: z.boolean(),
+      })
+      .strict(),
+    registryCache: z
+      .object({
+        ttlSeconds: z.number(),
       })
       .strict(),
     network: z
@@ -73,6 +79,12 @@ export const partialConfigSchema = z
     cache: z
       .object({
         enabled: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
+    registryCache: z
+      .object({
+        ttlSeconds: z.number().optional(),
       })
       .strict()
       .optional(),
@@ -133,6 +145,9 @@ export function getDefaultConfig(): ResolvedConfig {
     },
     cache: {
       enabled: true,
+    },
+    registryCache: {
+      ttlSeconds: 300,
     },
     network: {
       retries: 2,

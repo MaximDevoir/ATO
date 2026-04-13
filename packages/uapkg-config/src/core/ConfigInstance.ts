@@ -1,3 +1,4 @@
+import type { Result } from '@uapkg/diagnostics';
 import type {
   ConfigCreateOptions,
   ConfigGetOptions,
@@ -30,29 +31,36 @@ export class ConfigInstance {
   get(pathToProperty?: string, options: ConfigGetOptions = {}) {
     if (options.scope) {
       if (!pathToProperty) {
-        return this.writer.getRaw(this.cwd, options);
+        const rawResult = this.writer.getRaw(this.cwd, options);
+        if (!rawResult.ok) return null;
+        return rawResult.value;
       }
 
-      validateConfigPath(pathToProperty);
-      const scoped = this.writer.getRaw(this.cwd, options);
-      if (scoped === null) {
-        return null;
-      }
+      const pathResult = validateConfigPath(pathToProperty);
+      if (!pathResult.ok) return null;
 
-      return this.getValueFromObject(scoped, pathToProperty);
+      const scopedResult = this.writer.getRaw(this.cwd, options);
+      if (!scopedResult.ok) return null;
+      if (scopedResult.value === null) return null;
+
+      return this.getValueFromObject(scopedResult.value, pathToProperty);
     }
 
     if (!pathToProperty) {
       return this.getAll();
     }
 
-    validateConfigPath(pathToProperty);
+    const pathResult = validateConfigPath(pathToProperty);
+    if (!pathResult.ok) return null;
+
     return this.resolver.resolvePath(this.layers, pathToProperty);
   }
 
   getAll(options: ConfigListOptions = {}): ResolvedConfig | Record<string, unknown> | null {
     if (options.scope) {
-      return this.writer.listRaw(this.cwd, options);
+      const result = this.writer.listRaw(this.cwd, options);
+      if (!result.ok) return null;
+      return result.value;
     }
 
     return this.resolver.resolveAll(this.layers);
@@ -64,21 +72,30 @@ export class ConfigInstance {
     return config.registries[selected] ?? null;
   }
 
-  getWithOrigin(pathToProperty: string): ConfigValueWithOrigin {
-    validateConfigPath(pathToProperty);
+  getWithOrigin(pathToProperty: string): ConfigValueWithOrigin | null {
+    const pathResult = validateConfigPath(pathToProperty);
+    if (!pathResult.ok) return null;
     return this.resolver.getWithOrigin(this.layers, pathToProperty);
   }
 
   trace(pathToProperty: string): ConfigTraceEntry[] {
-    validateConfigPath(pathToProperty);
+    const pathResult = validateConfigPath(pathToProperty);
+    if (!pathResult.ok) return [];
     return this.resolver.trace(this.layers, pathToProperty);
   }
 
-  set(pathToProperty: string, value: unknown, options: ConfigWriteOptions = {}) {
+  set(
+    pathToProperty: string,
+    value: unknown,
+    options: ConfigWriteOptions = {},
+  ): Result<{ file: string; values: Record<string, unknown> }> {
     return this.writer.prepareSet(this.cwd, pathToProperty, value, options);
   }
 
-  delete(pathToProperty: string, options: ConfigWriteOptions = {}) {
+  delete(
+    pathToProperty: string,
+    options: ConfigWriteOptions = {},
+  ): Result<{ file: string; values: Record<string, unknown> }> {
     return this.writer.prepareDelete(this.cwd, pathToProperty, options);
   }
 

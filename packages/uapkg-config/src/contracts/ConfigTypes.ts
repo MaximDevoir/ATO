@@ -8,6 +8,7 @@ export interface RegistryRef {
 export interface RegistryConfig {
   url: string;
   ref: RegistryRef;
+  ttlSeconds?: number;
 }
 
 export interface ResolvedConfig {
@@ -20,6 +21,9 @@ export interface ResolvedConfig {
   };
   cache: {
     enabled: boolean;
+  };
+  registryCache: {
+    ttlSeconds: number;
   };
   network: {
     retries: number;

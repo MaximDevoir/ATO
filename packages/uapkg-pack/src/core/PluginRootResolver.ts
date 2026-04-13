@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { createPluginRootNotFoundDiagnostic, fail, ok, type Result } from '@uapkg/diagnostics';
 
 export interface ResolvedRoots {
   cwd: string;
@@ -8,18 +9,18 @@ export interface ResolvedRoots {
 }
 
 export class PluginRootResolver {
-  resolve(cwd: string): ResolvedRoots {
+  resolve(cwd: string): Result<ResolvedRoots> {
     const resolvedCwd = path.resolve(cwd);
     const pluginRoot = this.findNearestManifestRoot(resolvedCwd);
     if (!pluginRoot) {
-      throw new Error('[uapkg] No uapkg.json found from current directory upward');
+      return fail([createPluginRootNotFoundDiagnostic(resolvedCwd)]);
     }
 
-    return {
+    return ok({
       cwd: resolvedCwd,
       pluginRoot,
       gitRoot: this.findGitRoot(pluginRoot) ?? pluginRoot,
-    };
+    });
   }
 
   private findNearestManifestRoot(start: string) {

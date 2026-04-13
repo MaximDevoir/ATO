@@ -1,3 +1,5 @@
+import { createParseErrorDiagnostic, fail, ok, type Result } from '@uapkg/diagnostics';
+
 const directPaths = new Set([
   'registry',
   'registries',
@@ -7,6 +9,8 @@ const directPaths = new Set([
   'exec.shell',
   'cache',
   'cache.enabled',
+  'registryCache',
+  'registryCache.ttlSeconds',
   'network',
   'network.retries',
   'network.timeout',
@@ -15,12 +19,12 @@ const directPaths = new Set([
   'term.verbose',
 ]);
 
-export function validateConfigPath(pathToProperty: string) {
+export function validateConfigPath(pathToProperty: string): Result<void> {
   if (isValidConfigPath(pathToProperty)) {
-    return;
+    return ok(undefined);
   }
 
-  throw new Error(`[uapkg] Invalid config path: ${pathToProperty}`);
+  return fail([createParseErrorDiagnostic(`Invalid config path: ${pathToProperty}`)]);
 }
 
 export function isValidConfigPath(pathToProperty: string) {
@@ -54,6 +58,10 @@ export function isValidConfigPath(pathToProperty: string) {
   }
 
   if (segments.length === 4 && segments[2] === 'ref' && (segments[3] === 'type' || segments[3] === 'value')) {
+    return true;
+  }
+
+  if (segments.length === 3 && segments[2] === 'ttlSeconds') {
     return true;
   }
 

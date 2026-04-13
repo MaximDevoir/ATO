@@ -1,5 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import {
+  createManifestInvalidDiagnostic,
+  createManifestReadErrorDiagnostic,
+  fail,
+  ok,
+  type Result,
+} from '@uapkg/diagnostics';
 import semver from 'semver';
 import { z } from 'zod';
 import type { PackManifest } from '../contracts/PackTypes.js';
@@ -15,7 +22,7 @@ const packManifestSchema = z.object({
 });
 
 export class PackManifestReader {
-  read(pluginRoot: string): PackManifest {
+  read(pluginRoot: string): Result<PackManifest> {
     const manifestPath = path.join(pluginRoot, 'uapkg.json');
 
     let parsed: unknown;
@@ -23,15 +30,15 @@ export class PackManifestReader {
       parsed = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
     } catch (error) {
       const details = error instanceof Error ? error.message : String(error);
-      throw new Error(`[uapkg] Failed to read ${manifestPath}: ${details}`);
+      return fail([createManifestReadErrorDiagnostic(manifestPath, details)]);
     }
 
     const validated = packManifestSchema.safeParse(parsed);
     if (!validated.success) {
-      const pretty = z.prettifyError(validated.error);
-      throw new Error(`[uapkg] Invalid manifest ${manifestPath}:\n${pretty}`);
+      const issues = validated.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
+      return fail([createManifestInvalidDiagnostic(manifestPath, issues)]);
     }
 
-    return validated.data;
+    return ok(validated.data);
   }
 }

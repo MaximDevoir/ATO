@@ -15,6 +15,7 @@
   },
   "types": "./dist/index.d.ts",
   "dependencies": {
+    "@uapkg/diagnostics": "workspace:^",
     "zod": "4.3.6"
   },
   "scripts": {

@@ -44,7 +44,7 @@ describe('createConfig', () => {
 
     expect(resolved.term.quiet).toBe(true);
     expect(resolved.term.verbose).toBe(true);
-    expect(config.getWithOrigin('term.verbose').source).toBe('local');
+    expect(config.getWithOrigin('term.verbose')?.source).toBe('local');
     expect(config.trace('term.quiet').map((entry) => entry.source)).toContain('intermediary');
   });
 

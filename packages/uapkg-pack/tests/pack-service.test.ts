@@ -16,11 +16,13 @@ describe('PackService', () => {
 
     const result = await new PackService().pack({ cwd: root });
 
-    expect(fs.existsSync(result.archivePath)).toBe(true);
-    expect(result.integrityPath).toBeDefined();
-    expect(result.integrityPath ? fs.existsSync(result.integrityPath) : false).toBe(true);
-    expect(result.files).toContain('uapkg.json');
-    expect(result.files).toContain('file.txt');
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(fs.existsSync(result.value.archivePath)).toBe(true);
+    expect(result.value.integrityPath).toBeDefined();
+    expect(result.value.integrityPath ? fs.existsSync(result.value.integrityPath) : false).toBe(true);
+    expect(result.value.files).toContain('uapkg.json');
+    expect(result.value.files).toContain('file.txt');
   });
 
   it('supports dry-run without writing archive', async () => {
@@ -31,7 +33,9 @@ describe('PackService', () => {
     const outFile = 'custom.tgz';
     const result = await new PackService().pack({ cwd: root, dryRun: true, outFile });
 
-    expect(result.dryRun).toBe(true);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.dryRun).toBe(true);
     expect(fs.existsSync(path.join(root, outFile))).toBe(false);
   });
 });

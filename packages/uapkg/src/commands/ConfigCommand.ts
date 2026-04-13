@@ -21,7 +21,11 @@ export class ConfigCommand implements Command {
   constructor(private readonly options: ConfigCommandOptions) {}
 
   async execute() {
-    this.validateFlags();
+    const flagError = this.validateFlags();
+    if (flagError) {
+      Log.error(flagError);
+      return 1;
+    }
 
     const config = createConfig({ cwd: this.options.cwd });
     const action = this.options.action;
@@ -43,7 +47,8 @@ export class ConfigCommand implements Command {
         return this.executeEdit(config);
       }
       default: {
-        throw new Error(`[uapkg] Unsupported config action: ${action satisfies never}`);
+        Log.error(`Unsupported config action: ${action satisfies never}`);
+        return 1;
       }
     }
   }
@@ -51,7 +56,8 @@ export class ConfigCommand implements Command {
   private executeGet(config: ReturnType<typeof createConfig>) {
     const pathToProperty = this.options.pathToProperty;
     if (!pathToProperty) {
-      throw new Error('[uapkg] config get requires path_to_property');
+      Log.error('config get requires path_to_property');
+      return 1;
     }
 
     if (this.options.trace) {
@@ -86,6 +92,10 @@ export class ConfigCommand implements Command {
       }
 
       const result = config.getWithOrigin(pathToProperty);
+      if (!result) {
+        this.print({ value: null, source: 'default' });
+        return 0;
+      }
       this.print({
         ...result,
         file: result.file ? config.toDisplayPath(result.file) : undefined,
@@ -127,14 +137,23 @@ export class ConfigCommand implements Command {
     const rawValue = this.options.rawValue;
 
     if (!pathToProperty || rawValue === undefined) {
-      throw new Error('[uapkg] config set requires path_to_property and value');
+      Log.error('config set requires path_to_property and value');
+      return 1;
     }
 
     const value = this.parseJsonValue(rawValue);
-    const plan = config.set(pathToProperty, value, this.options.scope ? { scope: this.options.scope } : {});
+    if (value === undefined) return 1;
 
-    fs.mkdirSync(path.dirname(plan.file), { recursive: true });
-    fs.writeFileSync(plan.file, `${JSON.stringify(plan.values, null, 2)}\n`, 'utf8');
+    const plan = config.set(pathToProperty, value, this.options.scope ? { scope: this.options.scope } : {});
+    if (!plan.ok) {
+      for (const d of plan.diagnostics) {
+        Log.error(`[${d.code}] ${d.message}`);
+      }
+      return 1;
+    }
+
+    fs.mkdirSync(path.dirname(plan.value.file), { recursive: true });
+    fs.writeFileSync(plan.value.file, `${JSON.stringify(plan.value.values, null, 2)}\n`, 'utf8');
     config.reload({ cwd: this.options.cwd });
 
     return 0;
@@ -143,13 +162,20 @@ export class ConfigCommand implements Command {
   private executeDelete(config: ReturnType<typeof createConfig>) {
     const pathToProperty = this.options.pathToProperty;
     if (!pathToProperty) {
-      throw new Error('[uapkg] config delete requires path_to_property');
+      Log.error('config delete requires path_to_property');
+      return 1;
     }
 
     const plan = config.delete(pathToProperty, this.options.scope ? { scope: this.options.scope } : {});
+    if (!plan.ok) {
+      for (const d of plan.diagnostics) {
+        Log.error(`[${d.code}] ${d.message}`);
+      }
+      return 1;
+    }
 
-    fs.mkdirSync(path.dirname(plan.file), { recursive: true });
-    fs.writeFileSync(plan.file, `${JSON.stringify(plan.values, null, 2)}\n`, 'utf8');
+    fs.mkdirSync(path.dirname(plan.value.file), { recursive: true });
+    fs.writeFileSync(plan.value.file, `${JSON.stringify(plan.value.values, null, 2)}\n`, 'utf8');
     config.reload({ cwd: this.options.cwd });
 
     return 0;
@@ -173,33 +199,38 @@ export class ConfigCommand implements Command {
     });
 
     if (result.error) {
-      throw new Error(`[uapkg] Failed to open editor '${editor}': ${result.error.message}`);
+      Log.error(`Failed to open editor '${editor}': ${result.error.message}`);
+      return 1;
     }
 
     if ((result.status ?? 0) !== 0) {
-      throw new Error(`[uapkg] Editor exited with status ${result.status}`);
+      Log.error(`Editor exited with status ${result.status}`);
+      return 1;
     }
 
     return 0;
   }
 
-  private validateFlags() {
+  private validateFlags(): string | null {
     if (this.options.showOrigin && this.options.trace) {
-      throw new Error('[uapkg] --show-origin and --trace cannot be used together');
+      return '--show-origin and --trace cannot be used together';
     }
+    return null;
   }
 
-  private parseJsonValue(rawValue: string) {
+  private parseJsonValue(rawValue: string): unknown | undefined {
     let value: unknown;
 
     try {
       value = JSON.parse(rawValue);
     } catch {
-      throw new Error('[uapkg] config set value must be valid JSON');
+      Log.error('config set value must be valid JSON');
+      return undefined;
     }
 
     if (value === null) {
-      throw new Error('[uapkg] null is not a valid config value');
+      Log.error('null is not a valid config value');
+      return undefined;
     }
 
     return value;

@@ -1,5 +1,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import {
+  createLfsSkippedDiagnostic,
+  createNoFilesSelectedDiagnostic,
+  createOutFileIsDirectoryDiagnostic,
+  createUnresolvedLfsDiagnostic,
+  DiagnosticBag,
+  ok,
+  type Result,
+} from '@uapkg/diagnostics';
 import Log, { createLogger } from '@uapkg/log';
 import semver from 'semver';
 import type { PackOptions, PackResult } from '../contracts/PackTypes.js';
@@ -26,15 +35,40 @@ export class PackService {
     private readonly integrityWriter = new IntegrityWriter(),
   ) {}
 
-  async pack(options: PackOptions = {}): Promise<PackResult> {
+  async pack(options: PackOptions = {}): Promise<Result<PackResult>> {
+    const bag = new DiagnosticBag();
     const cwd = options.cwd ?? process.cwd();
-    const roots = this.rootResolver.resolve(cwd);
-    const manifest = this.manifestReader.read(roots.pluginRoot);
+
+    const rootsResult = this.rootResolver.resolve(cwd);
+    if (!rootsResult.ok) {
+      bag.mergeArray(rootsResult.diagnostics);
+      return bag.toFailure();
+    }
+    const roots = rootsResult.value;
+
+    const manifestResult = this.manifestReader.read(roots.pluginRoot);
+    if (!manifestResult.ok) {
+      bag.mergeArray(manifestResult.diagnostics);
+      return bag.toFailure();
+    }
+    const manifest = manifestResult.value;
 
     const rootPrefix = `${manifest.name}-${semver.clean(manifest.version)}`;
-    const archivePath = this.resolveArchivePath(roots.cwd, options.outFile);
 
-    const allFiles = this.fileCrawler.collect(roots.pluginRoot);
+    const archivePathResult = this.resolveArchivePath(roots.cwd, options.outFile);
+    if (!archivePathResult.ok) {
+      bag.mergeArray(archivePathResult.diagnostics);
+      return bag.toFailure();
+    }
+    const archivePath = archivePathResult.value;
+
+    const crawlResult = this.fileCrawler.collect(roots.pluginRoot);
+    if (!crawlResult.ok) {
+      bag.mergeArray(crawlResult.diagnostics);
+      return bag.toFailure();
+    }
+
+    const allFiles = crawlResult.value;
     const rules = this.ruleLoader.load(roots.gitRoot, roots.pluginRoot);
 
     const filtered = allFiles.filter((file) => {
@@ -47,7 +81,6 @@ export class PackService {
       return this.isEnforcedInclude(file.relativePath);
     });
 
-    const warnings: string[] = [];
     const included: string[] = [];
     let skippedLfs = false;
 
@@ -59,16 +92,14 @@ export class PackService {
 
       if (this.lfsPointerDetector.isPointerFile(file.absolutePath)) {
         if (options.allowMissingLfs === true) {
-          const warning = `[LFS] Skipping unresolved LFS file: ${file.relativePath}`;
-          warnings.push(warning);
-          this.logger.warn(warning);
+          bag.add(createLfsSkippedDiagnostic(file.relativePath));
+          this.logger.warn(`[LFS] Skipping unresolved LFS file: ${file.relativePath}`);
           skippedLfs = true;
           continue;
         }
 
-        throw new Error(
-          `[uapkg] Unresolved LFS pointer file: ${file.relativePath}. Run 'git lfs pull' or use --allow-missing-lfs.`,
-        );
+        bag.add(createUnresolvedLfsDiagnostic(file.relativePath));
+        return bag.toFailure();
       }
 
       included.push(file.relativePath);
@@ -80,7 +111,8 @@ export class PackService {
 
     const withoutManifest = included.filter((file) => file !== 'uapkg.json');
     if (withoutManifest.length === 0) {
-      throw new Error('[uapkg] No files selected for packing after ignore/LFS resolution');
+      bag.add(createNoFilesSelectedDiagnostic());
+      return bag.toFailure();
     }
 
     const uniqueIncluded = [...new Set(included)].filter((file) => file !== 'uapkg.lock');
@@ -89,9 +121,7 @@ export class PackService {
     );
 
     if (skippedLfs) {
-      const lfsWarning = "[LFS] The package may be incomplete. Run 'git lfs pull' or exclude via '.uapkgignore'.";
-      warnings.push(lfsWarning);
-      this.logger.warn(lfsWarning);
+      this.logger.warn("[LFS] The package may be incomplete. Run 'git lfs pull' or exclude via '.uapkgignore'.");
     }
 
     if (options.dryRun === true) {
@@ -99,13 +129,16 @@ export class PackService {
         this.logger.info(`${rootPrefix}/${relativePath}`);
       }
 
-      return {
+      return ok({
         pluginRoot: roots.pluginRoot,
         archivePath,
         files: sortedFiles,
-        warnings,
+        warnings: bag
+          .all()
+          .filter((d) => d.level === 'warning')
+          .map((d) => d.message),
         dryRun: true,
-      };
+      });
     }
 
     fs.mkdirSync(path.dirname(archivePath), { recursive: true });
@@ -119,24 +152,27 @@ export class PackService {
     const integrityPath = this.integrityWriter.write(archivePath);
     Log.info(`[uapkg] Packed ${sortedFiles.length} files into ${archivePath}`);
 
-    return {
+    return ok({
       pluginRoot: roots.pluginRoot,
       archivePath,
       integrityPath,
       files: sortedFiles,
-      warnings,
+      warnings: bag
+        .all()
+        .filter((d) => d.level === 'warning')
+        .map((d) => d.message),
       dryRun: false,
-    };
+    });
   }
 
-  private resolveArchivePath(cwd: string, outFile?: string) {
+  private resolveArchivePath(cwd: string, outFile?: string): Result<string> {
     const resolved = outFile ? path.resolve(cwd, outFile) : path.resolve(cwd, 'package.tgz');
 
     if (fs.existsSync(resolved) && fs.statSync(resolved).isDirectory()) {
-      throw new Error('[uapkg] --outFile must be a file path, not a directory');
+      return { ok: false, diagnostics: [createOutFileIsDirectoryDiagnostic(resolved)] };
     }
 
-    return resolved;
+    return ok(resolved);
   }
 
   private isEnforcedInclude(relativePath: string): boolean {

@@ -1,4 +1,12 @@
 import path from 'node:path';
+import {
+  createParseErrorDiagnostic,
+  createSchemaInvalidDiagnostic,
+  DiagnosticBag,
+  fail,
+  ok,
+  type Result,
+} from '@uapkg/diagnostics';
 import type { ConfigGetOptions, ConfigListOptions, ConfigScope, ConfigWriteOptions } from '../contracts/ConfigTypes.js';
 import { ConfigFileRepository } from '../files/ConfigFileRepository.js';
 import { ConfigPathResolver } from '../files/ConfigPathResolver.js';
@@ -11,67 +19,102 @@ export class ConfigWriter {
     private readonly repository = new ConfigFileRepository(),
   ) {}
 
-  getRaw(cwd: string, options: ConfigGetOptions = {}) {
+  getRaw(cwd: string, options: ConfigGetOptions = {}): Result<Record<string, unknown> | null> {
     if (options.scope === 'global') {
       const globalPath = this.pathResolver.resolve(cwd).globalFile;
-      return this.repository.read(globalPath).values;
+      const readResult = this.repository.read(globalPath);
+      if (!readResult.ok) return readResult as Result<never>;
+      return ok(readResult.value.values);
     }
 
     if (options.scope === 'local') {
       const localPath = this.pathResolver.findNearestLocalConfig(cwd);
       if (!localPath) {
-        return null;
+        return ok(null);
       }
 
-      return this.repository.read(localPath).values;
+      const readResult = this.repository.read(localPath);
+      if (!readResult.ok) return readResult as Result<never>;
+      return ok(readResult.value.values);
     }
 
-    throw new Error('[uapkg] Scope is required for getRaw');
+    return fail([createParseErrorDiagnostic('Scope is required for getRaw')]);
   }
 
-  listRaw(cwd: string, options: ConfigListOptions = {}) {
+  listRaw(cwd: string, options: ConfigListOptions = {}): Result<Record<string, unknown> | null> {
     return this.getRaw(cwd, { scope: options.scope });
   }
 
-  prepareSet(cwd: string, pathToProperty: string, value: unknown, options: ConfigWriteOptions = {}) {
-    validateConfigPath(pathToProperty);
+  prepareSet(
+    cwd: string,
+    pathToProperty: string,
+    value: unknown,
+    options: ConfigWriteOptions = {},
+  ): Result<{ file: string; values: Record<string, unknown> }> {
+    const bag = new DiagnosticBag();
+
+    const pathResult = validateConfigPath(pathToProperty);
+    if (!pathResult.ok) {
+      bag.mergeArray(pathResult.diagnostics);
+      return bag.toFailure();
+    }
+
     if (value === null) {
-      throw new Error('[uapkg] null is not a valid config value');
+      bag.addError('PARSE_ERROR', 'null is not a valid config value', { reason: 'null is not a valid config value' });
+      return bag.toFailure();
     }
 
     const targetFile = this.resolveWriteTarget(cwd, options.scope);
-    const existing = this.repository.read(targetFile).values;
-    const cloned = structuredClone(existing);
+    const readResult = this.repository.read(targetFile);
+    if (!readResult.ok) {
+      bag.mergeArray(readResult.diagnostics);
+      return bag.toFailure();
+    }
 
+    const cloned = structuredClone(readResult.value.values);
     setValueByPath(cloned, pathToProperty, value);
 
     const validation = partialConfigSchema.safeParse(cloned);
     if (!validation.success) {
-      throw new Error(
-        `[uapkg] Invalid config value for ${pathToProperty}: ${validation.error.issues[0]?.message ?? 'unknown error'}`,
-      );
+      const issues = validation.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
+      bag.add(createSchemaInvalidDiagnostic(targetFile, issues));
+      return bag.toFailure();
     }
 
-    return { file: targetFile, values: cloned };
+    return ok({ file: targetFile, values: cloned });
   }
 
-  prepareDelete(cwd: string, pathToProperty: string, options: ConfigWriteOptions = {}) {
-    validateConfigPath(pathToProperty);
+  prepareDelete(
+    cwd: string,
+    pathToProperty: string,
+    options: ConfigWriteOptions = {},
+  ): Result<{ file: string; values: Record<string, unknown> }> {
+    const bag = new DiagnosticBag();
+
+    const pathResult = validateConfigPath(pathToProperty);
+    if (!pathResult.ok) {
+      bag.mergeArray(pathResult.diagnostics);
+      return bag.toFailure();
+    }
 
     const targetFile = this.resolveWriteTarget(cwd, options.scope);
-    const existing = this.repository.read(targetFile).values;
-    const cloned = structuredClone(existing);
+    const readResult = this.repository.read(targetFile);
+    if (!readResult.ok) {
+      bag.mergeArray(readResult.diagnostics);
+      return bag.toFailure();
+    }
 
+    const cloned = structuredClone(readResult.value.values);
     deleteValueByPath(cloned, pathToProperty);
 
     const validation = partialConfigSchema.safeParse(cloned);
     if (!validation.success) {
-      throw new Error(
-        `[uapkg] Invalid config after deleting ${pathToProperty}: ${validation.error.issues[0]?.message ?? 'unknown error'}`,
-      );
+      const issues = validation.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
+      bag.add(createSchemaInvalidDiagnostic(targetFile, issues));
+      return bag.toFailure();
     }
 
-    return { file: targetFile, values: cloned };
+    return ok({ file: targetFile, values: cloned });
   }
 
   getEditTarget(cwd: string, scope?: ConfigScope): string {

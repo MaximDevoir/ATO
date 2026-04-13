@@ -1,13 +1,24 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import {
+  createCyclicSymlinkDiagnostic,
+  createInvalidPathDiagnostic,
+  createSymlinkOutsideRootDiagnostic,
+  DiagnosticBag,
+  fail,
+  ok,
+  type Result,
+} from '@uapkg/diagnostics';
 import type { CollectedFile } from '../contracts/PackTypes.js';
 
 export class FileCrawler {
-  collect(pluginRoot: string) {
+  collect(pluginRoot: string): Result<CollectedFile[]> {
     const files: CollectedFile[] = [];
     const pluginRootReal = fs.realpathSync(pluginRoot);
-    this.walk(pluginRoot, pluginRootReal, pluginRoot, files, new Set());
-    return files;
+    const bag = new DiagnosticBag();
+    this.walk(pluginRoot, pluginRootReal, pluginRoot, files, new Set(), bag);
+    if (bag.hasErrors()) return bag.toFailure();
+    return ok(files);
   }
 
   private walk(
@@ -16,24 +27,29 @@ export class FileCrawler {
     pluginRoot: string,
     files: CollectedFile[],
     resolutionStack: Set<string>,
+    bag: DiagnosticBag,
   ) {
     const stat = fs.lstatSync(absolutePath);
 
     if (stat.isSymbolicLink()) {
       const targetReal = fs.realpathSync(absolutePath);
-      this.assertPathInRoot(targetReal, pluginRootReal, absolutePath);
+      if (!this.isPathInRoot(targetReal, pluginRootReal)) {
+        bag.add(createSymlinkOutsideRootDiagnostic(absolutePath));
+        return;
+      }
 
       if (resolutionStack.has(targetReal)) {
-        throw new Error(`[uapkg] Cyclic symlink detected at ${absolutePath}`);
+        bag.add(createCyclicSymlinkDiagnostic(absolutePath));
+        return;
       }
 
       const nextStack = new Set(resolutionStack);
       nextStack.add(targetReal);
-      this.walkResolved(absolutePath, targetReal, pluginRootReal, pluginRoot, files, nextStack);
+      this.walkResolved(absolutePath, targetReal, pluginRootReal, pluginRoot, files, nextStack, bag);
       return;
     }
 
-    this.walkResolved(absolutePath, absolutePath, pluginRootReal, pluginRoot, files, resolutionStack);
+    this.walkResolved(absolutePath, absolutePath, pluginRootReal, pluginRoot, files, resolutionStack, bag);
   }
 
   private walkResolved(
@@ -43,6 +59,7 @@ export class FileCrawler {
     pluginRoot: string,
     files: CollectedFile[],
     resolutionStack: Set<string>,
+    bag: DiagnosticBag,
   ) {
     const stat = fs.statSync(resolvedPath);
 
@@ -50,7 +67,7 @@ export class FileCrawler {
       const entries = fs.readdirSync(resolvedPath).sort();
       for (const entry of entries) {
         const childVisible = path.join(visiblePath, entry);
-        this.walk(childVisible, pluginRootReal, pluginRoot, files, resolutionStack);
+        this.walk(childVisible, pluginRootReal, pluginRoot, files, resolutionStack, bag);
       }
       return;
     }
@@ -59,7 +76,7 @@ export class FileCrawler {
       return;
     }
 
-    const relativePath = this.normalizeRelative(pluginRoot, visiblePath);
+    const relativePath = this.normalizeRelative(pluginRoot, visiblePath, bag);
     if (!relativePath) {
       return;
     }
@@ -70,7 +87,7 @@ export class FileCrawler {
     });
   }
 
-  private normalizeRelative(root: string, filePath: string) {
+  private normalizeRelative(root: string, filePath: string, bag: DiagnosticBag) {
     const relative = path.relative(root, filePath);
     if (!relative || relative.startsWith('..')) {
       return null;
@@ -78,16 +95,15 @@ export class FileCrawler {
 
     const normalized = relative.split(path.sep).join('/');
     if (normalized.includes('/./') || normalized.includes('../') || normalized.startsWith('./')) {
-      throw new Error(`[uapkg] Invalid normalized path: ${normalized}`);
+      bag.add(createInvalidPathDiagnostic(normalized));
+      return null;
     }
 
     return normalized;
   }
 
-  private assertPathInRoot(targetReal: string, pluginRootReal: string, visiblePath: string) {
+  private isPathInRoot(targetReal: string, pluginRootReal: string): boolean {
     const relative = path.relative(pluginRootReal, targetReal);
-    if (relative.startsWith('..') || path.isAbsolute(relative)) {
-      throw new Error(`[uapkg] Symlink resolves outside plugin root: ${visiblePath}`);
-    }
+    return !relative.startsWith('..') && !path.isAbsolute(relative);
   }
 }
