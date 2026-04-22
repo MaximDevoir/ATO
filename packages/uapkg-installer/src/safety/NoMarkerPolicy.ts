@@ -57,4 +57,3 @@ export class NoMarkerPolicy implements SafetyPolicy {
     }
   }
 }
-

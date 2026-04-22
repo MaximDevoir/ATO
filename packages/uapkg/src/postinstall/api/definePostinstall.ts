@@ -18,4 +18,3 @@ import type { PostinstallDefinition } from './PostinstallDsl.js';
 export function definePostinstall(definition: PostinstallDefinition): PostinstallDefinition {
   return definition;
 }
-

@@ -76,4 +76,3 @@ export class SemverSelectionPolicy {
     return pre !== null && pre.length > 0;
   }
 }
-

@@ -19,4 +19,3 @@ export interface ParsedCSharpFile {
   readonly constructorInfo: ParsedConstructor;
   readonly source: string;
 }
-

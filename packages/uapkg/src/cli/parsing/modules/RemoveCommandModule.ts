@@ -24,5 +24,3 @@ export class RemoveCommandModule implements UAPKGCommandModule {
     );
   }
 }
-
-

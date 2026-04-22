@@ -23,4 +23,3 @@ export const PackageSpecSchema = z
   .strict();
 
 export type PackageSpec = z.infer<typeof PackageSpecSchema>;
-

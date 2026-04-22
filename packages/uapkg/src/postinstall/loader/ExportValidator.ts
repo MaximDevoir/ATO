@@ -1,9 +1,4 @@
-import {
-  type Result,
-  ok,
-  fail,
-  createPostinstallInvalidExportDiagnostic,
-} from '@uapkg/diagnostics';
+import { createPostinstallInvalidExportDiagnostic, fail, ok, type Result } from '@uapkg/diagnostics';
 import { type PostinstallDefinition, PostinstallDefinitionSchema } from '../api/PostinstallDsl.js';
 
 /**
@@ -37,4 +32,3 @@ export class ExportValidator {
     return moduleValue;
   }
 }
-

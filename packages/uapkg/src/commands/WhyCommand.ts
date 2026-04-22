@@ -53,4 +53,3 @@ export class WhyCommand implements Command {
     return 0;
   }
 }
-

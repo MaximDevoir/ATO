@@ -128,10 +128,24 @@ export class CSharpStructureAnalyzer {
         if (current === '"' && prev !== '\\') inDoubleQuote = false;
         continue;
       }
-      if (current === '/' && next === '/') { inSingleLineComment = true; i += 1; continue; }
-      if (current === '/' && next === '*') { inMultiLineComment = true; i += 1; continue; }
-      if (current === "'") { inSingleQuote = true; continue; }
-      if (current === '"') { inDoubleQuote = true; continue; }
+      if (current === '/' && next === '/') {
+        inSingleLineComment = true;
+        i += 1;
+        continue;
+      }
+      if (current === '/' && next === '*') {
+        inMultiLineComment = true;
+        i += 1;
+        continue;
+      }
+      if (current === "'") {
+        inSingleQuote = true;
+        continue;
+      }
+      if (current === '"') {
+        inDoubleQuote = true;
+        continue;
+      }
       if (current === '{') depth += 1;
       else if (current === '}') {
         depth -= 1;
@@ -141,4 +155,3 @@ export class CSharpStructureAnalyzer {
     throw new Error('Unbalanced braces in C# file');
   }
 }
-

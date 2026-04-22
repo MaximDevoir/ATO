@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
 import type { Diagnostic } from '@uapkg/diagnostics';
+import { describe, expect, it } from 'vitest';
 import { DiagnosticReporter } from '../../src/reporting/DiagnosticReporter.js';
 import { MemoryTextSink } from '../_fakes/MemoryTextSink.js';
 
@@ -38,4 +38,3 @@ describe('DiagnosticReporter', () => {
     expect(stderr.lines[0]).toContain('bang');
   });
 });
-

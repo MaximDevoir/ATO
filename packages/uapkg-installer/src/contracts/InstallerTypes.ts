@@ -57,4 +57,3 @@ export interface InstallerOptions {
   /** If true, the plan is produced but no IO is performed. */
   readonly dryRun?: boolean;
 }
-

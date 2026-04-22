@@ -12,7 +12,7 @@ import { LockfileSync } from '../resolver/LockfileSync.js';
 import { Resolver } from '../resolver/Resolver.js';
 import { type AddDependencyOptions, DependencyMutator } from './DependencyMutator.js';
 import { type LockfileDiff, LockfileDiffer } from './LockfileDiffer.js';
-import { type OutdatedEntry, OutdatedChecker } from './OutdatedChecker.js';
+import { OutdatedChecker, type OutdatedEntry } from './OutdatedChecker.js';
 import { WhyGraph, type WhyResult } from './WhyGraph.js';
 
 export interface PackageManifestOptions {

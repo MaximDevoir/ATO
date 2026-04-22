@@ -14,4 +14,3 @@ export interface PromptService {
   select(message: string, options: SelectOption[], fallbackValue: string): Promise<string>;
   text(message: string, initialValue: string): Promise<string>;
 }
-

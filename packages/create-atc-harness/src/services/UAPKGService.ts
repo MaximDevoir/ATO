@@ -27,9 +27,7 @@ export class UAPKGService implements UAPKGServiceLike {
     const existing = await this.manifestReader.read(projectDirectory);
     if (existing.ok) {
       if (existing.value.kind === 'project') return;
-      throw new Error(
-        `[create-atc-harness] Expected harness manifest kind 'project', found '${existing.value.kind}'`,
-      );
+      throw new Error(`[create-atc-harness] Expected harness manifest kind 'project', found '${existing.value.kind}'`);
     }
 
     const projectName = this.resolveProjectName(projectDirectory);

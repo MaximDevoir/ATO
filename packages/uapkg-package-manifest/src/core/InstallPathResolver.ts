@@ -1,5 +1,5 @@
 import type { InstallPath, PackageName } from '@uapkg/common-schema';
-import { createSafetyPathNotProjectManifestDiagnostic, DiagnosticBag } from '@uapkg/diagnostics';
+import { createSafetyPathNotProjectManifestDiagnostic, type DiagnosticBag } from '@uapkg/diagnostics';
 import type { Dependency, Manifest } from '@uapkg/package-manifest-schema';
 
 /**
@@ -48,4 +48,3 @@ export class InstallPathResolver {
     return `Plugins/${depName}` as InstallPath;
   }
 }
-

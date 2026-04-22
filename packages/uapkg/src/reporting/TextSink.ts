@@ -31,8 +31,5 @@ export const DIAGNOSTIC_LEVEL_ORDER: Readonly<Record<Diagnostic['level'], number
 };
 
 export function sortDiagnostics(diagnostics: readonly Diagnostic[]): Diagnostic[] {
-  return [...diagnostics].sort(
-    (a, b) => DIAGNOSTIC_LEVEL_ORDER[a.level] - DIAGNOSTIC_LEVEL_ORDER[b.level],
-  );
+  return [...diagnostics].sort((a, b) => DIAGNOSTIC_LEVEL_ORDER[a.level] - DIAGNOSTIC_LEVEL_ORDER[b.level]);
 }
-

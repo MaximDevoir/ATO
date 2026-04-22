@@ -12,4 +12,3 @@ export function getPluginHash(pluginName: string): string {
 export function getWrapperClassName(pluginName: string): string {
   return `UAPKG_${getPluginHash(pluginName)}`;
 }
-

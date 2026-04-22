@@ -59,4 +59,3 @@ export class StatusStream implements AsyncIterable<DownloadStatusSnapshot> {
     };
   }
 }
-

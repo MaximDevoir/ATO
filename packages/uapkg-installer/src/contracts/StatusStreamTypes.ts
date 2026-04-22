@@ -6,14 +6,7 @@ import type { PackageName, PackageVersion } from '@uapkg/common-schema';
  * One status row per slot; slot ids are stable across frames so Ink can
  * render a fixed-height region without re-flowing.
  */
-export type SlotState =
-  | 'idle'
-  | 'downloading'
-  | 'verifying'
-  | 'extracting'
-  | 'removing'
-  | 'done'
-  | 'failed';
+export type SlotState = 'idle' | 'downloading' | 'verifying' | 'extracting' | 'removing' | 'done' | 'failed';
 
 /**
  * Per-slot status snapshot.
@@ -48,4 +41,3 @@ export interface DownloadStatusSnapshot {
   readonly slots: readonly SlotSnapshot[];
   readonly totals: InstallTotals;
 }
-

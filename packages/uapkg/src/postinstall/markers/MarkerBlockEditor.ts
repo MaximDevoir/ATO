@@ -1,9 +1,4 @@
-import {
-  type Result,
-  ok,
-  fail,
-  createPostinstallMarkerCorruptDiagnostic,
-} from '@uapkg/diagnostics';
+import { createPostinstallMarkerCorruptDiagnostic, fail, ok, type Result } from '@uapkg/diagnostics';
 import { MarkerBlockService } from './MarkerBlockService.js';
 import { MarkerIntegrityValidator } from './MarkerIntegrityValidator.js';
 
@@ -44,18 +39,9 @@ export class MarkerBlockEditor {
    * owning `(pluginName, zone)` pair. Returns `Result.ok` when clean; returns
    * `Result.fail` with a `POSTINSTALL_MARKER_CORRUPT` diagnostic otherwise.
    */
-  public validate(
-    source: string,
-    pluginName: string,
-    zone: string,
-    filePath: string,
-  ): Result<void> {
+  public validate(source: string, pluginName: string, zone: string, filePath: string): Result<void> {
     const result = this.integrity.validate(source, pluginName, zone);
     if (result.ok) return ok(undefined);
-    return fail([
-      createPostinstallMarkerCorruptDiagnostic(pluginName, filePath, result.reason),
-    ]);
+    return fail([createPostinstallMarkerCorruptDiagnostic(pluginName, filePath, result.reason)]);
   }
 }
-
-

@@ -15,18 +15,14 @@ import type { PromptService, SelectOption } from './PromptService.js';
 // ---------------------------------------------------------------------------
 
 export class InkPromptService implements PromptService {
-  public constructor(
-    private readonly isInteractive = Boolean(process.stdin.isTTY && process.stdout.isTTY) && !isCI,
-  ) {}
+  public constructor(private readonly isInteractive = Boolean(process.stdin.isTTY && process.stdout.isTTY) && !isCI) {}
 
   public async select(message: string, options: SelectOption[], fallbackValue: string): Promise<string> {
     if (!this.isInteractive) {
       return fallbackValue;
     }
     return await new Promise<string>((resolve) => {
-      const app = render(
-        <SelectPrompt message={message} options={options} onSubmit={(value) => resolve(value)} />,
-      );
+      const app = render(<SelectPrompt message={message} options={options} onSubmit={(value) => resolve(value)} />);
       Promise.resolve().then(() => app.waitUntilExit());
     });
   }
@@ -95,4 +91,3 @@ function TextPrompt({
     </Box>
   );
 }
-

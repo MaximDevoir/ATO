@@ -34,4 +34,3 @@ export function prettyBytesProgress(done: number, total: number): string {
   }
   return `${(safeDone / GB).toFixed(1)} GB/${(safeTotal / GB).toFixed(1)} GB`;
 }
-

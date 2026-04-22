@@ -13,9 +13,6 @@ import type { Brand } from '../brand/Brand.js';
  */
 export type PostInstallPolicy = Brand<'allow' | 'deny', 'PostInstallPolicy'>;
 
-export const PostInstallPolicySchema = z
-  .enum(['allow', 'deny'])
-  .transform((v) => v as PostInstallPolicy);
+export const PostInstallPolicySchema = z.enum(['allow', 'deny']).transform((v) => v as PostInstallPolicy);
 
 export const POSTINSTALL_POLICY_DEFAULT: PostInstallPolicy = 'deny' as PostInstallPolicy;
-

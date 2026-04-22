@@ -1,5 +1,5 @@
-import type { ParsedCSharpFile } from './CSharpStructures.js';
 import { MarkerBlockService } from '../markers/MarkerBlockService.js';
+import type { ParsedCSharpFile } from './CSharpStructures.js';
 
 /**
  * Applies marker-delimited edits to a parsed C# file at three well-known anchors:
@@ -27,12 +27,7 @@ export class CSharpInjectionEngine {
     return `${withoutOwnedBlock.slice(0, lastUsingIndex)}\n${includeBlock}\n${withoutOwnedBlock.slice(lastUsingIndex).trimStart()}`;
   }
 
-  public applyClassWrapper(
-    parsed: ParsedCSharpFile,
-    pluginName: string,
-    wrapperContent: string,
-    zone: string,
-  ): string {
+  public applyClassWrapper(parsed: ParsedCSharpFile, pluginName: string, wrapperContent: string, zone: string): string {
     const classStart = parsed.classInfo.classOpenBraceIndex + 1;
     const classEnd = parsed.classInfo.classCloseBraceIndex;
     const classBody = parsed.source.slice(classStart, classEnd);
@@ -76,4 +71,3 @@ export class CSharpInjectionEngine {
     return `${constructorIndent}    `;
   }
 }
-

@@ -43,4 +43,3 @@ export const PostinstallDefinitionSchema = z
 export type ZoneDefinition = z.infer<typeof ZoneSchema>;
 export type ProjectSetupDefinition = z.infer<typeof ProjectSetupSchema>;
 export type PostinstallDefinition = z.infer<typeof PostinstallDefinitionSchema>;
-

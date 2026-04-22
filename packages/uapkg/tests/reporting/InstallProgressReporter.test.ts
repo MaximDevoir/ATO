@@ -1,13 +1,9 @@
-import { describe, expect, it } from 'vitest';
 import type { DownloadStatusSnapshot } from '@uapkg/installer';
+import { describe, expect, it } from 'vitest';
 import { InstallProgressReporter } from '../../src/reporting/InstallProgressReporter.js';
 import { MemoryTextSink } from '../_fakes/MemoryTextSink.js';
 
-function snap(
-  bytesDone: number,
-  bytesTotal: number,
-  activeSlots = 1,
-): DownloadStatusSnapshot {
+function snap(bytesDone: number, bytesTotal: number, activeSlots = 1): DownloadStatusSnapshot {
   return {
     slots: Array.from({ length: activeSlots }, (_, i) => ({
       slotId: i,
@@ -61,4 +57,3 @@ describe('InstallProgressReporter', () => {
     expect(sink.lines[0]).toMatch(/1 added, 2 updated, 3 removed, 4 unchanged/);
   });
 });
-

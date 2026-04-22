@@ -23,4 +23,3 @@ export class PostInstallPolicyResolver {
     return { policy: config.install.postInstallPolicy, resolvedFrom: 'install' };
   }
 }
-

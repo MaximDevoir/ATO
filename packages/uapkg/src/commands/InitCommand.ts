@@ -40,8 +40,9 @@ export class InitCommand implements Command {
     }
 
     const detected = this.detector.detect(this.root.cwd);
-    const kind = this.options.explicitKind
-      ?? ((await this.prompts.select(
+    const kind =
+      this.options.explicitKind ??
+      ((await this.prompts.select(
         'Select manifest kind',
         [
           { label: 'Project', value: 'project' },
@@ -50,8 +51,7 @@ export class InitCommand implements Command {
         detected.suggestedKind,
       )) as ManifestKind);
 
-    const rawName = this.options.explicitName
-      ?? (await this.prompts.text('Package name', detected.suggestedName));
+    const rawName = this.options.explicitName ?? (await this.prompts.text('Package name', detected.suggestedName));
 
     const nameResult = PackageNameSchema.safeParse(rawName.trim());
     if (!nameResult.success) {

@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import { type Result, ok, fail, createIoErrorDiagnostic } from '@uapkg/diagnostics';
+import { createIoErrorDiagnostic, fail, ok, type Result } from '@uapkg/diagnostics';
 import type { ZoneDefinition } from '../api/PostinstallDsl.js';
 import { MarkerBlockEditor } from '../markers/MarkerBlockEditor.js';
 import { CSharpInjectionEngine } from './CSharpInjectionEngine.js';
@@ -40,12 +40,7 @@ export class TargetCsInjector {
       if (zones.classBody?.trim()) {
         const parsedForWrapper = this.analyzer.parseTarget(filePath, source);
         const wrapperClassName = getWrapperClassName(pluginName);
-        const wrapper = this.wrapperFactory.createWrapper(
-          wrapperClassName,
-          'TargetRules',
-          'target',
-          zones.classBody,
-        );
+        const wrapper = this.wrapperFactory.createWrapper(wrapperClassName, 'TargetRules', 'target', zones.classBody);
         source = this.injector.applyClassWrapper(parsedForWrapper, pluginName, wrapper, 'target-class-body');
 
         const parsedForCtor = this.analyzer.parseTarget(filePath, source);
@@ -59,11 +54,7 @@ export class TargetCsInjector {
       fs.writeFileSync(filePath, source, 'utf-8');
       return ok(undefined);
     } catch (error) {
-      return fail([
-        createIoErrorDiagnostic(filePath, error instanceof Error ? error.message : String(error)),
-      ]);
+      return fail([createIoErrorDiagnostic(filePath, error instanceof Error ? error.message : String(error))]);
     }
   }
 }
-
-

@@ -1,15 +1,15 @@
+import { unlink } from 'node:fs/promises';
 import type { ConfigInstance } from '@uapkg/config';
 import { DiagnosticBag, ok, type Result } from '@uapkg/diagnostics';
 import type { Lockfile } from '@uapkg/package-manifest-schema';
 import type { RegistryCore } from '@uapkg/registry-core';
 import pLimit from 'p-limit';
-import type { InstallAction, InstallPlan, InstallerOptions } from '../contracts/InstallerTypes.js';
+import type { InstallAction, InstallerOptions, InstallPlan } from '../contracts/InstallerTypes.js';
 import type { DownloadStatusSnapshot } from '../contracts/StatusStreamTypes.js';
 import { NoMarkerPolicy } from '../safety/NoMarkerPolicy.js';
 import { SafetyPolicyRegistry } from '../safety/SafetyPolicyRegistry.js';
 import { SlotTable } from '../status/SlotTable.js';
 import { StatusStream } from '../status/StatusStream.js';
-import { unlink } from 'node:fs/promises';
 import { DiskStateInspector } from './DiskStateInspector.js';
 import { InstallPlanner } from './InstallPlanner.js';
 import { IntegrityVerifier } from './IntegrityVerifier.js';
@@ -245,4 +245,3 @@ export class Installer {
     }
   }
 }
-

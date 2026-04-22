@@ -23,4 +23,3 @@ export const InstallPathSchema = z
   .refine((v) => !v.startsWith('/'), 'Install path must be relative (no leading slash)')
   .refine((v) => !FORBIDDEN_SEGMENT.test(v), 'Install path must not contain ".." segments')
   .transform((v) => v as InstallPath);
-

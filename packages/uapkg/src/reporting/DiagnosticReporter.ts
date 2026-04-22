@@ -42,4 +42,3 @@ export class DiagnosticReporter {
     (diagnostic.level === 'error' ? this.stderr : this.stdout).writeLine(line);
   }
 }
-

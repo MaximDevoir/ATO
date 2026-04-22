@@ -25,11 +25,7 @@ export class PackageExtractor {
   ): Promise<Result<void>> {
     const bag = new DiagnosticBag();
     const targetAbs = resolve(manifestRoot, installPath);
-    const tempDir = join(
-      tmpdir(),
-      'uapkg-installer',
-      `extract-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-    );
+    const tempDir = join(tmpdir(), 'uapkg-installer', `extract-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
     try {
       await mkdir(tempDir, { recursive: true });
@@ -56,4 +52,3 @@ export class PackageExtractor {
     }
   }
 }
-

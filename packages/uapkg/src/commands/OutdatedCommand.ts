@@ -49,4 +49,3 @@ export class OutdatedCommand implements Command {
     return outdated.length > 0 ? 2 : 0;
   }
 }
-

@@ -1,4 +1,4 @@
-import { type Result, ok, fail } from '@uapkg/diagnostics';
+import { fail, ok, type Result } from '@uapkg/diagnostics';
 import type { PostinstallDefinition } from '../api/PostinstallDsl.js';
 import { EntryResolver, type ResolvedEntry } from './EntryResolver.js';
 import { EsbuildTranspiler } from './EsbuildTranspiler.js';
@@ -62,4 +62,3 @@ export class PostinstallLoader {
     return ok({ kind: 'transpiled', code: transpiled.value, originalPath: entry.path });
   }
 }
-

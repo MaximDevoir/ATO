@@ -64,8 +64,9 @@ export class ListCommand implements Command {
       process.stdout.write(`  ${name}@${locked.version}  [${locked.registry}]\n`);
     }
     if (this.options.depth > 0) {
-      const remaining = Object.entries(lockfile.packages as Record<string, { version: string; registry: string }>)
-        .filter(([name]) => !declared.includes(name));
+      const remaining = Object.entries(
+        lockfile.packages as Record<string, { version: string; registry: string }>,
+      ).filter(([name]) => !declared.includes(name));
       if (remaining.length > 0) {
         process.stdout.write('  --- transitive ---\n');
         for (const [name, locked] of remaining) {
@@ -76,4 +77,3 @@ export class ListCommand implements Command {
     return 0;
   }
 }
-

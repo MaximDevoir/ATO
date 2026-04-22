@@ -23,12 +23,7 @@ export type WrapperContextType = 'ModuleRules' | 'TargetRules';
  *   * retype the `object` parameter back to the requested ModuleRules/TargetRules.
  */
 export class CSharpWrapperFactory {
-  public createWrapper(
-    className: string,
-    contextType: WrapperContextType,
-    contextName: string,
-    body: string,
-  ): string {
+  public createWrapper(className: string, contextType: WrapperContextType, contextName: string, body: string): string {
     const wrapperClass = new CSharpAst.Class({
       name: className,
       namespace: '',
@@ -70,4 +65,3 @@ export class CSharpWrapperFactory {
       .replace(/;\}/g, ';\n    }');
   }
 }
-

@@ -64,8 +64,7 @@ export class InstallCommand implements Command {
 
     let postDiagnostics: readonly Diagnostic[] = [];
     if (!this.options.dryRun && candidates.length > 0) {
-      const moduleNameOverride =
-        manifest.kind === 'project' ? manifest.postinstall?.modules : undefined;
+      const moduleNameOverride = manifest.kind === 'project' ? manifest.postinstall?.modules : undefined;
       const postResult = await this.root.postinstall.run({
         projectRoot: this.root.cwd,
         manifestType,
@@ -100,5 +99,3 @@ export class InstallCommand implements Command {
     return 1;
   }
 }
-
-

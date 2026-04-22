@@ -1,5 +1,5 @@
-import { createReadStream } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { createReadStream } from 'node:fs';
 import type { AssetHash } from '@uapkg/common-schema';
 import { createIntegrityMismatchDiagnostic, DiagnosticBag, ok, type Result } from '@uapkg/diagnostics';
 
@@ -22,11 +22,7 @@ export class IntegrityVerifier {
     const actual = await this.hashFile(filePath, parsed.algorithm);
     if (actual !== parsed.hex) {
       bag.add(
-        createIntegrityMismatchDiagnostic(
-          packageName,
-          expected as unknown as string,
-          `${parsed.algorithm}:${actual}`,
-        ),
+        createIntegrityMismatchDiagnostic(packageName, expected as unknown as string, `${parsed.algorithm}:${actual}`),
       );
       return bag.toFailure();
     }
@@ -50,4 +46,3 @@ export class IntegrityVerifier {
     });
   }
 }
-

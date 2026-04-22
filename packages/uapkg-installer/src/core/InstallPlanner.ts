@@ -35,7 +35,7 @@ export class InstallPlanner {
     for (const [rawName, locked] of Object.entries(current)) {
       const name = rawName as PackageName;
       const state = diskState.get(name);
-      const defaultPath = (`Plugins/${name}` as unknown) as InstallPath;
+      const defaultPath = `Plugins/${name}` as unknown as InstallPath;
       const path = state?.path ?? defaultPath;
 
       if (!state?.exists || !state.hasManifest || state.installedName !== name) {
@@ -97,7 +97,7 @@ export class InstallPlanner {
         actions.push({
           type: 'remove',
           packageName: name,
-          path: state?.path ?? ((`Plugins/${name}` as unknown) as InstallPath),
+          path: state?.path ?? (`Plugins/${name}` as unknown as InstallPath),
           currentVersion: previous[rawName].version,
         });
       }
@@ -164,4 +164,3 @@ interface RegistryVersionShape {
     readonly package: { readonly url: string; readonly integrity: { readonly size: number } };
   };
 }
-

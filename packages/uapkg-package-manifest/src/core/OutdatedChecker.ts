@@ -99,4 +99,3 @@ export class OutdatedChecker {
     return 'up-to-date';
   }
 }
-

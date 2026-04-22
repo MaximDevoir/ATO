@@ -62,4 +62,3 @@ export class UnrealSourceCatalogBuilder {
     return files;
   }
 }
-

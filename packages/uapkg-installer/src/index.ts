@@ -6,9 +6,9 @@
 export type {
   InstallAction,
   InstallActionType,
+  InstallerOptions,
   InstallPlan,
   InstallSummary,
-  InstallerOptions,
 } from './contracts/InstallerTypes.js';
 export type {
   BuiltInSafetyPolicyId,
@@ -28,15 +28,19 @@ export { type DiskStateEntry, DiskStateInspector } from './core/DiskStateInspect
 export { Installer, type InstallerConstructorOptions } from './core/Installer.js';
 export { InstallPlanner } from './core/InstallPlanner.js';
 export { IntegrityVerifier } from './core/IntegrityVerifier.js';
-export { type DownloadProgress, type DownloadOptions, type DownloadResult, PackageDownloader } from './core/PackageDownloader.js';
+export {
+  type DownloadOptions,
+  type DownloadProgress,
+  type DownloadResult,
+  PackageDownloader,
+} from './core/PackageDownloader.js';
 export { PackageExtractor } from './core/PackageExtractor.js';
 export { PackageRemover } from './core/PackageRemover.js';
 
 // Safety
 export { NoMarkerPolicy } from './safety/NoMarkerPolicy.js';
-export { type SafetyVerdict, SafetyPolicyRegistry } from './safety/SafetyPolicyRegistry.js';
+export { SafetyPolicyRegistry, type SafetyVerdict } from './safety/SafetyPolicyRegistry.js';
 
 // Status
 export { SlotTable } from './status/SlotTable.js';
 export { StatusStream } from './status/StatusStream.js';
-

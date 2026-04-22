@@ -99,4 +99,3 @@ export function formatPackageSpec(spec: PackageSpec): string {
   const range = spec.range ? `@${spec.range}` : '';
   return `${scope}${spec.name}${range}`;
 }
-

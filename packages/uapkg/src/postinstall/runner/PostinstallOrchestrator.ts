@@ -1,7 +1,7 @@
 import type { Diagnostic, Result } from '@uapkg/diagnostics';
-import { DiagnosticBag, createIoErrorDiagnostic, createUnknownErrorDiagnostic } from '@uapkg/diagnostics';
+import { createIoErrorDiagnostic, createUnknownErrorDiagnostic, DiagnosticBag } from '@uapkg/diagnostics';
 import type { PostinstallDefinition } from '../api/PostinstallDsl.js';
-import { PostinstallLoader, type LoadedPostinstall } from '../loader/PostinstallLoader.js';
+import { type LoadedPostinstall, PostinstallLoader } from '../loader/PostinstallLoader.js';
 import { PostinstallPolicyGate } from '../policy/PostinstallPolicyGate.js';
 import { BuildCsInjector } from '../unreal/BuildCsInjector.js';
 import { ProjectFileLocator } from '../unreal/ProjectFileLocator.js';
@@ -141,9 +141,7 @@ export class PostinstallOrchestrator {
         } catch (error) {
           return {
             ok: false,
-            diagnostics: [
-              createIoErrorDiagnostic(projectRoot, error instanceof Error ? error.message : String(error)),
-            ],
+            diagnostics: [createIoErrorDiagnostic(projectRoot, error instanceof Error ? error.message : String(error))],
           };
         }
       }
@@ -182,14 +180,18 @@ export class PostinstallOrchestrator {
           continue;
         }
         const result = this.buildInjector.apply(moduleFile, loaded.packageName, def.setupModules);
-        this.absorb(result, bag, () => { anyFailed = true; });
+        this.absorb(result, bag, () => {
+          anyFailed = true;
+        });
       }
     }
 
     if (def.setupTargets) {
       for (const targetFile of catalog.targetFiles) {
         const result = this.targetInjector.apply(targetFile, loaded.packageName, def.setupTargets);
-        this.absorb(result, bag, () => { anyFailed = true; });
+        this.absorb(result, bag, () => {
+          anyFailed = true;
+        });
       }
     }
 
@@ -198,7 +200,9 @@ export class PostinstallOrchestrator {
       try {
         const uprojectPath = this.projectFileLocator.findProjectFile(projectRoot);
         const result = this.projectInjector.apply(uprojectPath, projectPlugins);
-        this.absorb(result, bag, () => { anyFailed = true; });
+        this.absorb(result, bag, () => {
+          anyFailed = true;
+        });
       } catch (error) {
         bag.add(createIoErrorDiagnostic(projectRoot, error instanceof Error ? error.message : String(error)));
         anyFailed = true;
@@ -213,7 +217,3 @@ export class PostinstallOrchestrator {
     if (!result.ok) onFail();
   }
 }
-
-
-
-

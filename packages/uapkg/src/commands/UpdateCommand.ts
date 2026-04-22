@@ -36,4 +36,3 @@ export class UpdateCommand implements Command {
     return install.execute();
   }
 }
-

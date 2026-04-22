@@ -69,4 +69,3 @@ export function createInvalidVersionRangeDiagnostic(input: string, range: string
     data: { input, range },
   };
 }
-

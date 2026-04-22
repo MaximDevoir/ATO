@@ -20,4 +20,3 @@ export class MemoryTextSink implements TextSink {
     return this.lines.join('\n');
   }
 }
-

@@ -102,4 +102,3 @@ export class DependencyMutator {
     } as Manifest;
   }
 }
-

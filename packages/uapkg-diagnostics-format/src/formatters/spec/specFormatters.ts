@@ -8,11 +8,7 @@ import type { FormatterMap } from '../../contracts/FormatterTypes.js';
 
 function formatInvalidPackageSpec(d: Diagnostic): string {
   const data = (d as InvalidPackageSpecDiagnostic).data;
-  const lines = [
-    `[ERROR INVALID_PACKAGE_SPEC]: ${d.message}`,
-    `  Input : ${data.input}`,
-    `  Reason: ${data.reason}`,
-  ];
+  const lines = [`[ERROR INVALID_PACKAGE_SPEC]: ${d.message}`, `  Input : ${data.input}`, `  Reason: ${data.reason}`];
   if (d.hint) lines.push(`  → ${d.hint}`);
   return lines.join('\n');
 }
@@ -36,4 +32,3 @@ export const specFormatters: FormatterMap = {
   INVALID_ORG_NAME: formatInvalidOrgName,
   INVALID_VERSION_RANGE: formatInvalidVersionRange,
 };
-

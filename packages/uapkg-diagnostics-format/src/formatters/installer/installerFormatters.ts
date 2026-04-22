@@ -75,4 +75,3 @@ export const installerFormatters: FormatterMap = {
   EXTRACTION_FAILED: formatExtractionFailed,
   DISK_REMOVE_FAILED: formatDiskRemoveFailed,
 };
-

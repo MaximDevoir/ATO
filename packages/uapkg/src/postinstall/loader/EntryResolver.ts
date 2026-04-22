@@ -1,11 +1,6 @@
 import fs from 'node:fs';
 import * as path from 'node:path';
-import {
-  type Result,
-  ok,
-  fail,
-  createPostinstallDuplicateEntryDiagnostic,
-} from '@uapkg/diagnostics';
+import { createPostinstallDuplicateEntryDiagnostic, fail, ok, type Result } from '@uapkg/diagnostics';
 
 /** Candidate extensions in resolution order (spec-mandated). */
 const CANDIDATE_EXTENSIONS = ['ts', 'js', 'mjs'] as const;
@@ -48,4 +43,3 @@ export class EntryResolver {
     return ok(found[0]);
   }
 }
-

@@ -19,33 +19,30 @@ export { createUAPKGCommandLineFactory, UAPKGCommandLineFactory } from './cli/UA
 
 // Commands — new surface
 export { AddCommand, type AddCommandOptions } from './commands/AddCommand.js';
-export { InstallCommand, type InstallCommandOptions } from './commands/InstallCommand.js';
-export { ListCommand, type ListCommandOptions } from './commands/ListCommand.js';
-export { OutdatedCommand, type OutdatedCommandOptions } from './commands/OutdatedCommand.js';
-export { RemoveCommand, type RemoveCommandOptions } from './commands/RemoveCommand.js';
-export { UpdateCommand, type UpdateCommandOptions } from './commands/UpdateCommand.js';
-export { WhyCommand, type WhyCommandOptions } from './commands/WhyCommand.js';
 // Commands — retained, ported onto CompositionRoot in Phase 10
 export { ConfigCommand } from './commands/ConfigCommand.js';
 export { InitCommand, type InitCommandOptions } from './commands/InitCommand.js';
+export { InstallCommand, type InstallCommandOptions } from './commands/InstallCommand.js';
+export { ListCommand, type ListCommandOptions } from './commands/ListCommand.js';
+export { OutdatedCommand, type OutdatedCommandOptions } from './commands/OutdatedCommand.js';
 export { PackCommand } from './commands/PackCommand.js';
 export {
   ProjectGetNameCommand,
   type ProjectGetNameCommandOptions,
 } from './commands/ProjectGetNameCommand.js';
-
+export { RemoveCommand, type RemoveCommandOptions } from './commands/RemoveCommand.js';
+export { UpdateCommand, type UpdateCommandOptions } from './commands/UpdateCommand.js';
+export { WhyCommand, type WhyCommandOptions } from './commands/WhyCommand.js';
+// Postinstall — new subsystem (Phase 7)
+export * from './postinstall/index.js';
 // Prompt abstractions (used by init)
 export { InkPromptService } from './prompts/InkPromptService.js';
-export type { PromptService, SelectOption } from './prompts/PromptService.js';
 export {
-  ProjectContextDetector,
   type ProjectContextDetection,
+  ProjectContextDetector,
 } from './prompts/ProjectContextDetector.js';
-
+export type { PromptService, SelectOption } from './prompts/PromptService.js';
 // Reporting
 export { DiagnosticReporter } from './reporting/DiagnosticReporter.js';
 export { InstallProgressReporter } from './reporting/InstallProgressReporter.js';
-export { JsonReporter, type JsonEnvelope } from './reporting/JsonReporter.js';
-
-// Postinstall — new subsystem (Phase 7)
-export * from './postinstall/index.js';
+export { type JsonEnvelope, JsonReporter } from './reporting/JsonReporter.js';

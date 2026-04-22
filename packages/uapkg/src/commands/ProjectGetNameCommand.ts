@@ -32,5 +32,3 @@ export class ProjectGetNameCommand implements Command {
     return 0;
   }
 }
-
-

@@ -42,4 +42,3 @@ function formatSnippet(source: string, line: number, column: number): string {
   const lineText = lines[line - 1] ?? '';
   return `${lineText}\n${' '.repeat(Math.max(0, column - 1))}^`;
 }
-

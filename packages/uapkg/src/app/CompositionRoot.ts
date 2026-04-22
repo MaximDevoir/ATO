@@ -2,9 +2,9 @@ import { ConfigInstance } from '@uapkg/config';
 import { Installer } from '@uapkg/installer';
 import { PackageManifest } from '@uapkg/package-manifest';
 import { RegistryCore } from '@uapkg/registry-core';
+import { PostinstallOrchestrator } from '../postinstall/runner/PostinstallOrchestrator.js';
 import { DiagnosticReporter } from '../reporting/DiagnosticReporter.js';
 import { JsonReporter } from '../reporting/JsonReporter.js';
-import { PostinstallOrchestrator } from '../postinstall/runner/PostinstallOrchestrator.js';
 
 export interface CompositionRootOptions {
   readonly cwd: string;
@@ -55,7 +55,11 @@ export class CompositionRoot {
       // wider return types, so cast through `unknown` to satisfy the narrower
       // structural type.
       this._registryCore = new RegistryCore({
-        configInstance: this.config as unknown as { get: (p?: string) => unknown; getAll: () => Record<string, unknown>; getDefaultRegistry: () => { url: string; ref: { type: string; value: string } } | null },
+        configInstance: this.config as unknown as {
+          get: (p?: string) => unknown;
+          getAll: () => Record<string, unknown>;
+          getDefaultRegistry: () => { url: string; ref: { type: string; value: string } } | null;
+        },
       });
     }
     return this._registryCore;
@@ -103,7 +107,3 @@ export class CompositionRoot {
     return this._json;
   }
 }
-
-
-
-

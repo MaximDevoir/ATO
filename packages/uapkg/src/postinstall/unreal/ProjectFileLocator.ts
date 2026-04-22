@@ -43,11 +43,13 @@ export class ProjectFileLocator {
       const current = stack.pop() as string;
       for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
         const fullPath = path.join(current, entry.name);
-        if (entry.isDirectory()) { stack.push(fullPath); continue; }
+        if (entry.isDirectory()) {
+          stack.push(fullPath);
+          continue;
+        }
         if (entry.isFile() && fullPath.endsWith(suffix)) files.push(fullPath);
       }
     }
     return files.sort((a, b) => a.localeCompare(b));
   }
 }
-

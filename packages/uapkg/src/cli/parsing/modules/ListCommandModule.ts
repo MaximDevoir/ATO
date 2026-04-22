@@ -25,4 +25,3 @@ export class ListCommandModule implements UAPKGCommandModule {
     );
   }
 }
-

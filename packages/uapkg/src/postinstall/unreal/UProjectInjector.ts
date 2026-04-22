@@ -1,11 +1,5 @@
 import fs from 'node:fs';
-import {
-  type Result,
-  ok,
-  fail,
-  createIoErrorDiagnostic,
-  createParseErrorDiagnostic,
-} from '@uapkg/diagnostics';
+import { createIoErrorDiagnostic, createParseErrorDiagnostic, fail, ok, type Result } from '@uapkg/diagnostics';
 
 interface UProjectPluginEntry {
   Name?: string;
@@ -33,9 +27,7 @@ export class UProjectInjector {
     try {
       source = fs.readFileSync(projectFilePath, 'utf-8');
     } catch (error) {
-      return fail([
-        createIoErrorDiagnostic(projectFilePath, error instanceof Error ? error.message : String(error)),
-      ]);
+      return fail([createIoErrorDiagnostic(projectFilePath, error instanceof Error ? error.message : String(error))]);
     }
 
     let parsed: UProjectDocument;
@@ -43,10 +35,7 @@ export class UProjectInjector {
       parsed = JSON.parse(source) as UProjectDocument;
     } catch (error) {
       return fail([
-        createParseErrorDiagnostic(
-          error instanceof Error ? error.message : String(error),
-          projectFilePath,
-        ),
+        createParseErrorDiagnostic(error instanceof Error ? error.message : String(error), projectFilePath),
       ]);
     }
 
@@ -69,11 +58,8 @@ export class UProjectInjector {
     try {
       fs.writeFileSync(projectFilePath, `${JSON.stringify(parsed, null, 2)}\n`, 'utf-8');
     } catch (error) {
-      return fail([
-        createIoErrorDiagnostic(projectFilePath, error instanceof Error ? error.message : String(error)),
-      ]);
+      return fail([createIoErrorDiagnostic(projectFilePath, error instanceof Error ? error.message : String(error))]);
     }
     return ok(undefined);
   }
 }
-

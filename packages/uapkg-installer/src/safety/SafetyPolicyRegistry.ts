@@ -68,4 +68,3 @@ export class SafetyPolicyRegistry {
     return ok(verdicts);
   }
 }
-

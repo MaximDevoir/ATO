@@ -59,4 +59,3 @@ export const postinstallFormatters: FormatterMap = {
   POSTINSTALL_MARKER_CORRUPT: formatMarkerCorrupt,
   POSTINSTALL_ESBUILD_ERROR: formatEsbuildError,
 };
-

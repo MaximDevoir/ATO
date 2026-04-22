@@ -4,10 +4,7 @@ import Config, {
   type PostInstallPolicyValue,
   type ResolvedConfig,
 } from '@uapkg/config';
-import {
-  createPostinstallPolicyDeniedDiagnostic,
-  type PostinstallPolicyDeniedDiagnostic,
-} from '@uapkg/diagnostics';
+import { createPostinstallPolicyDeniedDiagnostic, type PostinstallPolicyDeniedDiagnostic } from '@uapkg/diagnostics';
 
 /** Minimal config reader surface; defaults to the singleton `@uapkg/config`. */
 export interface PolicyConfigReader {
@@ -85,4 +82,3 @@ const FALLBACK_RESOLVED_CONFIG: ResolvedConfig = {
 };
 
 export type { ConfigInstance };
-

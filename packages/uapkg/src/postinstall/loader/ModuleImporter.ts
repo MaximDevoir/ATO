@@ -2,12 +2,7 @@ import fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import {
-  type Result,
-  ok,
-  fail,
-  createPostinstallLoadFailedDiagnostic,
-} from '@uapkg/diagnostics';
+import { createPostinstallLoadFailedDiagnostic, fail, ok, type Result } from '@uapkg/diagnostics';
 
 export type ModuleSource =
   | { readonly kind: 'file'; readonly path: string }
@@ -72,4 +67,3 @@ export class ModuleImporter {
     }
   }
 }
-

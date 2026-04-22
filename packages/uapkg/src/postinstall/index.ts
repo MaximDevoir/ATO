@@ -7,6 +7,7 @@
 // this barrel only.
 // ---------------------------------------------------------------------------
 
+export { definePostinstall } from './api/definePostinstall.js';
 // API
 export type { PostinstallDefinition, ProjectSetupDefinition, ZoneDefinition } from './api/PostinstallDsl.js';
 export {
@@ -14,32 +15,35 @@ export {
   ProjectSetupSchema,
   ZoneSchema,
 } from './api/PostinstallDsl.js';
-export { definePostinstall } from './api/definePostinstall.js';
 
 // Loader
 export { EntryResolver, type PostinstallEntryKind, type ResolvedEntry } from './loader/EntryResolver.js';
 export { EsbuildTranspiler } from './loader/EsbuildTranspiler.js';
 export { ExportValidator } from './loader/ExportValidator.js';
 export { ModuleImporter, type ModuleSource } from './loader/ModuleImporter.js';
-export { PostinstallLoader, type LoadedPostinstall } from './loader/PostinstallLoader.js';
-
-// Policy
-export {
-  PostinstallPolicyGate,
-  type PolicyDecision,
-  type PolicyConfigReader,
-} from './policy/PostinstallPolicyGate.js';
-
+export { type LoadedPostinstall, PostinstallLoader } from './loader/PostinstallLoader.js';
 // Markers
 export { MarkerBlockEditor } from './markers/MarkerBlockEditor.js';
 export { MarkerBlockService } from './markers/MarkerBlockService.js';
 export {
-  MarkerIntegrityValidator,
-  type MarkerIntegrityResult,
-  type MarkerIntegrityOk,
   type MarkerIntegrityFail,
+  type MarkerIntegrityOk,
+  type MarkerIntegrityResult,
+  MarkerIntegrityValidator,
 } from './markers/MarkerIntegrityValidator.js';
-
+// Policy
+export {
+  type PolicyConfigReader,
+  type PolicyDecision,
+  PostinstallPolicyGate,
+} from './policy/PostinstallPolicyGate.js';
+// Runner
+export {
+  type PostinstallCandidate,
+  PostinstallOrchestrator,
+  type PostinstallOrchestratorInput,
+  type PostinstallReport,
+} from './runner/PostinstallOrchestrator.js';
 // Unreal
 export { BuildCsInjector } from './unreal/BuildCsInjector.js';
 export { CSharpInjectionEngine } from './unreal/CSharpInjectionEngine.js';
@@ -55,16 +59,6 @@ export { getPluginHash, getWrapperClassName } from './unreal/PluginHash.js';
 export { PrettyParseError } from './unreal/PrettyParseError.js';
 export { ProjectFileLocator } from './unreal/ProjectFileLocator.js';
 export { TargetCsInjector } from './unreal/TargetCsInjector.js';
-export { UnrealSourceCatalogBuilder, type SourceCatalog } from './unreal/UnrealSourceCatalog.js';
+export { type SourceCatalog, UnrealSourceCatalogBuilder } from './unreal/UnrealSourceCatalog.js';
 export { UProjectInjector } from './unreal/UProjectInjector.js';
 export { UProjectMetadataReader } from './unreal/UProjectMetadataReader.js';
-
-// Runner
-export {
-  PostinstallOrchestrator,
-  type PostinstallCandidate,
-  type PostinstallOrchestratorInput,
-  type PostinstallReport,
-} from './runner/PostinstallOrchestrator.js';
-
-

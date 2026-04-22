@@ -27,4 +27,3 @@ export class JsonReporter {
     this.sink.writeLine(JSON.stringify(envelope, null, 2));
   }
 }
-

@@ -37,4 +37,3 @@ export interface SafetyPolicy {
   readonly id: string;
   evaluate(context: SafetyContext): Promise<SafetyEvaluation>;
 }
-

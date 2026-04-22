@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
 import type { Diagnostic } from '@uapkg/diagnostics';
-import { sortDiagnostics, DIAGNOSTIC_LEVEL_ORDER } from '../../src/reporting/TextSink.js';
+import { describe, expect, it } from 'vitest';
+import { DIAGNOSTIC_LEVEL_ORDER, sortDiagnostics } from '../../src/reporting/TextSink.js';
 
 function d(level: Diagnostic['level'], code = 'X'): Diagnostic {
   return { level, code, message: `${level}-${code}` } as Diagnostic;
@@ -25,4 +25,3 @@ describe('TextSink', () => {
     expect(input).toEqual(copy);
   });
 });
-

@@ -52,4 +52,3 @@ export class RemoveCommand implements Command {
     return install.execute();
   }
 }
-

@@ -40,4 +40,3 @@ describe('CompositionRoot', () => {
     expect(root.json).toBe(root.json);
   });
 });
-

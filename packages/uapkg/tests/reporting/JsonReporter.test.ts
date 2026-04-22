@@ -28,4 +28,3 @@ describe('JsonReporter', () => {
     expect(Array.isArray(parsed.diagnostics)).toBe(true);
   });
 });
-

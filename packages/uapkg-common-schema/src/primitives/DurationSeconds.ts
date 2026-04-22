@@ -12,4 +12,3 @@ export const DurationSecondsSchema = z
   .int()
   .min(0, 'Duration in seconds must be non-negative')
   .transform((v) => v as DurationSeconds);
-

@@ -42,4 +42,3 @@ export class PostinstallCandidateBuilder {
     return manifest.kind === 'project' ? 'project' : 'plugin';
   }
 }
-

@@ -48,4 +48,3 @@ export class MarkerBlockService {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 }
-

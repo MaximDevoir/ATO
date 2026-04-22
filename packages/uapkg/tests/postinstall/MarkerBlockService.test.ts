@@ -41,4 +41,3 @@ describe('MarkerBlockService', () => {
     expect(svc.containsOwnedBlock('nothing', PLUGIN, ZONE)).toBe(false);
   });
 });
-

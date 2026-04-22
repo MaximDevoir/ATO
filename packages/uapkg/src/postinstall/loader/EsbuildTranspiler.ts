@@ -1,11 +1,6 @@
 import fs from 'node:fs';
-import {
-  type Result,
-  ok,
-  fail,
-  createPostinstallEsbuildErrorDiagnostic,
-} from '@uapkg/diagnostics';
-import { build, type BuildOptions } from 'esbuild';
+import { createPostinstallEsbuildErrorDiagnostic, fail, ok, type Result } from '@uapkg/diagnostics';
+import { type BuildOptions, build } from 'esbuild';
 
 /**
  * Transpiles a single `.ts` postinstall entry into an in-memory ESM bundle.
@@ -55,9 +50,7 @@ export class EsbuildTranspiler {
       const result = await build(options);
       const file = result.outputFiles?.[0];
       if (!file) {
-        return fail([
-          createPostinstallEsbuildErrorDiagnostic(packageName, entryFile, 'esbuild produced no output'),
-        ]);
+        return fail([createPostinstallEsbuildErrorDiagnostic(packageName, entryFile, 'esbuild produced no output')]);
       }
       return ok(file.text);
     } catch (error) {
@@ -71,4 +64,3 @@ export class EsbuildTranspiler {
     }
   }
 }
-

@@ -73,4 +73,3 @@ interface MutableSlot {
   bytesTotal?: number;
   attempt: number;
 }
-

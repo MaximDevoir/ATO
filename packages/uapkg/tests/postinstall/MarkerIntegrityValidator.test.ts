@@ -51,12 +51,7 @@ describe('MarkerIntegrityValidator', () => {
   });
 
   it('ignores foreign plugin markers', () => {
-    const src = [
-      `// UAPKG-BEGIN other:${ZONE}`,
-      'foreign body',
-      `// UAPKG-END other:${ZONE}`,
-      block(),
-    ].join('\n');
+    const src = [`// UAPKG-BEGIN other:${ZONE}`, 'foreign body', `// UAPKG-END other:${ZONE}`, block()].join('\n');
     expect(v.validate(src, PLUGIN, ZONE).ok).toBe(true);
   });
 
@@ -75,4 +70,3 @@ describe('MarkerIntegrityValidator', () => {
     expect(v.validate(src, PLUGIN, ZONE).ok).toBe(true);
   });
 });
-

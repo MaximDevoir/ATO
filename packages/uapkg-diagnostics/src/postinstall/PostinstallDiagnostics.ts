@@ -161,4 +161,3 @@ export function createPostinstallEsbuildErrorDiagnostic(
     data: { packageName, entryFile, reason },
   };
 }
-

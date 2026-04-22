@@ -85,4 +85,3 @@ export class MarkerIntegrityValidator {
     return { ok: true };
   }
 }
-

@@ -20,14 +20,9 @@ export class UProjectMetadataReader {
     try {
       parsed = JSON.parse(source) as UProjectDocument;
     } catch (error) {
-      throw new Error(
-        `Failed to parse ${uprojectPath}: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      throw new Error(`Failed to parse ${uprojectPath}: ${error instanceof Error ? error.message : String(error)}`);
     }
 
-    return (parsed.Modules ?? [])
-      .map((entry) => entry.Name?.trim())
-      .filter((value): value is string => Boolean(value));
+    return (parsed.Modules ?? []).map((entry) => entry.Name?.trim()).filter((value): value is string => Boolean(value));
   }
 }
-

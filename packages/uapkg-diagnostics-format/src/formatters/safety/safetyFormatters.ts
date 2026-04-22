@@ -40,4 +40,3 @@ export const safetyFormatters: FormatterMap = {
   SAFETY_PATH_NOT_PROJECT_MANIFEST: formatPathNotProjectManifest,
   SAFETY_OVERRIDDEN_BY_FORCE: formatOverriddenByForce,
 };
-

@@ -1,7 +1,7 @@
-import type { Diagnostic } from '@uapkg/diagnostics';
 import { parsePackageSpec } from '@uapkg/common';
 import type { VersionRange } from '@uapkg/common-schema';
 import { RegistryNameSchema, VersionRangeSchema } from '@uapkg/common-schema';
+import type { Diagnostic } from '@uapkg/diagnostics';
 import type { Dependency } from '@uapkg/package-manifest-schema';
 import type { CompositionRoot } from '../app/CompositionRoot.js';
 import { InstallProgressReporter } from '../reporting/InstallProgressReporter.js';
@@ -66,11 +66,10 @@ export class AddCommand implements Command {
       version: rangeParsed.data,
       registry: registryParsed.data,
     };
-    const addResult = await this.root.packageManifest.addDependency(
-      spec.name as unknown as string,
-      dep,
-      { bucket: this.options.dev ? 'devDependencies' : 'dependencies', pin: this.options.pin },
-    );
+    const addResult = await this.root.packageManifest.addDependency(spec.name as unknown as string, dep, {
+      bucket: this.options.dev ? 'devDependencies' : 'dependencies',
+      pin: this.options.pin,
+    });
     if (!addResult.ok) return this.fail(addResult.diagnostics);
 
     // Delegate to Install for the resolve/execute/postinstall pipeline.
@@ -95,5 +94,3 @@ export class AddCommand implements Command {
 
 // Silence an unused-import warning in strict TS setups; retained for type clarity.
 void InstallProgressReporter;
-
-
