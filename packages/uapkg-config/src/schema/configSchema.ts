@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import type { ResolvedConfig } from '../contracts/ConfigTypes.js';
 
+// Accepted postinstall policy values. The `prompt` value is intentionally
+// omitted — uapkg commands must remain non-interactive.
+const postInstallPolicySchema = z.enum(['allow', 'deny']);
+
 const registryRefSchema = z
   .object({
     type: z.enum(['branch', 'tag', 'rev']),
@@ -16,6 +20,12 @@ const registryConfigSchema = z
       value: 'main',
     }),
     ttlSeconds: z.number().optional(),
+    /**
+     * Per-registry override of `install.postInstallPolicy`. When omitted the
+     * global policy applies. Resolution is "nearest wins": per-registry
+     * overrides the global value.
+     */
+    postInstallPolicy: postInstallPolicySchema.optional(),
   })
   .strict();
 
@@ -44,6 +54,21 @@ export const configSchema = z
       .object({
         retries: z.number(),
         timeout: z.number(),
+        /**
+         * Maximum number of simultaneous asset downloads the installer will
+         * perform. Must be >= 1. Default: 5.
+         */
+        maxConcurrentDownloads: z.number().int().min(1),
+      })
+      .strict(),
+    install: z
+      .object({
+        /**
+         * Global postinstall policy. Default: `deny` (postinstall hooks are
+         * treated as authoritative bootstrap documentation and require explicit
+         * opt-in). Per-registry overrides apply via `registries.<name>.postInstallPolicy`.
+         */
+        postInstallPolicy: postInstallPolicySchema,
       })
       .strict(),
     term: z
@@ -92,6 +117,13 @@ export const partialConfigSchema = z
       .object({
         retries: z.number().optional(),
         timeout: z.number().optional(),
+        maxConcurrentDownloads: z.number().int().min(1).optional(),
+      })
+      .strict()
+      .optional(),
+    install: z
+      .object({
+        postInstallPolicy: postInstallPolicySchema.optional(),
       })
       .strict()
       .optional(),
@@ -152,6 +184,10 @@ export function getDefaultConfig(): ResolvedConfig {
     network: {
       retries: 2,
       timeout: 300,
+      maxConcurrentDownloads: 5,
+    },
+    install: {
+      postInstallPolicy: 'deny',
     },
     term: {
       quiet: false,

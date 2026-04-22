@@ -65,6 +65,10 @@ export function isValidConfigPath(pathToProperty: string) {
     return true;
   }
 
+  if (segments.length === 3 && segments[2] === 'postInstallPolicy') {
+    return true;
+  }
+
   return false;
 }
 

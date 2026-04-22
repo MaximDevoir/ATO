@@ -15,7 +15,12 @@
   },
   "types": "./dist/index.d.ts",
   "dependencies": {
-    "@uapkg/diagnostics": "workspace:^"
+    "@uapkg/common-schema": "workspace:^",
+    "@uapkg/diagnostics": "workspace:^",
+    "semver": "7.7.1"
+  },
+  "devDependencies": {
+    "@types/semver": "7.7.0"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

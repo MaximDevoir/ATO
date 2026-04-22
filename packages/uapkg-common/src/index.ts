@@ -18,3 +18,10 @@ export { normalizeUrl } from './normalize/normalizeUrl.js';
 
 // Paths
 export { normalizePath, toForwardSlash } from './paths/forwardSlash.js';
+
+// Package spec parsing (CLI "@org/name@range")
+export { formatPackageSpec, parsePackageSpec } from './spec/parsePackageSpec.js';
+
+// Human formatting
+export { prettyBytes, prettyBytesProgress } from './format/prettyBytes.js';
+

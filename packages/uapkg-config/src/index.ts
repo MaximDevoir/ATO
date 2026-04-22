@@ -30,6 +30,10 @@ export type {
   ConfigCreateOptions,
   ConfigTraceEntry,
   ConfigValueWithOrigin,
+  PostInstallPolicyValue,
+  RegistryConfig,
+  RegistryRef,
   ResolvedConfig,
 } from './contracts/ConfigTypes.js';
 export { ConfigInstance, createConfig };
+export { PostInstallPolicyResolver } from './core/PostInstallPolicyResolver.js';

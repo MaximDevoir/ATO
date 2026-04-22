@@ -5,10 +5,14 @@ export interface RegistryRef {
   value: string;
 }
 
+export type PostInstallPolicyValue = 'allow' | 'deny';
+
 export interface RegistryConfig {
   url: string;
   ref: RegistryRef;
   ttlSeconds?: number;
+  /** Per-registry override of `install.postInstallPolicy`. */
+  postInstallPolicy?: PostInstallPolicyValue;
 }
 
 export interface ResolvedConfig {
@@ -28,6 +32,12 @@ export interface ResolvedConfig {
   network: {
     retries: number;
     timeout: number;
+    /** Maximum simultaneous asset downloads. Default: 5. */
+    maxConcurrentDownloads: number;
+  };
+  install: {
+    /** Global postinstall policy. Default: `deny`. */
+    postInstallPolicy: PostInstallPolicyValue;
   };
   term: {
     quiet: boolean;

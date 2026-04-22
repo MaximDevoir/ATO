@@ -1,8 +1,12 @@
 import type { GeneralDiagnostic } from './general/GeneralDiagnostics.js';
+import type { InstallerDiagnostic } from './installer/InstallerDiagnostics.js';
 import type { ManifestDiagnostic } from './manifest/ManifestDiagnostics.js';
 import type { PackDiagnostic } from './pack/PackDiagnostics.js';
+import type { PostinstallDiagnostic } from './postinstall/PostinstallDiagnostics.js';
 import type { RegistryDiagnostic } from './registry/RegistryDiagnostics.js';
 import type { ResolverDiagnostic } from './resolver/ResolverDiagnostics.js';
+import type { SafetyDiagnostic } from './safety/SafetyDiagnostics.js';
+import type { SpecParseDiagnostic } from './spec/SpecDiagnostics.js';
 
 /**
  * The unified Diagnostic type — a discriminated union of every known
@@ -18,7 +22,11 @@ export type Diagnostic =
   | RegistryDiagnostic
   | ManifestDiagnostic
   | PackDiagnostic
-  | GeneralDiagnostic;
+  | GeneralDiagnostic
+  | InstallerDiagnostic
+  | PostinstallDiagnostic
+  | SafetyDiagnostic
+  | SpecParseDiagnostic;
 
 /**
  * Extract a specific diagnostic by code.

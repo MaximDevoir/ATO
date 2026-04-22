@@ -95,5 +95,67 @@ export {
   createVersionConflictDiagnostic,
   createVersionNotFoundDiagnostic,
 } from './resolver/ResolverDiagnostics.js';
+// --- Installer family ---
+export type {
+  DiskRemoveFailedDiagnostic,
+  DownloadFailedDiagnostic,
+  DownloadHttpStatusDiagnostic,
+  ExtractionFailedDiagnostic,
+  InstallerDiagnostic,
+  IntegrityMismatchDiagnostic,
+  NetworkRetriesExhaustedDiagnostic,
+  NetworkTimeoutDiagnostic,
+} from './installer/InstallerDiagnostics.js';
+export {
+  createDiskRemoveFailedDiagnostic,
+  createDownloadFailedDiagnostic,
+  createDownloadHttpStatusDiagnostic,
+  createExtractionFailedDiagnostic,
+  createIntegrityMismatchDiagnostic,
+  createNetworkRetriesExhaustedDiagnostic,
+  createNetworkTimeoutDiagnostic,
+} from './installer/InstallerDiagnostics.js';
+// --- Postinstall family ---
+export type {
+  PostinstallDiagnostic,
+  PostinstallDuplicateEntryDiagnostic,
+  PostinstallEsbuildErrorDiagnostic,
+  PostinstallInvalidExportDiagnostic,
+  PostinstallLoadFailedDiagnostic,
+  PostinstallMarkerCorruptDiagnostic,
+  PostinstallPolicyDeniedDiagnostic,
+} from './postinstall/PostinstallDiagnostics.js';
+export {
+  createPostinstallDuplicateEntryDiagnostic,
+  createPostinstallEsbuildErrorDiagnostic,
+  createPostinstallInvalidExportDiagnostic,
+  createPostinstallLoadFailedDiagnostic,
+  createPostinstallMarkerCorruptDiagnostic,
+  createPostinstallPolicyDeniedDiagnostic,
+} from './postinstall/PostinstallDiagnostics.js';
+// --- Safety family ---
+export type {
+  SafetyDiagnostic,
+  SafetyOverriddenByForceDiagnostic,
+  SafetyPathNotProjectManifestDiagnostic,
+  SafetyTargetExistsNoManifestDiagnostic,
+} from './safety/SafetyDiagnostics.js';
+export {
+  createSafetyOverriddenByForceDiagnostic,
+  createSafetyPathNotProjectManifestDiagnostic,
+  createSafetyTargetExistsNoManifestDiagnostic,
+} from './safety/SafetyDiagnostics.js';
+// --- Spec-parse family ---
+export type {
+  InvalidOrgNameDiagnostic,
+  InvalidPackageSpecDiagnostic,
+  InvalidVersionRangeDiagnostic,
+  SpecParseDiagnostic,
+} from './spec/SpecDiagnostics.js';
+export {
+  createInvalidOrgNameDiagnostic,
+  createInvalidPackageSpecDiagnostic,
+  createInvalidVersionRangeDiagnostic,
+} from './spec/SpecDiagnostics.js';
 // Unified type
 export type { Diagnostic, DiagnosticByCode, DiagnosticCode } from './types.js';
