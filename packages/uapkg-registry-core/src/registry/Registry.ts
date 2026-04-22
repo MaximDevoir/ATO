@@ -95,10 +95,11 @@ export class Registry {
     packageName: string,
     versionRange: string,
     registryName: string,
+    current?: string,
   ): Promise<Result<ResolvedVersion>> {
     const manifestResult = await this.getPackageManifest(packageName);
     if (!manifestResult.ok) return manifestResult as Result<never>;
-    return resolveVersion(manifestResult.value, versionRange, registryName);
+    return resolveVersion(manifestResult.value, versionRange, registryName, current);
   }
 
   // -------------------------------------------------------------------

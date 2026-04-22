@@ -9,7 +9,17 @@ export type {
   ResolvedGraph,
   ResolverOptions,
 } from './contracts/ManifestTypes.js';
+export {
+  type AddDependencyOptions,
+  type DependencyBucket,
+  DependencyMutator,
+} from './core/DependencyMutator.js';
+export { DevDependencyPolicy } from './core/DevDependencyPolicy.js';
+export { type ResolvedInstallPath, InstallPathResolver } from './core/InstallPathResolver.js';
+export { type LockfileChange, type LockfileDiff, LockfileDiffer } from './core/LockfileDiffer.js';
+export { type OutdatedEntry, type OutdatedStatus, OutdatedChecker } from './core/OutdatedChecker.js';
 export { PackageManifest, type PackageManifestOptions } from './core/PackageManifest.js';
+export { type WhyPath, type WhyResult, WhyGraph } from './core/WhyGraph.js';
 export { LockfileReader } from './io/LockfileReader.js';
 export { LockfileWriter } from './io/LockfileWriter.js';
 export { ManifestReader } from './io/ManifestReader.js';

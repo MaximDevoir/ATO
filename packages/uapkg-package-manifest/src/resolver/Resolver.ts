@@ -10,17 +10,11 @@ import {
 import type { Dependency, Manifest } from '@uapkg/package-manifest-schema';
 import type { RegistryCore } from '@uapkg/registry-core';
 import type { PackageNode, ResolvedGraph, ResolverOptions } from '../contracts/ManifestTypes.js';
+import { DevDependencyPolicy } from '../core/DevDependencyPolicy.js';
 
-/**
- * Pure dependency resolver.
- *
- * - Resolves dependency intent → resolved graph using `RegistryCore`.
- * - Deduplicates by (registry + name + version).
- * - Detects cycles and version conflicts for single-version packages.
- * - Applies overrides before resolution.
- * - Has NO side effects.
- */
 export class Resolver {
+  private readonly devPolicy = new DevDependencyPolicy();
+
   constructor(private readonly registryCore: RegistryCore) {}
 
   async resolve(manifest: Manifest, options: ResolverOptions = {}): Promise<Result<ResolvedGraph>> {
@@ -29,22 +23,21 @@ export class Resolver {
     const visiting = new Set<string>();
     const roots: PackageNode[] = [];
 
-    const deps = this.applyOverrides(manifest.dependencies ?? {}, options.overrides);
+    const rootBuckets = this.devPolicy.pickBuckets(manifest, true);
+    const rootDeps: Record<string, Dependency> = {};
+    for (const b of rootBuckets) {
+      for (const [n, d] of Object.entries(b.map)) rootDeps[n] = d;
+    }
+    const deps = this.applyOverrides(rootDeps, options.overrides);
 
     for (const [name, dep] of Object.entries(deps)) {
       const result = await this.resolveNode(name, dep, bag, nodes, visiting, []);
-      if (result) {
-        roots.push(result);
-      }
+      if (result) roots.push(result);
     }
 
-    // Check for cross-registry name collisions
     this.checkNameCollisions(nodes, bag);
 
-    if (bag.hasErrors()) {
-      return bag.toFailure();
-    }
-
+    if (bag.hasErrors()) return bag.toFailure();
     return ok({ nodes, roots });
   }
 
@@ -71,13 +64,11 @@ export class Resolver {
 
     const nodeKey = `${dep.registry}::${name}@${resolved.value.version}`;
 
-    // Cycle detection
     if (visiting.has(nodeKey)) {
       bag.add(createCircularDepDiagnostic([...path, name]));
       return null;
     }
 
-    // Dedup — already resolved
     const existing = nodes.get(nodeKey);
     if (existing) return existing;
 
@@ -85,7 +76,7 @@ export class Resolver {
     const childDeps = new Map<string, PackageNode>();
 
     const versionEntry = resolved.value.entry;
-    if (versionEntry.dependencies) {
+    if (versionEntry.dependencies && !this.devPolicy.includeTransitiveDev()) {
       for (const [childName, childDep] of Object.entries(versionEntry.dependencies)) {
         const child = await this.resolveNode(
           childName,
@@ -95,9 +86,7 @@ export class Resolver {
           visiting,
           [...path, name],
         );
-        if (child) {
-          childDeps.set(childName, child);
-        }
+        if (child) childDeps.set(childName, child);
       }
     }
 
@@ -112,7 +101,6 @@ export class Resolver {
       dependencies: childDeps,
     };
 
-    // Single-version conflict detection
     const conflictKey = `${dep.registry}::${name}`;
     for (const [key, existing] of nodes) {
       if (key.startsWith(conflictKey) && existing.version !== node.version) {

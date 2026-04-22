@@ -29,3 +29,4 @@ export { RegistryPackageReader } from './registry/RegistryPackageReader.js';
 export { evaluateSyncPolicy } from './registry/RegistrySyncPolicy.js';
 export { RegistryUpdater } from './registry/RegistryUpdater.js';
 export { type ResolvedVersion, resolveVersion } from './resolution/PackageResolver.js';
+export { SemverSelectionPolicy } from './resolution/SemverSelectionPolicy.js';
