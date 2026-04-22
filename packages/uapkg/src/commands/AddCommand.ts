@@ -1,132 +1,99 @@
-import type { Dependency, DependencyOverride, UAPKGManifest } from '../domain/UAPKGManifest.js';
-import { DependencyInstaller } from '../install/DependencyInstaller.js';
-import type { LockfileRepository } from '../lockfile/LockfileRepository.js';
-import { LockfileSynchronizer } from '../lockfile/LockfileSynchronizer.js';
-import type { ManifestRepository } from '../manifest/ManifestRepository.js';
-import { PostinstallRunner } from '../postinstall/PostinstallRunner.js';
-import type { FileSystemService } from '../services/FileSystemService.js';
-import type { GitClient } from '../services/GitClient.js';
-import { parseGitReference } from '../services/GitReferenceParser.js';
-import type { Reporter } from '../ui/ConsoleReporter.js';
-import { normalizeAddedDependencyVersion } from '../utils/VersionUtils.js';
+import type { Diagnostic } from '@uapkg/diagnostics';
+import { parsePackageSpec } from '@uapkg/common';
+import type { VersionRange } from '@uapkg/common-schema';
+import { RegistryNameSchema, VersionRangeSchema } from '@uapkg/common-schema';
+import type { Dependency } from '@uapkg/package-manifest-schema';
+import type { CompositionRoot } from '../app/CompositionRoot.js';
+import { InstallProgressReporter } from '../reporting/InstallProgressReporter.js';
 import type { Command } from './Command.js';
+import { InstallCommand } from './InstallCommand.js';
 
 export interface AddCommandOptions {
-  cwd: string;
-  source: string;
-  force: boolean;
-  pin: boolean;
-  harnessed: boolean;
+  readonly spec: string;
+  readonly pin: boolean;
+  readonly dev: boolean;
+  readonly registry?: string;
+  readonly force: boolean;
+  readonly dryRun: boolean;
+  readonly outputFormat: 'text' | 'json';
 }
 
+/**
+ * `uapkg add <@Org/Name@range>` — parse the spec, mutate the manifest,
+ * delegate to `InstallCommand` for the resolve/install/postinstall pipeline.
+ *
+ * This command is deliberately thin — it is a manifest-mutation shim around
+ * `install`. All resolution/installation invariants live one level down.
+ */
 export class AddCommand implements Command {
-  constructor(
+  public constructor(
+    private readonly root: CompositionRoot,
     private readonly options: AddCommandOptions,
-    private readonly manifestRepository: ManifestRepository,
-    private readonly lockfileRepository: LockfileRepository,
-    private readonly fileSystem: FileSystemService,
-    private readonly gitClient: GitClient,
-    private readonly reporter: Reporter,
-    private readonly postinstallRunner: PostinstallRunner = new PostinstallRunner(),
   ) {}
 
-  async execute() {
-    const manifest = this.manifestRepository.read(this.options.cwd);
-    const source = this.options.source.trim();
-    if (!source) {
-      throw new Error('[uapkg] add requires a dependency source');
+  public async execute(): Promise<number> {
+    const specResult = parsePackageSpec(this.options.spec);
+    if (!specResult.ok) return this.fail(specResult.diagnostics);
+    const spec = specResult.value;
+
+    const registryName = this.options.registry ?? this.root.config.get('registry');
+    const registryParsed = RegistryNameSchema.safeParse(registryName ?? 'default');
+    if (!registryParsed.success) {
+      return this.fail([
+        {
+          level: 'error',
+          code: 'INVALID_ARGS',
+          message: 'Registry name is invalid.',
+          data: { value: registryName },
+        } as unknown as Diagnostic,
+      ]);
     }
 
-    const dependency = await this.resolveDependencyDescriptor(source);
-    const dependencies = manifest.dependencies ?? [];
-    const existingIndex = dependencies.findIndex((item: Dependency) => item.name === dependency.name);
-    if (existingIndex >= 0) {
-      dependencies[existingIndex] = dependency;
-      this.reporter.warn(`[uapkg] Replaced existing dependency '${dependency.name}'`);
-    } else {
-      dependencies.push(dependency);
+    const rangeStr = spec.range ?? ('*' as unknown as VersionRange);
+    const rangeParsed = VersionRangeSchema.safeParse(rangeStr);
+    if (!rangeParsed.success) {
+      return this.fail([
+        {
+          level: 'error',
+          code: 'INVALID_VERSION_RANGE',
+          message: `Invalid version range "${rangeStr}".`,
+          data: { input: this.options.spec, range: rangeStr },
+        } as unknown as Diagnostic,
+      ]);
     }
-    manifest.dependencies = dependencies;
-    this.applyProjectLevelFlags(manifest, dependency);
-    this.manifestRepository.write(this.options.cwd, manifest);
 
-    const synchronizer = new LockfileSynchronizer(
-      this.manifestRepository,
-      this.lockfileRepository,
-      this.fileSystem,
-      this.gitClient,
-      this.reporter,
+    const dep: Dependency = {
+      version: rangeParsed.data,
+      registry: registryParsed.data,
+    };
+    const addResult = await this.root.packageManifest.addDependency(
+      spec.name as unknown as string,
+      dep,
+      { bucket: this.options.dev ? 'devDependencies' : 'dependencies', pin: this.options.pin },
     );
-    const synchronized = await synchronizer.synchronize(this.options.cwd, {
+    if (!addResult.ok) return this.fail(addResult.diagnostics);
+
+    // Delegate to Install for the resolve/execute/postinstall pipeline.
+    const install = new InstallCommand(this.root, {
       force: this.options.force,
-      refresh: true,
+      frozen: false,
+      dryRun: this.options.dryRun,
+      outputFormat: this.options.outputFormat,
     });
-    await new DependencyInstaller(this.fileSystem, this.gitClient).installAll(
-      synchronized.manifestType,
-      this.options.cwd,
-      synchronized.packages,
-    );
-    await this.postinstallRunner.run(this.options.cwd, synchronized.manifestType, synchronized.packages, this.reporter);
-
-    this.reporter.info(`[uapkg] Added dependency ${dependency.name} from ${dependency.source}`);
-    return 0;
+    return install.execute();
   }
 
-  private applyProjectLevelFlags(manifest: UAPKGManifest, dependency: Dependency) {
-    if (this.options.pin) {
-      if (manifest.type !== 'project') {
-        this.reporter.warn('[uapkg] --pin is only meaningful at project level; ignoring.');
-      } else {
-        const overrides = manifest.overrides ?? [];
-        const override: DependencyOverride = {
-          name: dependency.name,
-          source: dependency.source,
-          version: dependency.version,
-        };
-        const existingIndex = overrides.findIndex((entry) => entry.name === dependency.name);
-        if (existingIndex >= 0) {
-          overrides[existingIndex] = override;
-        } else {
-          overrides.push(override);
-        }
-        manifest.overrides = overrides;
-      }
+  private fail(diagnostics: readonly Diagnostic[]): number {
+    if (this.options.outputFormat === 'json') {
+      this.root.json.emit({ status: 'error', command: 'add', diagnostics });
+    } else {
+      this.root.diagnostics.reportAll(diagnostics);
     }
-
-    if (this.options.harnessed) {
-      if (manifest.type !== 'project') {
-        this.reporter.warn('[uapkg] --harnessed is only meaningful at project level; ignoring.');
-      } else {
-        const harnessedPlugins = new Set(manifest.harnessedPlugins ?? []);
-        harnessedPlugins.add(dependency.name);
-        manifest.harnessedPlugins = [...harnessedPlugins];
-      }
-    }
-  }
-
-  private async resolveDependencyDescriptor(source: string): Promise<Dependency> {
-    if (source.startsWith('file:')) {
-      const manifest = this.manifestRepository.read(
-        this.fileSystem.resolve(this.options.cwd, source.slice('file:'.length)),
-      );
-      return {
-        name: manifest.name,
-        source,
-      };
-    }
-
-    const parsed = parseGitReference(source);
-    const tempDirectory = this.fileSystem.createTempDir('uapkg-add-');
-    try {
-      await this.gitClient.clone(parsed, tempDirectory);
-      const manifest = this.manifestRepository.read(tempDirectory);
-      return {
-        name: manifest.name,
-        source: parsed.repositoryUrl,
-        version: normalizeAddedDependencyVersion(parsed.ref),
-      };
-    } finally {
-      this.fileSystem.removeDir(tempDirectory);
-    }
+    return 1;
   }
 }
+
+// Silence an unused-import warning in strict TS setups; retained for type clarity.
+void InstallProgressReporter;
+
+

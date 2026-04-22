@@ -30,7 +30,11 @@ export class AddCommandModule implements UAPKGCommandModule {
             type: 'boolean',
             default: false,
             describe: 'Mark dependency as harnessed (tracked in lockfile, but protected during updates)',
-          }),
+          })
+          .option('dev', { type: 'boolean', default: false, describe: 'Add to devDependencies' })
+          .option('registry', { type: 'string', describe: 'Registry name (defaults to config `registry`)' })
+          .option('dry-run', { type: 'boolean', default: false, describe: 'Compute the plan but perform no IO' })
+          .option('json', { type: 'boolean', default: false, describe: 'Emit JSON on stdout' }),
       (argv) => {
         sink.set(
           this.factory.createAdd(String(argv.source), {
@@ -38,6 +42,10 @@ export class AddCommandModule implements UAPKGCommandModule {
             force: argv.force === true,
             pin: argv.pin === true,
             harnessed: argv.harnessed === true,
+            dev: argv.dev === true,
+            registry: typeof argv.registry === 'string' ? argv.registry : undefined,
+            dryRun: argv['dry-run'] === true,
+            outputFormat: argv.json === true ? 'json' : 'text',
           }),
         );
       },

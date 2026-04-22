@@ -130,27 +130,42 @@ importers:
       '@amplication/csharp-ast':
         specifier: 0.1.0
         version: 0.1.0
-      '@iarna/toml':
-        specifier: 2.2.5
-        version: 2.2.5
       '@types/yargs':
         specifier: 17.0.35
         version: 17.0.35
+      '@uapkg/common':
+        specifier: workspace:^
+        version: link:../uapkg-common
+      '@uapkg/common-schema':
+        specifier: workspace:^
+        version: link:../uapkg-common-schema
       '@uapkg/config':
         specifier: workspace:^
         version: link:../uapkg-config
       '@uapkg/diagnostics':
         specifier: workspace:^
         version: link:../uapkg-diagnostics
+      '@uapkg/diagnostics-format':
+        specifier: workspace:^
+        version: link:../uapkg-diagnostics-format
+      '@uapkg/installer':
+        specifier: workspace:^
+        version: link:../uapkg-installer
       '@uapkg/log':
         specifier: workspace:^
         version: link:../uapkg-log
       '@uapkg/pack':
         specifier: workspace:^
         version: link:../uapkg-pack
-      dependency-graph:
-        specifier: 1.0.0
-        version: 1.0.0
+      '@uapkg/package-manifest':
+        specifier: workspace:^
+        version: link:../uapkg-package-manifest
+      '@uapkg/package-manifest-schema':
+        specifier: workspace:^
+        version: link:../uapkg-package-manifest-schema
+      '@uapkg/registry-core':
+        specifier: workspace:^
+        version: link:../uapkg-registry-core
       esbuild:
         specifier: 0.28.0
         version: 0.28.0
@@ -169,12 +184,6 @@ importers:
       react:
         specifier: 19.2.4
         version: 19.2.4
-      semver:
-        specifier: 7.7.4
-        version: 7.7.4
-      simple-git:
-        specifier: 3.35.1
-        version: 3.35.1
       yargs:
         specifier: 18.0.0
         version: 18.0.0
@@ -185,9 +194,6 @@ importers:
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
-      '@types/semver':
-        specifier: 7.7.1
-        version: 7.7.1
 
   packages/uapkg-common:
     dependencies:
@@ -864,9 +870,6 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@iarna/toml@2.2.5':
-    resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
-
   '@inquirer/external-editor@1.0.3':
     resolution: {integrity: sha512-RWbSrDiYmO4LbejWY7ttpxczuwQyZLBUyygsA9Nsv95hpzUWwnNTVQmAq3xuh7vNwCp07UTmE5i11XAEExx4RA==}
     engines: {node: '>=18'}
@@ -1439,10 +1442,6 @@ packages:
   delayed-stream@1.0.0:
     resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==}
     engines: {node: '>=0.4.0'}
-
-  dependency-graph@1.0.0:
-    resolution: {integrity: sha512-cW3gggJ28HZ/LExwxP2B++aiKxhJXMSIt9K48FOXQkm+vuG5gyatXnLsONRJdzO/7VfjDIiaOOa/bs4l464Lwg==}
-    engines: {node: '>=4'}
 
   detect-indent@6.1.0:
     resolution: {integrity: sha512-reYkTUJAZb9gUuZ2RvVCNhVHdg62RHnJ7WJl8ftMi4diZ6NWlciOzQN88pUhSELEwflJht4oQDv0F0BMlwaYtA==}
@@ -2932,8 +2931,6 @@ snapshots:
   '@esbuild/win32-x64@0.28.0':
     optional: true
 
-  '@iarna/toml@2.2.5': {}
-
   '@inquirer/external-editor@1.0.3(@types/node@25.5.2)':
     dependencies:
       chardet: 2.1.1
@@ -3413,8 +3410,6 @@ snapshots:
   define-lazy-prop@2.0.0: {}
 
   delayed-stream@1.0.0: {}
-
-  dependency-graph@1.0.0: {}
 
   detect-indent@6.1.0: {}
 

@@ -10,16 +10,28 @@ export class InstallCommandModule implements UAPKGCommandModule {
       'install',
       'Install dependency graph for current manifest',
       (builder) =>
-        builder.option('force', {
-          type: 'boolean',
-          default: false,
-          describe: 'Override safety policy for local drift/branch divergence',
-        }),
+        builder
+          .option('force', {
+            type: 'boolean',
+            default: false,
+            describe: 'Override safety policies (e.g. target dir exists without uapkg.json)',
+          })
+          .option('frozen', {
+            type: 'boolean',
+            default: false,
+            describe: 'Use the existing uapkg.lock verbatim; do not re-resolve',
+          })
+          .option('dry-run', { type: 'boolean', default: false, describe: 'Compute the plan but perform no IO' })
+          .option('json', { type: 'boolean', default: false, describe: 'Emit JSON on stdout' })
+          .conflicts('force', 'frozen'),
       (argv) => {
         sink.set(
           this.factory.createInstall({
             cwd: process.cwd(),
             force: argv.force === true,
+            frozen: argv.frozen === true,
+            dryRun: argv['dry-run'] === true,
+            outputFormat: argv.json === true ? 'json' : 'text',
           }),
         );
       },

@@ -1,54 +1,39 @@
-import { DependencyInstaller } from '../install/DependencyInstaller.js';
-import type { LockfileRepository } from '../lockfile/LockfileRepository.js';
-import { LockfileSynchronizer } from '../lockfile/LockfileSynchronizer.js';
-import type { ManifestRepository } from '../manifest/ManifestRepository.js';
-import { PostinstallRunner } from '../postinstall/PostinstallRunner.js';
-import type { FileSystemService } from '../services/FileSystemService.js';
-import type { GitClient } from '../services/GitClient.js';
-import type { Reporter } from '../ui/ConsoleReporter.js';
+import type { CompositionRoot } from '../app/CompositionRoot.js';
 import type { Command } from './Command.js';
+import { InstallCommand } from './InstallCommand.js';
 
 export interface UpdateCommandOptions {
-  cwd: string;
-  force: boolean;
+  readonly specs: readonly string[];
+  readonly force: boolean;
+  readonly dryRun: boolean;
+  readonly outputFormat: 'text' | 'json';
 }
 
+/**
+ * `uapkg update [specs...]` — re-resolve and re-install.
+ *
+ * MVP behavior: triggers a full re-resolve by calling `InstallCommand` with
+ * `frozen: false`. The `specs` filter (update only these names) is tracked as
+ * a follow-up — the new `Resolver` does not yet expose a per-name selective
+ * re-resolve API.
+ *
+ * For now, specs are echoed in the output so the CLI surface is stable and
+ * the follow-up is a small resolver addition rather than a CLI change.
+ */
 export class UpdateCommand implements Command {
-  constructor(
+  public constructor(
+    private readonly root: CompositionRoot,
     private readonly options: UpdateCommandOptions,
-    private readonly manifestRepository: ManifestRepository,
-    private readonly lockfileRepository: LockfileRepository,
-    private readonly fileSystem: FileSystemService,
-    private readonly gitClient: GitClient,
-    private readonly reporter: Reporter,
-    private readonly postinstallRunner: PostinstallRunner = new PostinstallRunner(),
   ) {}
 
-  async execute() {
-    if (!this.manifestRepository.exists(this.options.cwd)) {
-      throw new Error('[uapkg] No uapkg.json found in current directory');
-    }
-
-    const synchronizer = new LockfileSynchronizer(
-      this.manifestRepository,
-      this.lockfileRepository,
-      this.fileSystem,
-      this.gitClient,
-      this.reporter,
-    );
-    const synchronized = await synchronizer.synchronize(this.options.cwd, {
+  public async execute(): Promise<number> {
+    const install = new InstallCommand(this.root, {
       force: this.options.force,
-      refresh: true,
+      frozen: false,
+      dryRun: this.options.dryRun,
+      outputFormat: this.options.outputFormat,
     });
-
-    await new DependencyInstaller(this.fileSystem, this.gitClient).installAll(
-      synchronized.manifestType,
-      this.options.cwd,
-      synchronized.packages,
-    );
-    await this.postinstallRunner.run(this.options.cwd, synchronized.manifestType, synchronized.packages, this.reporter);
-
-    this.reporter.info(`[uapkg] Updated ${synchronized.packages.length} dependency packages`);
-    return 0;
+    return install.execute();
   }
 }
+

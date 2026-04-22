@@ -5,9 +5,13 @@ import { AddCommandModule } from './modules/AddCommandModule.js';
 import { ConfigCommandModule } from './modules/ConfigCommandModule.js';
 import { InitCommandModule } from './modules/InitCommandModule.js';
 import { InstallCommandModule } from './modules/InstallCommandModule.js';
+import { ListCommandModule } from './modules/ListCommandModule.js';
+import { OutdatedCommandModule } from './modules/OutdatedCommandModule.js';
 import { PackCommandModule } from './modules/PackCommandModule.js';
 import { ProjectGetNameCommandModule } from './modules/ProjectGetNameCommandModule.js';
+import { RemoveCommandModule } from './modules/RemoveCommandModule.js';
 import { UpdateCommandModule } from './modules/UpdateCommandModule.js';
+import { WhyCommandModule } from './modules/WhyCommandModule.js';
 
 export class UAPKGParserRegistry {
   constructor(
@@ -16,6 +20,10 @@ export class UAPKGParserRegistry {
       new AddCommandModule(),
       new InstallCommandModule(),
       new UpdateCommandModule(),
+      new RemoveCommandModule(),
+      new OutdatedCommandModule(),
+      new WhyCommandModule(),
+      new ListCommandModule(),
       new PackCommandModule(),
       new ProjectGetNameCommandModule(),
       new ConfigCommandModule(),

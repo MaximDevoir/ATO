@@ -1,4 +1,15 @@
-export type UAPKGCommandName = 'init' | 'add' | 'install' | 'update' | 'project-get-name' | 'config' | 'pack';
+export type UAPKGCommandName =
+  | 'init'
+  | 'add'
+  | 'install'
+  | 'update'
+  | 'project-get-name'
+  | 'config'
+  | 'pack'
+  | 'outdated'
+  | 'why'
+  | 'list'
+  | 'remove';
 export type UAPKGConfigAction = 'get' | 'list' | 'set' | 'delete' | 'edit';
 export type UAPKGConfigScope = 'global' | 'local';
 export type UAPKGOutputFormat = 'text' | 'json';
@@ -20,16 +31,26 @@ export interface AddCommandLine extends BaseCommandLine {
   force: boolean;
   pin: boolean;
   harnessed: boolean;
+  dev: boolean;
+  registry?: string;
+  dryRun: boolean;
+  outputFormat: UAPKGOutputFormat;
 }
 
 export interface InstallCommandLine extends BaseCommandLine {
   command: 'install';
   force: boolean;
+  frozen: boolean;
+  dryRun: boolean;
+  outputFormat: UAPKGOutputFormat;
 }
 
 export interface UpdateCommandLine extends BaseCommandLine {
   command: 'update';
+  specs: string[];
   force: boolean;
+  dryRun: boolean;
+  outputFormat: UAPKGOutputFormat;
 }
 
 export interface ProjectGetNameCommandLine extends BaseCommandLine {
@@ -54,6 +75,29 @@ export interface PackCommandLine extends BaseCommandLine {
   outFile?: string;
 }
 
+export interface OutdatedCommandLine extends BaseCommandLine {
+  command: 'outdated';
+  outputFormat: UAPKGOutputFormat;
+}
+
+export interface WhyCommandLine extends BaseCommandLine {
+  command: 'why';
+  target: string;
+  outputFormat: UAPKGOutputFormat;
+}
+
+export interface ListCommandLine extends BaseCommandLine {
+  command: 'list';
+  depth: number;
+  outputFormat: UAPKGOutputFormat;
+}
+
+export interface RemoveCommandLine extends BaseCommandLine {
+  command: 'remove';
+  packageName: string;
+  outputFormat: UAPKGOutputFormat;
+}
+
 export type UAPKGCommandLine =
   | InitCommandLine
   | AddCommandLine
@@ -61,7 +105,11 @@ export type UAPKGCommandLine =
   | UpdateCommandLine
   | ProjectGetNameCommandLine
   | ConfigCommandLine
-  | PackCommandLine;
+  | PackCommandLine
+  | OutdatedCommandLine
+  | WhyCommandLine
+  | ListCommandLine
+  | RemoveCommandLine;
 
 export interface CommonCommandLineOptions {
   cwd?: string;
@@ -71,10 +119,38 @@ export interface AddCommandLineOptions extends CommonCommandLineOptions {
   force?: boolean;
   pin?: boolean;
   harnessed?: boolean;
+  dev?: boolean;
+  registry?: string;
+  dryRun?: boolean;
+  outputFormat?: UAPKGOutputFormat;
 }
 
 export interface InstallOrUpdateCommandLineOptions extends CommonCommandLineOptions {
   force?: boolean;
+  frozen?: boolean;
+  dryRun?: boolean;
+  outputFormat?: UAPKGOutputFormat;
+}
+
+export interface UpdateFactoryOptions extends InstallOrUpdateCommandLineOptions {
+  specs?: string[];
+}
+
+export interface OutdatedFactoryOptions extends CommonCommandLineOptions {
+  outputFormat?: UAPKGOutputFormat;
+}
+
+export interface WhyFactoryOptions extends CommonCommandLineOptions {
+  outputFormat?: UAPKGOutputFormat;
+}
+
+export interface ListFactoryOptions extends CommonCommandLineOptions {
+  depth?: number;
+  outputFormat?: UAPKGOutputFormat;
+}
+
+export interface RemoveFactoryOptions extends CommonCommandLineOptions {
+  outputFormat?: UAPKGOutputFormat;
 }
 
 export interface ConfigCommonOptions extends CommonCommandLineOptions {
@@ -113,6 +189,10 @@ export class UAPKGCommandLineFactory {
       force: options.force === true,
       pin: options.pin === true,
       harnessed: options.harnessed === true,
+      dev: options.dev === true,
+      registry: options.registry,
+      dryRun: options.dryRun === true,
+      outputFormat: options.outputFormat ?? 'text',
     };
   }
 
@@ -121,14 +201,55 @@ export class UAPKGCommandLineFactory {
       command: 'install',
       cwd: this.resolveCwd(options.cwd),
       force: options.force === true,
+      frozen: options.frozen === true,
+      dryRun: options.dryRun === true,
+      outputFormat: options.outputFormat ?? 'text',
     };
   }
 
-  createUpdate(options: InstallOrUpdateCommandLineOptions = {}): UpdateCommandLine {
+  createUpdate(options: UpdateFactoryOptions = {}): UpdateCommandLine {
     return {
       command: 'update',
       cwd: this.resolveCwd(options.cwd),
+      specs: options.specs ?? [],
       force: options.force === true,
+      dryRun: options.dryRun === true,
+      outputFormat: options.outputFormat ?? 'text',
+    };
+  }
+
+  createOutdated(options: OutdatedFactoryOptions = {}): OutdatedCommandLine {
+    return {
+      command: 'outdated',
+      cwd: this.resolveCwd(options.cwd),
+      outputFormat: options.outputFormat ?? 'text',
+    };
+  }
+
+  createWhy(target: string, options: WhyFactoryOptions = {}): WhyCommandLine {
+    return {
+      command: 'why',
+      cwd: this.resolveCwd(options.cwd),
+      target,
+      outputFormat: options.outputFormat ?? 'text',
+    };
+  }
+
+  createList(options: ListFactoryOptions = {}): ListCommandLine {
+    return {
+      command: 'list',
+      cwd: this.resolveCwd(options.cwd),
+      depth: options.depth ?? 0,
+      outputFormat: options.outputFormat ?? 'text',
+    };
+  }
+
+  createRemove(packageName: string, options: RemoveFactoryOptions = {}): RemoveCommandLine {
+    return {
+      command: 'remove',
+      cwd: this.resolveCwd(options.cwd),
+      packageName,
+      outputFormat: options.outputFormat ?? 'text',
     };
   }
 
