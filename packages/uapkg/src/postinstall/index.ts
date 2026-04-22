@@ -33,6 +33,12 @@ export {
 // Markers
 export { MarkerBlockEditor } from './markers/MarkerBlockEditor.js';
 export { MarkerBlockService } from './markers/MarkerBlockService.js';
+export {
+  MarkerIntegrityValidator,
+  type MarkerIntegrityResult,
+  type MarkerIntegrityOk,
+  type MarkerIntegrityFail,
+} from './markers/MarkerIntegrityValidator.js';
 
 // Unreal
 export { BuildCsInjector } from './unreal/BuildCsInjector.js';
@@ -60,4 +66,5 @@ export {
   type PostinstallOrchestratorInput,
   type PostinstallReport,
 } from './runner/PostinstallOrchestrator.js';
+
 
