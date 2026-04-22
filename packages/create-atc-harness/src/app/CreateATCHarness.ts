@@ -142,7 +142,7 @@ export class CreateATCHarness {
       const rootSourceSpecifier = this.resolveRootDependencySourceSpecifier(manifestResolution);
       status.setStatus(`[UAPKG] Harnessing ${manifestResolution.manifest.name ?? 'plugin'}...`);
       await this.uapkgService.addDependency(outputRoot, rootSourceSpecifier, {
-        harnessed: true,
+        dev: true,
       });
 
       for (const dependencySpecifier of this.resolveDirectHarnessedDependencySourceSpecifiers(
@@ -151,7 +151,7 @@ export class CreateATCHarness {
       )) {
         status.setStatus(`[UAPKG] Harnessing direct dependency ${dependencySpecifier.name}...`);
         await this.uapkgService.addDependency(outputRoot, dependencySpecifier.sourceSpecifier, {
-          harnessed: true,
+          dev: true,
         });
       }
 

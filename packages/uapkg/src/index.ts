@@ -1,10 +1,10 @@
 // ---------------------------------------------------------------------------
 // @uapkg/uapkg — public API
 //
-// Phase 8 rewrite: this barrel exposes the new composition-root driven
-// command surface. Legacy exports (DependencyGraphBuilder, TOMLLockfileRepository,
-// DependencyInstaller, SafetyPolicy, UAPKGManifest types, etc.) were removed
-// in Phase 10.
+// Phase 8 + Phase 10 final surface. Legacy exports (`UAPKGManifest`,
+// `FileManifestRepository`, `DependencyGraphBuilder`, `TOMLLockfileRepository`,
+// `DependencyInstaller`, `SafetyPolicy`, etc.) were removed in Phase 10; use
+// `@uapkg/package-manifest` + `@uapkg/package-manifest-schema` instead.
 // ---------------------------------------------------------------------------
 
 // Application dispatcher + composition root
@@ -25,11 +25,22 @@ export { OutdatedCommand, type OutdatedCommandOptions } from './commands/Outdate
 export { RemoveCommand, type RemoveCommandOptions } from './commands/RemoveCommand.js';
 export { UpdateCommand, type UpdateCommandOptions } from './commands/UpdateCommand.js';
 export { WhyCommand, type WhyCommandOptions } from './commands/WhyCommand.js';
-// Commands — kept from pre-Phase-8 (already compose with the new packages)
+// Commands — retained, ported onto CompositionRoot in Phase 10
 export { ConfigCommand } from './commands/ConfigCommand.js';
-export { InitCommand } from './commands/InitCommand.js';
+export { InitCommand, type InitCommandOptions } from './commands/InitCommand.js';
 export { PackCommand } from './commands/PackCommand.js';
-export { ProjectGetNameCommand } from './commands/ProjectGetNameCommand.js';
+export {
+  ProjectGetNameCommand,
+  type ProjectGetNameCommandOptions,
+} from './commands/ProjectGetNameCommand.js';
+
+// Prompt abstractions (used by init)
+export { InkPromptService } from './prompts/InkPromptService.js';
+export type { PromptService, SelectOption } from './prompts/PromptService.js';
+export {
+  ProjectContextDetector,
+  type ProjectContextDetection,
+} from './prompts/ProjectContextDetector.js';
 
 // Reporting
 export { DiagnosticReporter } from './reporting/DiagnosticReporter.js';
@@ -38,12 +49,3 @@ export { JsonReporter, type JsonEnvelope } from './reporting/JsonReporter.js';
 
 // Postinstall — new subsystem (Phase 7)
 export * from './postinstall/index.js';
-
-// Legacy re-exports retained for external consumers (e.g. create-atc-harness).
-// These will move onto `@uapkg/package-manifest` in a follow-up, after which
-// they can be deleted.
-export { FileManifestRepository } from './manifest/ManifestRepository.js';
-export type { ManifestType, UAPKGManifest } from './domain/UAPKGManifest.js';
-export { UAPKGManifestSchema } from './domain/UAPKGManifest.js';
-
-

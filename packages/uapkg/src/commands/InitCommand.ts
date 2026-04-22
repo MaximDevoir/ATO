@@ -1,54 +1,84 @@
-import type { ManifestType, UAPKGManifest } from '../domain/UAPKGManifest.js';
-import type { ManifestRepository } from '../manifest/ManifestRepository.js';
-import type { ProjectContextDetector } from '../services/ProjectContextDetector.js';
-import type { Reporter } from '../ui/ConsoleReporter.js';
-import type { PromptService } from '../ui/PromptService.js';
+import type { PackageName, PackageVersion } from '@uapkg/common-schema';
+import { PackageNameSchema, PackageVersionSchema } from '@uapkg/common-schema';
+import { ManifestReader, ManifestWriter } from '@uapkg/package-manifest';
+import type { Manifest, ManifestKind } from '@uapkg/package-manifest-schema';
+import type { CompositionRoot } from '../app/CompositionRoot.js';
+import type { ProjectContextDetector } from '../prompts/ProjectContextDetector.js';
+import type { PromptService } from '../prompts/PromptService.js';
 import type { Command } from './Command.js';
 
 export interface InitCommandOptions {
-  cwd: string;
-  explicitType?: ManifestType;
-  explicitName?: string;
+  readonly explicitKind?: ManifestKind;
+  readonly explicitName?: string;
 }
 
+// ---------------------------------------------------------------------------
+// InitCommand — creates a minimal `uapkg.json` (new schema) for the current
+// working directory, interactively selecting `kind` + `name` when missing.
+//
+// - Writes via `@uapkg/package-manifest` ManifestWriter.
+// - Pre-check uses ManifestReader (fails fast if manifest already present).
+// - No mutation beyond the single write; idempotency is the caller's duty
+//   (create-atc-harness checks existence before calling).
+// ---------------------------------------------------------------------------
+
+const DEFAULT_INITIAL_VERSION = '0.0.0';
+
 export class InitCommand implements Command {
-  constructor(
+  public constructor(
+    private readonly root: CompositionRoot,
     private readonly options: InitCommandOptions,
-    private readonly manifestRepository: ManifestRepository,
     private readonly detector: ProjectContextDetector,
-    private readonly promptService: PromptService,
-    private readonly reporter: Reporter,
+    private readonly prompts: PromptService,
   ) {}
 
-  async execute() {
-    if (this.manifestRepository.exists(this.options.cwd)) {
-      throw new Error('[uapkg] uapkg.json already exists in current directory');
+  public async execute(): Promise<number> {
+    const existing = await new ManifestReader().read(this.root.cwd);
+    if (existing.ok) {
+      process.stderr.write('[uapkg] uapkg.json already exists in current directory\n');
+      return 1;
     }
 
-    const detected = this.detector.detect(this.options.cwd);
-    const selectedType = this.options.explicitType
-      ? this.options.explicitType
-      : ((await this.promptService.select(
-          'Select manifest type',
-          [
-            { label: 'Project', value: 'project' },
-            { label: 'Plugin', value: 'plugin' },
-          ],
-          detected.suggestedType,
-        )) as ManifestType);
+    const detected = this.detector.detect(this.root.cwd);
+    const kind = this.options.explicitKind
+      ?? ((await this.prompts.select(
+        'Select manifest kind',
+        [
+          { label: 'Project', value: 'project' },
+          { label: 'Plugin', value: 'plugin' },
+        ],
+        detected.suggestedKind,
+      )) as ManifestKind);
 
-    const name = this.options.explicitName
-      ? this.options.explicitName
-      : await this.promptService.text('Package name', detected.suggestedName);
+    const rawName = this.options.explicitName
+      ?? (await this.prompts.text('Package name', detected.suggestedName));
 
-    const manifest: UAPKGManifest = {
-      name: name.trim(),
-      type: selectedType,
-      dependencies: [],
-    };
+    const nameResult = PackageNameSchema.safeParse(rawName.trim());
+    if (!nameResult.success) {
+      process.stderr.write(`[uapkg] Invalid package name "${rawName}": must be lowercase alphanumeric with hyphens\n`);
+      return 1;
+    }
+    const versionResult = PackageVersionSchema.safeParse(DEFAULT_INITIAL_VERSION);
+    if (!versionResult.success) {
+      process.stderr.write(`[uapkg] Internal error: default version "${DEFAULT_INITIAL_VERSION}" rejected by schema\n`);
+      return 1;
+    }
 
-    this.manifestRepository.write(this.options.cwd, manifest);
-    this.reporter.info(`[uapkg] Created uapkg.json (${selectedType}) for ${manifest.name}`);
+    const manifest: Manifest = this.buildManifest(kind, nameResult.data, versionResult.data);
+    const writeResult = await new ManifestWriter().write(this.root.cwd, manifest);
+    if (!writeResult.ok) {
+      this.root.diagnostics.reportAll(writeResult.diagnostics);
+      return 1;
+    }
+
+    process.stdout.write(`[uapkg] Created uapkg.json (${kind}) for ${String(nameResult.data)}\n`);
     return 0;
+  }
+
+  private buildManifest(kind: ManifestKind, name: PackageName, version: PackageVersion): Manifest {
+    if (kind === 'plugin') {
+      return { name, version, kind: 'plugin' };
+    }
+    return { name, version, kind: 'project' };
   }
 }

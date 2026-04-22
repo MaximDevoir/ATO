@@ -10,20 +10,18 @@ import { ProjectGetNameCommand } from '../commands/ProjectGetNameCommand.js';
 import { RemoveCommand } from '../commands/RemoveCommand.js';
 import { UpdateCommand } from '../commands/UpdateCommand.js';
 import { WhyCommand } from '../commands/WhyCommand.js';
-import { FileManifestRepository } from '../manifest/ManifestRepository.js';
-import { ProjectContextDetector } from '../services/ProjectContextDetector.js';
-import { ConsoleReporter } from '../ui/ConsoleReporter.js';
-import { InkPromptService } from '../ui/PromptService.js';
+import { InkPromptService } from '../prompts/InkPromptService.js';
+import { ProjectContextDetector } from '../prompts/ProjectContextDetector.js';
 import { CompositionRoot } from './CompositionRoot.js';
 
 /**
  * Dispatcher: maps the parsed command-line shape to a concrete command
  * implementation, wiring dependencies via {@link CompositionRoot}.
  *
- * `init`, `project-get-name`, `pack`, `config` still use their pre-existing
- * constructors — they already produce correct behavior against the new
- * `@uapkg/config` / `@uapkg/pack` infrastructure. Phase 10 will migrate them
- * onto `CompositionRoot` + delete the remaining legacy IO services.
+ * Every command now composes over {@link CompositionRoot}. The `init` and
+ * `project-get-name` commands additionally receive a prompt service +
+ * project-context detector (split out of the legacy `ui/` + `services/`
+ * folders in Phase 10).
  */
 export class UAPKGApplication {
   async run(commandLine: UAPKGCommandLine): Promise<number> {
@@ -100,19 +98,14 @@ export class UAPKGApplication {
 
       case 'init':
         return new InitCommand(
-          { cwd: commandLine.cwd, explicitType: commandLine.type, explicitName: commandLine.name },
-          new FileManifestRepository(),
+          root,
+          { explicitKind: commandLine.type, explicitName: commandLine.name },
           new ProjectContextDetector(),
           new InkPromptService(),
-          new ConsoleReporter(),
         ).execute();
 
       case 'project-get-name':
-        return new ProjectGetNameCommand(
-          { cwd: commandLine.cwd },
-          new FileManifestRepository(),
-          new ConsoleReporter(),
-        ).execute();
+        return new ProjectGetNameCommand(root).execute();
 
       default: {
         const exhaustive: never = commandLine;
@@ -122,4 +115,3 @@ export class UAPKGApplication {
     }
   }
 }
-

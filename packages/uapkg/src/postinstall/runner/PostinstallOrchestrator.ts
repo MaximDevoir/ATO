@@ -32,6 +32,12 @@ export interface PostinstallOrchestratorInput {
   readonly projectRoot: string;
   readonly manifestType: 'project' | 'plugin';
   readonly candidates: readonly PostinstallCandidate[];
+  /**
+   * Optional explicit module-name list (from `postinstall.modules` in the
+   * project manifest). When provided, overrides the names discovered from
+   * `.uproject`'s `Modules[]`. An empty array = override to "no modules".
+   */
+  readonly moduleNameOverride?: readonly string[];
 }
 
 /**
@@ -75,7 +81,7 @@ export class PostinstallOrchestrator {
       return bag.toResult({ executed, skipped });
     }
 
-    const catalogResult = this.buildCatalog(input.projectRoot, plan);
+    const catalogResult = this.buildCatalog(input.projectRoot, plan, input.moduleNameOverride);
     if (!catalogResult.ok) {
       bag.mergeArray(catalogResult.diagnostics);
       return bag.toFailure();
@@ -120,20 +126,26 @@ export class PostinstallOrchestrator {
   private buildCatalog(
     projectRoot: string,
     plan: Array<{ candidate: PostinstallCandidate; loaded: LoadedPostinstall }>,
+    moduleNameOverride: readonly string[] | undefined,
   ): Result<{ catalog: ReturnType<UnrealSourceCatalogBuilder['build']>; moduleNames: readonly string[] }> {
     const hasModuleSetup = plan.some((entry) => Boolean(entry.loaded.definition.setupModules));
     let moduleNames: readonly string[] = [];
     if (hasModuleSetup) {
-      try {
-        const uprojectPath = this.projectFileLocator.findProjectFile(projectRoot);
-        moduleNames = this.uprojectReader.readModuleNames(uprojectPath);
-      } catch (error) {
-        return {
-          ok: false,
-          diagnostics: [
-            createIoErrorDiagnostic(projectRoot, error instanceof Error ? error.message : String(error)),
-          ],
-        };
+      if (moduleNameOverride !== undefined) {
+        // Explicit override from project manifest wins; empty = no modules.
+        moduleNames = moduleNameOverride;
+      } else {
+        try {
+          const uprojectPath = this.projectFileLocator.findProjectFile(projectRoot);
+          moduleNames = this.uprojectReader.readModuleNames(uprojectPath);
+        } catch (error) {
+          return {
+            ok: false,
+            diagnostics: [
+              createIoErrorDiagnostic(projectRoot, error instanceof Error ? error.message : String(error)),
+            ],
+          };
+        }
       }
     }
 
@@ -201,4 +213,7 @@ export class PostinstallOrchestrator {
     if (!result.ok) onFail();
   }
 }
+
+
+
 

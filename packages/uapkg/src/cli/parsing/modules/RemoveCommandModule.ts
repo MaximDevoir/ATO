@@ -8,7 +8,7 @@ export class RemoveCommandModule implements UAPKGCommandModule {
   register(parser: Argv, sink: CommandLineSink): Argv {
     return parser.command(
       'remove <package>',
-      'Remove a dependency from uapkg.json (run `uapkg install` to remove from disk)',
+      'Remove a dependency from uapkg.json and reconcile the install tree',
       (builder) =>
         builder
           .positional('package', { type: 'string', demandOption: true, describe: 'Package name to remove' })
@@ -24,4 +24,5 @@ export class RemoveCommandModule implements UAPKGCommandModule {
     );
   }
 }
+
 

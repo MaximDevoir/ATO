@@ -26,11 +26,6 @@ export class AddCommandModule implements UAPKGCommandModule {
             default: false,
             describe: 'Add/replace project override for this dependency',
           })
-          .option('harnessed', {
-            type: 'boolean',
-            default: false,
-            describe: 'Mark dependency as harnessed (tracked in lockfile, but protected during updates)',
-          })
           .option('dev', { type: 'boolean', default: false, describe: 'Add to devDependencies' })
           .option('registry', { type: 'string', describe: 'Registry name (defaults to config `registry`)' })
           .option('dry-run', { type: 'boolean', default: false, describe: 'Compute the plan but perform no IO' })
@@ -41,7 +36,6 @@ export class AddCommandModule implements UAPKGCommandModule {
             cwd: process.cwd(),
             force: argv.force === true,
             pin: argv.pin === true,
-            harnessed: argv.harnessed === true,
             dev: argv.dev === true,
             registry: typeof argv.registry === 'string' ? argv.registry : undefined,
             dryRun: argv['dry-run'] === true,

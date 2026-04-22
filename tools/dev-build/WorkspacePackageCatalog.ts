@@ -66,6 +66,11 @@ export class WorkspacePackageCatalog {
         projectName: 'uapkg-package-manifest',
         directory: path.join(this.workspaceRoot, 'packages', 'uapkg-package-manifest'),
       },
+      {
+        id: '@uapkg/installer',
+        projectName: 'uapkg-installer',
+        directory: path.join(this.workspaceRoot, 'packages', 'uapkg-installer'),
+      },
     ];
   }
 }

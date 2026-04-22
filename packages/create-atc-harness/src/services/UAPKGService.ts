@@ -1,10 +1,12 @@
 import * as path from 'node:path';
-import { createUAPKGCommandLineFactory, FileManifestRepository, UAPKGApplication } from 'uapkg';
+import { ManifestReader } from '@uapkg/package-manifest';
+import { createUAPKGCommandLineFactory, UAPKGApplication } from 'uapkg';
 import type { FileSystem } from './FileSystem';
 
 export interface AddDependencyOptions {
   pin?: boolean;
-  harnessed?: boolean;
+  /** Add to devDependencies (old "harnessed" semantics). */
+  dev?: boolean;
   force?: boolean;
 }
 
@@ -16,18 +18,18 @@ export interface UAPKGServiceLike {
 
 export class UAPKGService implements UAPKGServiceLike {
   private readonly application = new UAPKGApplication();
-  private readonly manifestRepository = new FileManifestRepository();
+  private readonly manifestReader = new ManifestReader();
   private readonly commandLineFactory = createUAPKGCommandLineFactory();
 
   constructor(private readonly fileSystem: FileSystem) {}
 
   async ensureProjectInitialized(projectDirectory: string) {
-    if (this.manifestRepository.exists(projectDirectory)) {
-      const manifest = this.manifestRepository.read(projectDirectory);
-      if (manifest.type === 'project') {
-        return;
-      }
-      throw new Error(`[create-atc-harness] Expected harness manifest type 'project', found '${manifest.type}'`);
+    const existing = await this.manifestReader.read(projectDirectory);
+    if (existing.ok) {
+      if (existing.value.kind === 'project') return;
+      throw new Error(
+        `[create-atc-harness] Expected harness manifest kind 'project', found '${existing.value.kind}'`,
+      );
     }
 
     const projectName = this.resolveProjectName(projectDirectory);
@@ -46,7 +48,7 @@ export class UAPKGService implements UAPKGServiceLike {
         cwd: projectDirectory,
         force: options.force,
         pin: options.pin,
-        harnessed: options.harnessed,
+        dev: options.dev,
       }),
     );
   }

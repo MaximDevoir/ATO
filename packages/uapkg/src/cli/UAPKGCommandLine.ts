@@ -30,7 +30,6 @@ export interface AddCommandLine extends BaseCommandLine {
   source: string;
   force: boolean;
   pin: boolean;
-  harnessed: boolean;
   dev: boolean;
   registry?: string;
   dryRun: boolean;
@@ -118,7 +117,6 @@ export interface CommonCommandLineOptions {
 export interface AddCommandLineOptions extends CommonCommandLineOptions {
   force?: boolean;
   pin?: boolean;
-  harnessed?: boolean;
   dev?: boolean;
   registry?: string;
   dryRun?: boolean;
@@ -188,7 +186,6 @@ export class UAPKGCommandLineFactory {
       source,
       force: options.force === true,
       pin: options.pin === true,
-      harnessed: options.harnessed === true,
       dev: options.dev === true,
       registry: options.registry,
       dryRun: options.dryRun === true,
