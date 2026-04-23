@@ -29,8 +29,8 @@ export class PackCommandModule implements UAPKGCommandModule {
         sink.set(
           this.factory.createPack({
             cwd: process.cwd(),
-            dryRun: argv['dry-run'] === true,
-            allowMissingLfs: argv['allow-missing-lfs'] === true,
+            dryRun: argv['dry-run'],
+            allowMissingLfs: argv['allow-missing-lfs'],
             outFile: typeof argv.outFile === 'string' ? argv.outFile : undefined,
           }),
         );

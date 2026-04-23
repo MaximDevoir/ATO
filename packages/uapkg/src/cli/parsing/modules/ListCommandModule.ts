@@ -18,7 +18,7 @@ export class ListCommandModule implements UAPKGCommandModule {
           this.factory.createList({
             cwd: process.cwd(),
             depth: typeof argv.depth === 'number' ? argv.depth : 0,
-            outputFormat: argv.json === true ? 'json' : 'text',
+            outputFormat: argv.json ? 'json' : 'text',
           }),
         );
       },

@@ -42,8 +42,8 @@ export class ConfigCommandModule implements UAPKGCommandModule {
             describe: 'Trace value across all layers',
           }),
       (argv) => {
-        const scope = resolveScope(argv.global === true, argv.local === true);
-        const output = argv.json === true ? 'json' : 'text';
+        const scope = resolveScope(argv.global, argv.local);
+        const output = argv.json ? 'json' : 'text';
         const action = String(argv.action);
         const cwd = process.cwd();
 
@@ -54,8 +54,8 @@ export class ConfigCommandModule implements UAPKGCommandModule {
                 cwd,
                 scope,
                 output,
-                showOrigin: argv['show-origin'] === true,
-                trace: argv.trace === true,
+                showOrigin: argv['show-origin'],
+                trace: argv.trace,
               }),
             );
             return;

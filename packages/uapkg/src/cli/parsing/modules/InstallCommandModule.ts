@@ -28,10 +28,10 @@ export class InstallCommandModule implements UAPKGCommandModule {
         sink.set(
           this.factory.createInstall({
             cwd: process.cwd(),
-            force: argv.force === true,
-            frozen: argv.frozen === true,
-            dryRun: argv['dry-run'] === true,
-            outputFormat: argv.json === true ? 'json' : 'text',
+            force: argv.force,
+            frozen: argv.frozen,
+            dryRun: argv['dry-run'],
+            outputFormat: argv.json ? 'json' : 'text',
           }),
         );
       },

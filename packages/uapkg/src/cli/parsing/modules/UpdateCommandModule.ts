@@ -26,9 +26,9 @@ export class UpdateCommandModule implements UAPKGCommandModule {
           this.factory.createUpdate({
             cwd: process.cwd(),
             specs,
-            force: argv.force === true,
-            dryRun: argv['dry-run'] === true,
-            outputFormat: argv.json === true ? 'json' : 'text',
+            force: argv.force,
+            dryRun: argv['dry-run'],
+            outputFormat: argv.json ? 'json' : 'text',
           }),
         );
       },

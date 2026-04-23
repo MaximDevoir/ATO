@@ -17,7 +17,7 @@ export class RemoveCommandModule implements UAPKGCommandModule {
         sink.set(
           this.factory.createRemove(String(argv.package), {
             cwd: process.cwd(),
-            outputFormat: argv.json === true ? 'json' : 'text',
+            outputFormat: argv.json ? 'json' : 'text',
           }),
         );
       },

@@ -24,7 +24,7 @@ export class InitCommandModule implements UAPKGCommandModule {
         sink.set(
           this.factory.createInit({
             cwd: process.cwd(),
-            type: argv.type as 'project' | 'plugin' | undefined,
+            type: argv.type,
             name: typeof argv.name === 'string' ? argv.name : undefined,
           }),
         );

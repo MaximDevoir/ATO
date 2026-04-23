@@ -17,7 +17,7 @@ export class WhyCommandModule implements UAPKGCommandModule {
         sink.set(
           this.factory.createWhy(String(argv.package), {
             cwd: process.cwd(),
-            outputFormat: argv.json === true ? 'json' : 'text',
+            outputFormat: argv.json ? 'json' : 'text',
           }),
         );
       },

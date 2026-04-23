@@ -34,12 +34,12 @@ export class AddCommandModule implements UAPKGCommandModule {
         sink.set(
           this.factory.createAdd(String(argv.source), {
             cwd: process.cwd(),
-            force: argv.force === true,
-            pin: argv.pin === true,
-            dev: argv.dev === true,
+            force: argv.force,
+            pin: argv.pin,
+            dev: argv.dev,
             registry: typeof argv.registry === 'string' ? argv.registry : undefined,
-            dryRun: argv['dry-run'] === true,
-            outputFormat: argv.json === true ? 'json' : 'text',
+            dryRun: argv['dry-run'],
+            outputFormat: argv.json ? 'json' : 'text',
           }),
         );
       },
