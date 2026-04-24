@@ -18,6 +18,7 @@
       "@uapkg/pack": ["./packages/uapkg-pack/src/index.ts"],
       "@uapkg/diagnostics": ["./packages/uapkg-diagnostics/src/index.ts"],
       "@uapkg/diagnostics-format": ["./packages/uapkg-diagnostics-format/src/index.ts"],
+      "@uapkg/diagnostics-format/ink": ["./packages/uapkg-diagnostics-format/src/ink/index.ts"],
       "@uapkg/common": ["./packages/uapkg-common/src/index.ts"],
       "@uapkg/common-schema": ["./packages/uapkg-common-schema/src/index.ts"],
       "@uapkg/registry-schema": ["./packages/uapkg-registry-schema/src/index.ts"],

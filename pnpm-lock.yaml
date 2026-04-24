@@ -246,6 +246,16 @@ importers:
       '@uapkg/diagnostics':
         specifier: workspace:^
         version: link:../uapkg-diagnostics
+      ink:
+        specifier: 6.8.0
+        version: 6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4)
+      react:
+        specifier: 19.2.4
+        version: 19.2.4
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
 
   packages/uapkg-installer:
     dependencies:

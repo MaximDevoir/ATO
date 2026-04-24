@@ -1,44 +1,35 @@
 import type { Diagnostic } from '@uapkg/diagnostics';
-import { createFormatterRegistry, defaultFormatters, type FormatterRegistry } from '@uapkg/diagnostics-format';
-import { ProcessTextSink, sortDiagnostics, type TextSink } from './TextSink.js';
+import type { DiagnosticRenderer } from './DiagnosticRenderer.js';
+import { InkDiagnosticRenderer } from './InkDiagnosticRenderer.js';
+import { sortDiagnostics } from './TextSink.js';
 
 /**
  * Human-readable diagnostic reporter.
  *
- * Errors go to stderr; warnings + info go to stdout. Severity icons are
- * ASCII-only so the output is pipe-safe. Formatting is delegated to the
- * shared `FormatterRegistry` in `@uapkg/diagnostics-format`, which resolves
- * code-specific formatters and falls back to `formatPlainText` for anything
- * unknown.
+ * Routing policy: `error` → stderr, `warning` / `info` → stdout. Output
+ * rendering is delegated to an injected {@link DiagnosticRenderer} so this
+ * class is UI-agnostic.
  *
- * A single instance is safe to reuse across multiple commands in one CLI run.
+ * Defaults to the Ink renderer (styled, colored output); tests typically
+ * inject {@link TextDiagnosticRenderer}.
+ *
+ * One instance is safe to reuse across commands in a single CLI run.
  */
 export class DiagnosticReporter {
-  private readonly registry: FormatterRegistry;
-  private readonly stdout: TextSink;
-  private readonly stderr: TextSink;
-
   public constructor(
-    registry: FormatterRegistry = createFormatterRegistry(defaultFormatters),
-    stdout: TextSink = new ProcessTextSink(process.stdout),
-    stderr: TextSink = new ProcessTextSink(process.stderr),
-  ) {
-    this.registry = registry;
-    this.stdout = stdout;
-    this.stderr = stderr;
-  }
+    private readonly renderer: DiagnosticRenderer = new InkDiagnosticRenderer(),
+  ) {}
 
   public reportAll(diagnostics: readonly Diagnostic[]): void {
     if (diagnostics.length === 0) return;
-    for (const d of sortDiagnostics(diagnostics)) {
-      this.reportOne(d);
-    }
+    const sorted = sortDiagnostics(diagnostics);
+    const errors = sorted.filter((d) => d.level === 'error');
+    const others = sorted.filter((d) => d.level !== 'error');
+    if (errors.length > 0) this.renderer.render(errors, 'stderr');
+    if (others.length > 0) this.renderer.render(others, 'stdout');
   }
 
   public reportOne(diagnostic: Diagnostic): void {
-    const icon = diagnostic.level === 'error' ? 'x' : diagnostic.level === 'warning' ? '!' : 'i';
-    const body = this.registry.format(diagnostic);
-    const line = `[${icon}] ${body}`;
-    (diagnostic.level === 'error' ? this.stderr : this.stdout).writeLine(line);
+    this.reportAll([diagnostic]);
   }
 }
