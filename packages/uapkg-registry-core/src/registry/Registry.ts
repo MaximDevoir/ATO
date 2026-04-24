@@ -1,5 +1,11 @@
 import type { RegistryIdentifier, UnixTimestamp } from '@uapkg/common-schema';
-import { DiagnosticBag, ok, type Result } from '@uapkg/diagnostics';
+import {
+  createRegistryUnreachableDiagnostic,
+  type Diagnostic,
+  DiagnosticBag,
+  ok,
+  type Result,
+} from '@uapkg/diagnostics';
 import type { PackageRegistryManifest } from '@uapkg/registry-schema';
 import type {
   RegistryDescriptor,
@@ -20,6 +26,7 @@ import { RegistryUpdater } from './RegistryUpdater.js';
  * Exposes registry-level operations: sync, read manifests, resolve versions.
  */
 export class Registry {
+  public readonly registryName: string;
   public readonly id: RegistryIdentifier;
   public readonly descriptor: RegistryDescriptor;
   public readonly shortId: string;
@@ -33,12 +40,14 @@ export class Registry {
   private readonly ttlSeconds: number;
 
   private constructor(
+    registryName: string,
     descriptor: RegistryDescriptor,
     id: RegistryIdentifier,
     shortId: string,
     gitBinary: string,
     ttlSeconds: number,
   ) {
+    this.registryName = registryName;
     this.descriptor = descriptor;
     this.id = id;
     this.shortId = shortId;
@@ -50,13 +59,14 @@ export class Registry {
 
   /** Factory — use this instead of `new`. */
   static create(
+    registryName: string,
     descriptor: RegistryDescriptor,
     id: RegistryIdentifier,
     shortId: string,
     gitBinary: string,
     ttlSeconds: number,
   ): Registry {
-    return new Registry(descriptor, id, shortId, gitBinary, ttlSeconds);
+    return new Registry(registryName, descriptor, id, shortId, gitBinary, ttlSeconds);
   }
 
   // -------------------------------------------------------------------
@@ -67,6 +77,7 @@ export class Registry {
   async ensureUpToDate(options?: RegistryUpdateOptions): Promise<Result<RegistryUpdateResult>> {
     const forced = options?.bypassFreshnessCheck ?? false;
     const lastSyncAt = await this.getLastSyncTimestamp();
+    const initialized = this.metadataReader.exists();
 
     const decision = evaluateSyncPolicy({
       lastSyncAt,
@@ -80,14 +91,23 @@ export class Registry {
       return ok(reason);
     }
 
-    return this.performUpdate();
+    return this.performUpdate(initialized);
   }
 
   /** Read a package registry manifest from the local cache. */
   async getPackageManifest(packageName: string): Promise<Result<PackageRegistryManifest>> {
+    const bag = new DiagnosticBag();
     const readyResult = await this.ensureReady();
     if (!readyResult.ok) return readyResult as Result<never>;
-    return this.packageReader.readPackageManifest(packageName);
+    bag.mergeArray(readyResult.diagnostics);
+
+    const packageResult = await this.packageReader.readPackageManifest(packageName);
+    if (!packageResult.ok) {
+      bag.mergeArray(packageResult.diagnostics);
+      return bag.toFailure();
+    }
+
+    return bag.toResult(packageResult.value);
   }
 
   /** Resolve the best matching version for a package. */
@@ -97,9 +117,18 @@ export class Registry {
     registryName: string,
     current?: string,
   ): Promise<Result<ResolvedVersion>> {
+    const bag = new DiagnosticBag();
     const manifestResult = await this.getPackageManifest(packageName);
     if (!manifestResult.ok) return manifestResult as Result<never>;
-    return resolveVersion(manifestResult.value, versionRange, registryName, current);
+    bag.mergeArray(manifestResult.diagnostics);
+
+    const resolved = resolveVersion(manifestResult.value, versionRange, registryName, current);
+    if (!resolved.ok) {
+      bag.mergeArray(resolved.diagnostics);
+      return bag.toFailure();
+    }
+
+    return bag.toResult(resolved.value);
   }
 
   // -------------------------------------------------------------------
@@ -108,14 +137,12 @@ export class Registry {
 
   private async ensureReady(): Promise<Result<void>> {
     if (!this.initPromise) {
-      this.initPromise = this.ensureUpToDate().then((r) =>
-        r.ok ? ok(undefined) : { ok: false as const, diagnostics: r.diagnostics },
-      );
+      this.initPromise = this.ensureUpToDate().then((r) => (r.ok ? ok(undefined, r.diagnostics) : r));
     }
     return this.initPromise;
   }
 
-  private async performUpdate(): Promise<Result<RegistryUpdateResult>> {
+  private async performUpdate(initialized: boolean): Promise<Result<RegistryUpdateResult>> {
     const bag = new DiagnosticBag();
     const lock = new RegistryLock(getRegistryLockPath(this.shortId));
 
@@ -142,7 +169,12 @@ export class Registry {
 
       const updateResult = await this.updater.update();
       if (!updateResult.ok) {
-        bag.mergeArray(updateResult.diagnostics);
+        const unreachable = this.toRegistryUnreachableDiagnostic(updateResult.diagnostics, initialized);
+        if (initialized) {
+          this.hasUpdatedThisProcess = true;
+          return ok('Failed', [unreachable]);
+        }
+        bag.add(unreachable);
         return bag.toFailure();
       }
 
@@ -163,5 +195,26 @@ export class Registry {
   private async writeMetadata(): Promise<void> {
     const now = Math.floor(Date.now() / 1000) as UnixTimestamp;
     await this.metadataReader.write({ lastRegistrySyncAt: now, registryIdentifier: this.id });
+  }
+
+  private toRegistryUnreachableDiagnostic(diagnostics: readonly Diagnostic[], initialized: boolean) {
+    const first = diagnostics[0];
+    const cause = first?.message ?? 'Registry update failed.';
+    const httpStatus = this.extractHttpStatus(cause);
+
+    return createRegistryUnreachableDiagnostic({
+      registryName: this.registryName,
+      url: this.descriptor.url,
+      cause,
+      initialized,
+      httpStatus,
+      level: initialized ? 'warning' : 'error',
+    });
+  }
+
+  private extractHttpStatus(text: string): number | undefined {
+    const match = text.match(/\b([1-5][0-9][0-9])\b/);
+    if (!match) return undefined;
+    return Number(match[1]);
   }
 }

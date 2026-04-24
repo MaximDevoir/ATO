@@ -1,4 +1,5 @@
 import type { Diagnostic } from '@uapkg/diagnostics';
+import type { Lockfile } from '@uapkg/package-manifest-schema';
 import type { CompositionRoot } from '../app/CompositionRoot.js';
 import { InstallProgressReporter } from '../reporting/InstallProgressReporter.js';
 import type { Command } from './Command.js';
@@ -33,17 +34,26 @@ export class InstallCommand implements Command {
 
   public async execute(): Promise<number> {
     const pm = this.root.packageManifest;
+    const commandDiagnostics: Diagnostic[] = [];
 
     const manifestResult = await pm.readManifest();
     if (!manifestResult.ok) return this.fail(manifestResult.diagnostics);
     const manifest = manifestResult.value;
 
-    const previousLockfileResult = await pm.readLockfile();
-    const previousLockfile = previousLockfileResult.ok ? previousLockfileResult.value : null;
+    let previousLockfile: Lockfile | null = null;
+    if (!this.options.frozen) {
+      const previousLockfileResult = await pm.readLockfileOptional();
+      if (!previousLockfileResult.ok) return this.fail(previousLockfileResult.diagnostics);
+      previousLockfile = previousLockfileResult.value;
+    }
 
     const installResult = await pm.install({ frozen: this.options.frozen });
-    if (!installResult.ok) return this.fail(installResult.diagnostics);
+    if (!installResult.ok) return this.fail([...commandDiagnostics, ...installResult.diagnostics]);
+    commandDiagnostics.push(...installResult.diagnostics);
     const lockfile = installResult.value;
+    if (this.options.frozen) {
+      previousLockfile = lockfile;
+    }
 
     const progress = new InstallProgressReporter();
     const consumer = progress.consume(this.root.installer.getStatusStream());
@@ -55,7 +65,7 @@ export class InstallCommand implements Command {
     });
     await consumer;
 
-    if (!executeResult.ok) return this.fail(executeResult.diagnostics);
+    if (!executeResult.ok) return this.fail([...commandDiagnostics, ...executeResult.diagnostics]);
     const plan = executeResult.value;
 
     const builder = new PostinstallCandidateBuilder();
@@ -72,7 +82,9 @@ export class InstallCommand implements Command {
         moduleNameOverride,
       });
       postDiagnostics = postResult.diagnostics;
-      if (!postResult.ok) return this.fail([...executeResult.diagnostics, ...postResult.diagnostics]);
+      if (!postResult.ok) {
+        return this.fail([...commandDiagnostics, ...executeResult.diagnostics, ...postResult.diagnostics]);
+      }
     }
 
     if (this.options.outputFormat === 'json') {
@@ -80,12 +92,12 @@ export class InstallCommand implements Command {
         status: 'ok',
         command: 'install',
         data: { plan: plan.summary },
-        diagnostics: [...executeResult.diagnostics, ...postDiagnostics],
+        diagnostics: [...commandDiagnostics, ...executeResult.diagnostics, ...postDiagnostics],
       });
       return 0;
     }
 
-    this.root.diagnostics.reportAll([...executeResult.diagnostics, ...postDiagnostics]);
+    this.root.diagnostics.reportAll([...commandDiagnostics, ...executeResult.diagnostics, ...postDiagnostics]);
     progress.renderSummary(plan.summary);
     return 0;
   }

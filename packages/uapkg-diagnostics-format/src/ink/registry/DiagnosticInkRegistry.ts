@@ -40,4 +40,3 @@ export class DiagnosticInkRegistry implements IDiagnosticInkRegistry {
 export function createInkRegistry(seed?: DiagnosticInkComponentMap): DiagnosticInkRegistry {
   return new DiagnosticInkRegistry(seed);
 }
-

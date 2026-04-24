@@ -1,5 +1,3 @@
-import type { ReactElement } from 'react';
-import { Box, Text } from 'ink';
 import type {
   CircularDepDiagnostic,
   PackageNotFoundDiagnostic,
@@ -7,6 +5,8 @@ import type {
   VersionConflictDiagnostic,
   VersionNotFoundDiagnostic,
 } from '@uapkg/diagnostics';
+import { Box, Text } from 'ink';
+import type { ReactElement } from 'react';
 import type { DiagnosticBodyProps, DiagnosticInkComponentMap } from '../contracts/InkTypes.js';
 
 function VersionConflict({ diagnostic }: DiagnosticBodyProps): ReactElement {
@@ -14,11 +14,14 @@ function VersionConflict({ diagnostic }: DiagnosticBodyProps): ReactElement {
   return (
     <Box flexDirection="column">
       <Text>
-        Package <Text color="cyan">{data.packageName}</Text> in registry{' '}
-        <Text color="cyan">{data.registry}</Text> resolved to conflicting versions:
+        Package <Text color="cyan">{data.packageName}</Text> in registry <Text color="cyan">{data.registry}</Text>{' '}
+        resolved to conflicting versions:
       </Text>
       {data.versions.map((v) => (
-        <Text key={v}> • <Text color="yellow">{v}</Text></Text>
+        <Text key={v}>
+          {' '}
+          • <Text color="yellow">{v}</Text>
+        </Text>
       ))}
     </Box>
   );
@@ -37,8 +40,7 @@ function PackageNotFound({ diagnostic }: DiagnosticBodyProps): ReactElement {
   const data = (diagnostic as PackageNotFoundDiagnostic).data;
   return (
     <Text>
-      Could not find <Text color="cyan">{data.packageName}</Text> in registry{' '}
-      <Text color="cyan">{data.registry}</Text>.
+      Could not find <Text color="cyan">{data.packageName}</Text> in registry <Text color="cyan">{data.registry}</Text>.
     </Text>
   );
 }
@@ -49,8 +51,7 @@ function VersionNotFound({ diagnostic }: DiagnosticBodyProps): ReactElement {
     <Box flexDirection="column">
       <Text>
         No version of <Text color="cyan">{data.packageName}</Text> matches{' '}
-        <Text color="yellow">{data.versionRange}</Text> (registry{' '}
-        <Text color="cyan">{data.registry}</Text>).
+        <Text color="yellow">{data.versionRange}</Text> (registry <Text color="cyan">{data.registry}</Text>).
       </Text>
       {data.availableVersions.length > 0 ? (
         <Text>Available: {data.availableVersions.join(', ')}</Text>
@@ -78,4 +79,3 @@ export const resolverInkComponents: DiagnosticInkComponentMap = {
   VERSION_NOT_FOUND: VersionNotFound,
   REGISTRY_NAME_COLLISION: RegistryNameCollision,
 };
-

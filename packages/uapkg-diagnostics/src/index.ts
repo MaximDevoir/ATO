@@ -43,8 +43,11 @@ export {
 } from './installer/InstallerDiagnostics.js';
 // --- Manifest family ---
 export type {
+  DependencyNotFoundDiagnostic,
   ForbiddenOverridesDiagnostic,
   LockfileInvalidDiagnostic,
+  LockfileMissingDiagnostic,
+  LockfileOutOfSyncDiagnostic,
   ManifestDiagnostic,
   ManifestInvalidDiagnostic,
   ManifestReadErrorDiagnostic,
@@ -52,8 +55,11 @@ export type {
   UnresolvedRegistryDiagnostic,
 } from './manifest/ManifestDiagnostics.js';
 export {
+  createDependencyNotFoundDiagnostic,
   createForbiddenOverridesDiagnostic,
   createLockfileInvalidDiagnostic,
+  createLockfileMissingDiagnostic,
+  createLockfileOutOfSyncDiagnostic,
   createManifestInvalidDiagnostic,
   createManifestReadErrorDiagnostic,
   createManifestWriteErrorDiagnostic,
@@ -107,6 +113,7 @@ export type {
   NetworkErrorDiagnostic,
   RegistryDiagnostic,
   RegistryNotFoundDiagnostic,
+  RegistryUnreachableDiagnostic,
   SchemaInvalidDiagnostic,
 } from './registry/RegistryDiagnostics.js';
 export {
@@ -115,6 +122,7 @@ export {
   createLockAcquisitionFailedDiagnostic,
   createNetworkErrorDiagnostic,
   createRegistryNotFoundDiagnostic,
+  createRegistryUnreachableDiagnostic,
   createSchemaInvalidDiagnostic,
 } from './registry/RegistryDiagnostics.js';
 // --- Resolver family ---

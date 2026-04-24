@@ -1,5 +1,5 @@
-import type { ComponentType } from 'react';
 import type { Diagnostic, DiagnosticCode } from '@uapkg/diagnostics';
+import type { ComponentType } from 'react';
 
 /**
  * Props every family-body component receives. Each component renders only
@@ -31,4 +31,3 @@ export interface IDiagnosticInkRegistry {
   register(code: DiagnosticCode, component: DiagnosticBodyComponent): void;
   resolve(code: DiagnosticCode): DiagnosticBodyComponent | undefined;
 }
-

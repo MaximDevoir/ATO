@@ -1,5 +1,3 @@
-import type { ReactElement } from 'react';
-import { Box, Text } from 'ink';
 import type {
   DiskRemoveFailedDiagnostic,
   DownloadFailedDiagnostic,
@@ -9,6 +7,8 @@ import type {
   NetworkRetriesExhaustedDiagnostic,
   NetworkTimeoutDiagnostic,
 } from '@uapkg/diagnostics';
+import { Box, Text } from 'ink';
+import type { ReactElement } from 'react';
 import type { DiagnosticBodyProps, DiagnosticInkComponentMap } from '../contracts/InkTypes.js';
 
 function DownloadFailed({ diagnostic }: DiagnosticBodyProps): ReactElement {
@@ -19,7 +19,9 @@ function DownloadFailed({ diagnostic }: DiagnosticBodyProps): ReactElement {
         Downloading <Text color="cyan">{data.packageName}</Text> failed on attempt{' '}
         <Text color="yellow">{data.attempt}</Text>.
       </Text>
-      <Text>URL: <Text color="gray">{data.url}</Text></Text>
+      <Text>
+        URL: <Text color="gray">{data.url}</Text>
+      </Text>
       <Text color="gray">{data.reason}</Text>
     </Box>
   );
@@ -30,10 +32,11 @@ function DownloadHttpStatus({ diagnostic }: DiagnosticBodyProps): ReactElement {
   return (
     <Box flexDirection="column">
       <Text>
-        <Text color="cyan">{data.packageName}</Text> returned HTTP{' '}
-        <Text color="yellow">{data.status}</Text>.
+        <Text color="cyan">{data.packageName}</Text> returned HTTP <Text color="yellow">{data.status}</Text>.
       </Text>
-      <Text>URL: <Text color="gray">{data.url}</Text></Text>
+      <Text>
+        URL: <Text color="gray">{data.url}</Text>
+      </Text>
     </Box>
   );
 }
@@ -46,7 +49,9 @@ function NetworkTimeout({ diagnostic }: DiagnosticBodyProps): ReactElement {
         Timed out after <Text color="yellow">{data.timeoutSeconds}s</Text> fetching{' '}
         <Text color="cyan">{data.packageName}</Text>.
       </Text>
-      <Text>URL: <Text color="gray">{data.url}</Text></Text>
+      <Text>
+        URL: <Text color="gray">{data.url}</Text>
+      </Text>
     </Box>
   );
 }
@@ -56,10 +61,12 @@ function NetworkRetriesExhausted({ diagnostic }: DiagnosticBodyProps): ReactElem
   return (
     <Box flexDirection="column">
       <Text>
-        Gave up on <Text color="cyan">{data.packageName}</Text> after{' '}
-        <Text color="yellow">{data.attempts}</Text> attempts.
+        Gave up on <Text color="cyan">{data.packageName}</Text> after <Text color="yellow">{data.attempts}</Text>{' '}
+        attempts.
       </Text>
-      <Text>URL: <Text color="gray">{data.url}</Text></Text>
+      <Text>
+        URL: <Text color="gray">{data.url}</Text>
+      </Text>
     </Box>
   );
 }
@@ -71,8 +78,12 @@ function IntegrityMismatch({ diagnostic }: DiagnosticBodyProps): ReactElement {
       <Text>
         Integrity mismatch for <Text color="cyan">{data.packageName}</Text>.
       </Text>
-      <Text>Expected: <Text color="gray">{data.expected}</Text></Text>
-      <Text>Actual:   <Text color="yellow">{data.actual}</Text></Text>
+      <Text>
+        Expected: <Text color="gray">{data.expected}</Text>
+      </Text>
+      <Text>
+        Actual: <Text color="yellow">{data.actual}</Text>
+      </Text>
     </Box>
   );
 }
@@ -84,7 +95,9 @@ function ExtractionFailed({ diagnostic }: DiagnosticBodyProps): ReactElement {
       <Text>
         Extraction of <Text color="cyan">{data.packageName}</Text> failed.
       </Text>
-      <Text>Path: <Text color="gray">{data.path}</Text></Text>
+      <Text>
+        Path: <Text color="gray">{data.path}</Text>
+      </Text>
       <Text color="gray">{data.reason}</Text>
     </Box>
   );
@@ -97,7 +110,9 @@ function DiskRemoveFailed({ diagnostic }: DiagnosticBodyProps): ReactElement {
       <Text>
         Could not remove <Text color="cyan">{data.packageName}</Text> from disk.
       </Text>
-      <Text>Path: <Text color="gray">{data.path}</Text></Text>
+      <Text>
+        Path: <Text color="gray">{data.path}</Text>
+      </Text>
       <Text color="gray">{data.reason}</Text>
     </Box>
   );
@@ -112,4 +127,3 @@ export const installerInkComponents: DiagnosticInkComponentMap = {
   EXTRACTION_FAILED: ExtractionFailed,
   DISK_REMOVE_FAILED: DiskRemoveFailed,
 };
-

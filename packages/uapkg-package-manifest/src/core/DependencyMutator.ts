@@ -1,4 +1,9 @@
-import type { Dependency, Manifest, ProjectManifest } from '@uapkg/package-manifest-schema';
+import {
+  type Dependency,
+  type Manifest,
+  type ProjectManifest,
+  toDependencyDeclaration,
+} from '@uapkg/package-manifest-schema';
 
 /**
  * Which dependency bucket a mutation targets.
@@ -17,6 +22,11 @@ export interface AddDependencyOptions {
   readonly pin?: boolean;
 }
 
+export interface RemoveDependencyResult {
+  readonly manifest: Manifest;
+  readonly removed: boolean;
+}
+
 /**
  * Pure, immutable mutations of a `Manifest`.
  *
@@ -32,17 +42,18 @@ export class DependencyMutator {
    * project, the same entry is mirrored into `overrides`.
    */
   addDependency(manifest: Manifest, name: string, dep: Dependency, options: AddDependencyOptions = {}): Manifest {
+    const declaration = toDependencyDeclaration(dep) as unknown as Dependency;
     const bucket: DependencyBucket = options.bucket ?? 'dependencies';
     const next: Manifest = {
       ...manifest,
-      [bucket]: { ...(manifest[bucket] ?? {}), [name]: dep },
+      [bucket]: { ...(manifest[bucket] ?? {}), [name]: declaration },
     } as Manifest;
 
     if (options.pin && next.kind === 'project') {
       const project = next as ProjectManifest;
       return {
         ...project,
-        overrides: { ...(project.overrides ?? {}), [name]: dep },
+        overrides: { ...(project.overrides ?? {}), [name]: declaration },
       } as Manifest;
     }
 
@@ -53,11 +64,14 @@ export class DependencyMutator {
    * Remove a dependency from every bucket. If the manifest is a project, the
    * matching `overrides` entry (if any) is also removed.
    */
-  removeDependency(manifest: Manifest, name: string): Manifest {
+  removeDependency(manifest: Manifest, name: string): RemoveDependencyResult {
+    let removed = false;
+
     const stripFromBucket = (bucket: DependencyBucket) => {
       const existing = manifest[bucket];
       if (!existing || !(name in existing)) return existing;
       const { [name]: _removed, ...rest } = existing;
+      removed = true;
       return Object.keys(rest).length === 0 ? undefined : rest;
     };
 
@@ -72,14 +86,18 @@ export class DependencyMutator {
       const project = next as ProjectManifest;
       if (project.overrides && name in project.overrides) {
         const { [name]: _overridden, ...restOverrides } = project.overrides;
+        removed = true;
         return {
-          ...project,
-          overrides: Object.keys(restOverrides).length === 0 ? undefined : restOverrides,
-        } as Manifest;
+          manifest: {
+            ...project,
+            overrides: Object.keys(restOverrides).length === 0 ? undefined : restOverrides,
+          } as Manifest,
+          removed,
+        };
       }
     }
 
-    return next;
+    return { manifest: next, removed };
   }
 
   /**
@@ -96,9 +114,11 @@ export class DependencyMutator {
         overrides: Object.keys(rest).length === 0 ? undefined : rest,
       } as Manifest;
     }
+
+    const declaration = toDependencyDeclaration(dep) as unknown as Dependency;
     return {
       ...project,
-      overrides: { ...(project.overrides ?? {}), [name]: dep },
+      overrides: { ...(project.overrides ?? {}), [name]: declaration },
     } as Manifest;
   }
 }

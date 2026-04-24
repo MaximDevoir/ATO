@@ -1,10 +1,8 @@
 import { parsePackageSpec } from '@uapkg/common';
-import type { VersionRange } from '@uapkg/common-schema';
-import { RegistryNameSchema, VersionRangeSchema } from '@uapkg/common-schema';
 import type { Diagnostic } from '@uapkg/diagnostics';
-import type { Dependency } from '@uapkg/package-manifest-schema';
 import type { CompositionRoot } from '../app/CompositionRoot.js';
 import { InstallProgressReporter } from '../reporting/InstallProgressReporter.js';
+import { DependencyAddResolver } from './add/DependencyAddResolver.js';
 import type { Command } from './Command.js';
 import { InstallCommand } from './InstallCommand.js';
 
@@ -36,40 +34,18 @@ export class AddCommand implements Command {
     if (!specResult.ok) return this.fail(specResult.diagnostics);
     const spec = specResult.value;
 
-    const registryName = this.options.registry ?? this.root.config.get('registry');
-    const registryParsed = RegistryNameSchema.safeParse(registryName ?? 'default');
-    if (!registryParsed.success) {
-      return this.fail([
-        {
-          level: 'error',
-          code: 'INVALID_ARGS',
-          message: 'Registry name is invalid.',
-          data: { value: registryName },
-        } as unknown as Diagnostic,
-      ]);
-    }
+    const addResolver = new DependencyAddResolver(this.root);
+    const resolved = await addResolver.resolve(spec, this.options.registry);
+    if (!resolved.ok) return this.fail(resolved.diagnostics);
 
-    const rangeStr = spec.range ?? ('*' as unknown as VersionRange);
-    const rangeParsed = VersionRangeSchema.safeParse(rangeStr);
-    if (!rangeParsed.success) {
-      return this.fail([
-        {
-          level: 'error',
-          code: 'INVALID_VERSION_RANGE',
-          message: `Invalid version range "${rangeStr}".`,
-          data: { input: this.options.spec, range: rangeStr },
-        } as unknown as Diagnostic,
-      ]);
-    }
-
-    const dep: Dependency = {
-      version: rangeParsed.data,
-      registry: registryParsed.data,
-    };
-    const addResult = await this.root.packageManifest.addDependency(spec.name as unknown as string, dep, {
-      bucket: this.options.dev ? 'devDependencies' : 'dependencies',
-      pin: this.options.pin,
-    });
+    const addResult = await this.root.packageManifest.addDependency(
+      spec.name as unknown as string,
+      resolved.value.dependency,
+      {
+        bucket: this.options.dev ? 'devDependencies' : 'dependencies',
+        pin: this.options.pin,
+      },
+    );
     if (!addResult.ok) return this.fail(addResult.diagnostics);
 
     // Delegate to Install for the resolve/execute/postinstall pipeline.

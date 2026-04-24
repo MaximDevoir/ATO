@@ -16,4 +16,3 @@ export interface DiagnosticRenderer {
    */
   render(diagnostics: readonly Diagnostic[], stream: 'stdout' | 'stderr'): void;
 }
-

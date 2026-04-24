@@ -1,6 +1,6 @@
-import type { ReactElement } from 'react';
-import { Text } from 'ink';
 import type { Diagnostic } from '@uapkg/diagnostics';
+import { Text } from 'ink';
+import type { ReactElement } from 'react';
 
 const LEVEL_CONFIG: Record<Diagnostic['level'], { readonly icon: string; readonly color: string }> = {
   error: { icon: '✖', color: 'red' },
@@ -20,4 +20,3 @@ export function SeverityBadge({ level }: SeverityBadgeProps): ReactElement {
   const { icon, color } = LEVEL_CONFIG[level];
   return <Text color={color}>{icon}</Text>;
 }
-

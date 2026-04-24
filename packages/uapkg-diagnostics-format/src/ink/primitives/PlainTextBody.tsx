@@ -1,5 +1,5 @@
-import type { ReactElement } from 'react';
 import { Text } from 'ink';
+import type { ReactElement } from 'react';
 import type { DiagnosticBodyProps } from '../contracts/InkTypes.js';
 
 /**
@@ -10,4 +10,3 @@ import type { DiagnosticBodyProps } from '../contracts/InkTypes.js';
 export function PlainTextBody({ diagnostic }: DiagnosticBodyProps): ReactElement {
   return <Text>{diagnostic.message}</Text>;
 }
-

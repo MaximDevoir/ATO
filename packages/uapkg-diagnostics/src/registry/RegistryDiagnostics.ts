@@ -58,6 +58,18 @@ export type CacheReadErrorDiagnostic = DiagnosticBase<
   }
 >;
 
+/** Registry could not be reached, optionally with cached state available. */
+export type RegistryUnreachableDiagnostic = DiagnosticBase<
+  'REGISTRY_UNREACHABLE',
+  {
+    readonly registryName: string;
+    readonly url: string;
+    readonly httpStatus?: number;
+    readonly cause: string;
+    readonly initialized: boolean;
+  }
+>;
+
 /** Union of all registry diagnostics. */
 export type RegistryDiagnostic =
   | NetworkErrorDiagnostic
@@ -65,7 +77,8 @@ export type RegistryDiagnostic =
   | SchemaInvalidDiagnostic
   | RegistryNotFoundDiagnostic
   | LockAcquisitionFailedDiagnostic
-  | CacheReadErrorDiagnostic;
+  | CacheReadErrorDiagnostic
+  | RegistryUnreachableDiagnostic;
 
 // ---------------------------------------------------------------------------
 // Factory helpers
@@ -131,5 +144,29 @@ export function createCacheReadErrorDiagnostic(cachePath: string, reason: string
     message: `Failed to read registry cache at "${cachePath}": ${reason}.`,
     hint: 'The cache may be corrupted. Try running `uapkg update` to refresh.',
     data: { cachePath, reason },
+  };
+}
+
+export function createRegistryUnreachableDiagnostic(input: {
+  readonly registryName: string;
+  readonly url: string;
+  readonly cause: string;
+  readonly initialized: boolean;
+  readonly httpStatus?: number;
+  readonly level?: 'error' | 'warning';
+}): RegistryUnreachableDiagnostic {
+  return {
+    level: input.level ?? (input.initialized ? 'warning' : 'error'),
+    code: 'REGISTRY_UNREACHABLE',
+    message: `The "${input.registryName}" registry could not be reached at ${input.url}.`,
+    hint: `Verify the registry URL with 'uapkg config get registries.${input.registryName}.url --trace'.
+The registry may also be temporarily unavailable.`,
+    data: {
+      registryName: input.registryName,
+      url: input.url,
+      cause: input.cause,
+      initialized: input.initialized,
+      httpStatus: input.httpStatus,
+    },
   };
 }

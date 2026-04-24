@@ -1,9 +1,9 @@
 import { parsePackageSpec } from '@uapkg/common';
 import type { PackageName, VersionRange } from '@uapkg/common-schema';
 import {
-  type Diagnostic,
   createInvalidPackageSpecDiagnostic,
   createPackageNotFoundDiagnostic,
+  type Diagnostic,
 } from '@uapkg/diagnostics';
 import type { Dependency, Manifest } from '@uapkg/package-manifest-schema';
 import type { CompositionRoot } from '../app/CompositionRoot.js';
@@ -95,12 +95,7 @@ export class UpdateCommand implements Command {
     if (!located) {
       return {
         ok: false,
-        diagnostics: [
-          createPackageNotFoundDiagnostic(
-            spec.name as unknown as PackageName,
-            String(manifest.name),
-          ),
-        ],
+        diagnostics: [createPackageNotFoundDiagnostic(spec.name as unknown as PackageName, String(manifest.name))],
       };
     }
 

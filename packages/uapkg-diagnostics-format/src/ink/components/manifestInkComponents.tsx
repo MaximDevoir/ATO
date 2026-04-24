@@ -1,13 +1,16 @@
-import type { ReactElement } from 'react';
-import { Box, Text } from 'ink';
 import type {
+  DependencyNotFoundDiagnostic,
   ForbiddenOverridesDiagnostic,
   LockfileInvalidDiagnostic,
+  LockfileMissingDiagnostic,
+  LockfileOutOfSyncDiagnostic,
   ManifestInvalidDiagnostic,
   ManifestReadErrorDiagnostic,
   ManifestWriteErrorDiagnostic,
   UnresolvedRegistryDiagnostic,
 } from '@uapkg/diagnostics';
+import { Box, Text } from 'ink';
+import type { ReactElement } from 'react';
 import type { DiagnosticBodyProps, DiagnosticInkComponentMap } from '../contracts/InkTypes.js';
 
 function FileIssues({
@@ -43,8 +46,8 @@ function ForbiddenOverrides({ diagnostic }: DiagnosticBodyProps): ReactElement {
   const data = (diagnostic as ForbiddenOverridesDiagnostic).data;
   return (
     <Text>
-      <Text color="cyan">{data.manifestKind}</Text> manifest at{' '}
-      <Text color="cyan">{data.filePath}</Text> cannot declare overrides.
+      <Text color="cyan">{data.manifestKind}</Text> manifest at <Text color="cyan">{data.filePath}</Text> cannot declare
+      overrides.
     </Text>
   );
 }
@@ -83,12 +86,51 @@ function ManifestWriteError({ diagnostic }: DiagnosticBodyProps): ReactElement {
   );
 }
 
+function LockfileMissing({ diagnostic }: DiagnosticBodyProps): ReactElement {
+  const data = (diagnostic as LockfileMissingDiagnostic).data;
+  return (
+    <Text>
+      Lockfile not found at <Text color="cyan">{data.filePath}</Text>.
+    </Text>
+  );
+}
+
+function DependencyNotFound({ diagnostic }: DiagnosticBodyProps): ReactElement {
+  const data = (diagnostic as DependencyNotFoundDiagnostic).data;
+  return (
+    <Text>
+      Package <Text color="cyan">{data.packageName}</Text> is not declared and will not be removed.
+    </Text>
+  );
+}
+
+function LockfileOutOfSync({ diagnostic }: DiagnosticBodyProps): ReactElement {
+  const data = (diagnostic as LockfileOutOfSyncDiagnostic).data;
+  return (
+    <Box flexDirection="column">
+      <Text>Lockfile is out of sync with the following errors:</Text>
+      {data.issues.map((issue, index) => (
+        <Text key={`${issue.code}-${index}`}>
+          {' '}
+          {index + 1}. [{issue.severity.toUpperCase()} {issue.code}] {issue.message}
+        </Text>
+      ))}
+      {data.additionalIssues > 0 ? <Text>There are {data.additionalIssues} additional errors.</Text> : null}
+      <Text>
+        View full list at: <Text color="cyan">{data.logFilePath}</Text>
+      </Text>
+    </Box>
+  );
+}
+
 export const manifestInkComponents: DiagnosticInkComponentMap = {
   MANIFEST_INVALID: ManifestInvalid,
   LOCKFILE_INVALID: LockfileInvalid,
+  LOCKFILE_MISSING: LockfileMissing,
+  LOCKFILE_OUT_OF_SYNC: LockfileOutOfSync,
   FORBIDDEN_OVERRIDES: ForbiddenOverrides,
   UNRESOLVED_REGISTRY: UnresolvedRegistry,
   MANIFEST_READ_ERROR: ManifestReadError,
   MANIFEST_WRITE_ERROR: ManifestWriteError,
+  DEPENDENCY_NOT_FOUND: DependencyNotFound,
 };
-

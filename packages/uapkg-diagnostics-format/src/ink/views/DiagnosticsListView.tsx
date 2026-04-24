@@ -1,6 +1,6 @@
-import type { ReactElement } from 'react';
-import { Box } from 'ink';
 import type { Diagnostic } from '@uapkg/diagnostics';
+import { Box } from 'ink';
+import type { ReactElement } from 'react';
 import type { IDiagnosticInkRegistry } from '../contracts/InkTypes.js';
 import { DiagnosticView } from './DiagnosticView.js';
 
@@ -27,5 +27,3 @@ export function DiagnosticsListView({ diagnostics, registry }: DiagnosticsListVi
     </Box>
   );
 }
-
-

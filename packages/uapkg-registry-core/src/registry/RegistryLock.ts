@@ -36,8 +36,10 @@ export class RegistryLock {
     };
 
     try {
-      const { writeFile: wf } = await import('node:fs/promises');
+      const { mkdir: mk, writeFile: wf } = await import('node:fs/promises');
       const { openSync, closeSync } = await import('node:fs');
+      const lockDir = this.lockPath.replace(/[/\\][^/\\]+$/, '');
+      await mk(lockDir, { recursive: true });
       // Attempt atomic exclusive create
       const fd = openSync(this.lockPath, 'wx');
       closeSync(fd);

@@ -1,9 +1,9 @@
 import type { Diagnostic } from '@uapkg/diagnostics';
 import {
   createInkRegistry,
-  defaultInkComponents,
   type DiagnosticInkRegistry,
   DiagnosticsListView,
+  defaultInkComponents,
 } from '@uapkg/diagnostics-format/ink';
 import { render } from 'ink';
 import { createElement } from 'react';
@@ -45,4 +45,3 @@ export class InkDiagnosticRenderer implements DiagnosticRenderer {
     }
   }
 }
-

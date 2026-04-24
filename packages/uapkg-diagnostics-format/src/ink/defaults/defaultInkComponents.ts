@@ -1,4 +1,3 @@
-import type { DiagnosticInkComponentMap } from '../contracts/InkTypes.js';
 import { installerInkComponents } from '../components/installerInkComponents.js';
 import { manifestInkComponents } from '../components/manifestInkComponents.js';
 import { postinstallInkComponents } from '../components/postinstallInkComponents.js';
@@ -6,6 +5,7 @@ import { registryInkComponents } from '../components/registryInkComponents.js';
 import { resolverInkComponents } from '../components/resolverInkComponents.js';
 import { safetyInkComponents } from '../components/safetyInkComponents.js';
 import { specInkComponents } from '../components/specInkComponents.js';
+import type { DiagnosticInkComponentMap } from '../contracts/InkTypes.js';
 
 /**
  * Aggregated default Ink component map — one entry per well-known diagnostic
@@ -26,4 +26,3 @@ export const defaultInkComponents: DiagnosticInkComponentMap = {
   ...safetyInkComponents,
   ...specInkComponents,
 };
-

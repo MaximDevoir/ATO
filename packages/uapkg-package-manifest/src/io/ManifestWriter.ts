@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createManifestWriteErrorDiagnostic, DiagnosticBag, ok, type Result } from '@uapkg/diagnostics';
-import type { Manifest } from '@uapkg/package-manifest-schema';
+import { type Manifest, toDependencyRecordDeclaration } from '@uapkg/package-manifest-schema';
 
 const MANIFEST_FILENAME = 'uapkg.json';
 
@@ -19,11 +19,26 @@ export class ManifestWriter {
       if (!existsSync(manifestRoot)) {
         await mkdir(manifestRoot, { recursive: true });
       }
-      await writeFile(filePath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf-8');
+      await writeFile(filePath, `${JSON.stringify(this.toSerializableManifest(manifest), null, 2)}\n`, 'utf-8');
       return ok(undefined);
     } catch (err) {
       bag.add(createManifestWriteErrorDiagnostic(filePath, String(err)));
       return bag.toFailure();
     }
+  }
+
+  private toSerializableManifest(manifest: Manifest): Record<string, unknown> {
+    const next: Record<string, unknown> = {
+      ...manifest,
+      dependencies: toDependencyRecordDeclaration(manifest.dependencies),
+      devDependencies: toDependencyRecordDeclaration(manifest.devDependencies),
+      peerDependencies: toDependencyRecordDeclaration(manifest.peerDependencies),
+    };
+
+    if (manifest.kind === 'project') {
+      next.overrides = toDependencyRecordDeclaration(manifest.overrides);
+    }
+
+    return next;
   }
 }

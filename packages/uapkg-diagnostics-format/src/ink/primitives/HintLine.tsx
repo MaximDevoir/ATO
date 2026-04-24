@@ -1,5 +1,5 @@
-import type { ReactElement } from 'react';
 import { Box, Text } from 'ink';
+import type { ReactElement } from 'react';
 
 export interface HintLineProps {
   readonly hint: string;
@@ -18,4 +18,3 @@ export function HintLine({ hint }: HintLineProps): ReactElement | null {
     </Box>
   );
 }
-

@@ -33,9 +33,22 @@ export class RemoveCommand implements Command {
       return 1;
     }
 
-    // Surface any non-error diagnostics returned by the mutator.
+    const missing = result.diagnostics.some((d) => d.code === 'DEPENDENCY_NOT_FOUND');
+
     if (result.diagnostics.length > 0 && this.options.outputFormat === 'text') {
       this.root.diagnostics.reportAll(result.diagnostics);
+    }
+
+    if (missing) {
+      if (this.options.outputFormat === 'json') {
+        this.root.json.emit({
+          status: 'ok',
+          command: 'remove',
+          data: { removed: false, packageName: this.options.packageName },
+          diagnostics: result.diagnostics,
+        });
+      }
+      return 0;
     }
 
     if (this.options.outputFormat === 'text') {

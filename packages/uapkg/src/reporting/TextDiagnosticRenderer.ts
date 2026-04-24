@@ -28,4 +28,3 @@ export class TextDiagnosticRenderer implements DiagnosticRenderer {
     }
   }
 }
-

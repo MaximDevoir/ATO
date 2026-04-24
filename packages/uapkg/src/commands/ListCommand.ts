@@ -21,20 +21,36 @@ export class ListCommand implements Command {
 
   public async execute(): Promise<number> {
     const manifestResult = await this.root.packageManifest.readManifest();
-    const lockfileResult = await this.root.packageManifest.readLockfile();
+    const lockfileResult = await this.root.packageManifest.getLockfileForReadOnly();
 
-    if (!manifestResult.ok || !lockfileResult.ok) {
+    if (!manifestResult.ok) {
       if (this.options.outputFormat === 'json') {
         this.root.json.emit({
           status: 'error',
           command: 'list',
-          diagnostics: [...(manifestResult.diagnostics ?? []), ...(lockfileResult.diagnostics ?? [])],
+          diagnostics: [...(manifestResult.diagnostics ?? [])],
         });
       } else {
         this.root.diagnostics.reportAll(manifestResult.diagnostics);
+      }
+      return 1;
+    }
+
+    if (!lockfileResult.ok) {
+      if (this.options.outputFormat === 'json') {
+        this.root.json.emit({
+          status: 'error',
+          command: 'list',
+          diagnostics: [...(lockfileResult.diagnostics ?? [])],
+        });
+      } else {
         this.root.diagnostics.reportAll(lockfileResult.diagnostics);
       }
       return 1;
+    }
+
+    if (this.options.outputFormat === 'text') {
+      this.root.diagnostics.reportAll(lockfileResult.diagnostics);
     }
 
     const lockfile = lockfileResult.value;
@@ -49,7 +65,7 @@ export class ListCommand implements Command {
         status: 'ok',
         command: 'list',
         data: { declared, packages: lockfile.packages },
-        diagnostics: [],
+        diagnostics: lockfileResult.diagnostics,
       });
       return 0;
     }

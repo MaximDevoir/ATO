@@ -1,5 +1,3 @@
-import type { ReactElement } from 'react';
-import { Box, Text } from 'ink';
 import type {
   PostinstallDuplicateEntryDiagnostic,
   PostinstallEsbuildErrorDiagnostic,
@@ -8,16 +6,16 @@ import type {
   PostinstallMarkerCorruptDiagnostic,
   PostinstallPolicyDeniedDiagnostic,
 } from '@uapkg/diagnostics';
+import { Box, Text } from 'ink';
+import type { ReactElement } from 'react';
 import type { DiagnosticBodyProps, DiagnosticInkComponentMap } from '../contracts/InkTypes.js';
 
 function PolicyDenied({ diagnostic }: DiagnosticBodyProps): ReactElement {
   const data = (diagnostic as PostinstallPolicyDeniedDiagnostic).data;
   return (
     <Text>
-      <Text color="cyan">{data.packageName}</Text> (registry{' '}
-      <Text color="cyan">{data.registry}</Text>) was skipped by policy{' '}
-      <Text color="yellow">{data.policy}</Text> (from{' '}
-      <Text color="gray">{data.resolvedFrom}</Text>).
+      <Text color="cyan">{data.packageName}</Text> (registry <Text color="cyan">{data.registry}</Text>) was skipped by
+      policy <Text color="yellow">{data.policy}</Text> (from <Text color="gray">{data.resolvedFrom}</Text>).
     </Text>
   );
 }
@@ -59,7 +57,10 @@ function DuplicateEntry({ diagnostic }: DiagnosticBodyProps): ReactElement {
         <Text color="cyan">{data.packageName}</Text> has multiple postinstall entry files:
       </Text>
       {data.candidates.map((c) => (
-        <Text key={c}> • <Text color="yellow">{c}</Text></Text>
+        <Text key={c}>
+          {' '}
+          • <Text color="yellow">{c}</Text>
+        </Text>
       ))}
     </Box>
   );
@@ -85,8 +86,7 @@ function EsbuildError({ diagnostic }: DiagnosticBodyProps): ReactElement {
   return (
     <Box flexDirection="column">
       <Text>
-        esbuild failed on <Text color="cyan">{data.entryFile}</Text> for{' '}
-        <Text color="cyan">{data.packageName}</Text>.
+        esbuild failed on <Text color="cyan">{data.entryFile}</Text> for <Text color="cyan">{data.packageName}</Text>.
       </Text>
       <Text color="gray">{data.reason}</Text>
     </Box>
@@ -101,5 +101,3 @@ export const postinstallInkComponents: DiagnosticInkComponentMap = {
   POSTINSTALL_MARKER_CORRUPT: MarkerCorrupt,
   POSTINSTALL_ESBUILD_ERROR: EsbuildError,
 };
-
-

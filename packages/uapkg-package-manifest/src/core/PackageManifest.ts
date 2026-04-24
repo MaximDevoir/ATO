@@ -1,10 +1,19 @@
+import { join } from 'node:path';
 import type { PackageName } from '@uapkg/common-schema';
 import type { ConfigInstance } from '@uapkg/config';
-import { createForbiddenOverridesDiagnostic, DiagnosticBag, ok, type Result } from '@uapkg/diagnostics';
+import {
+  createDependencyNotFoundDiagnostic,
+  createForbiddenOverridesDiagnostic,
+  createLockfileOutOfSyncDiagnostic,
+  DiagnosticBag,
+  ok,
+  type Result,
+} from '@uapkg/diagnostics';
 import type { Dependency, Lockfile, Manifest } from '@uapkg/package-manifest-schema';
 import type { RegistryCore } from '@uapkg/registry-core';
 import type { ResolvedGraph, ResolverOptions } from '../contracts/ManifestTypes.js';
 import { LockfileReader } from '../io/LockfileReader.js';
+import { LockfileSyncIssueWriter } from '../io/LockfileSyncIssueWriter.js';
 import { LockfileWriter } from '../io/LockfileWriter.js';
 import { ManifestReader } from '../io/ManifestReader.js';
 import { ManifestWriter } from '../io/ManifestWriter.js';
@@ -12,6 +21,8 @@ import { LockfileSync } from '../resolver/LockfileSync.js';
 import { Resolver } from '../resolver/Resolver.js';
 import { type AddDependencyOptions, DependencyMutator } from './DependencyMutator.js';
 import { type LockfileDiff, LockfileDiffer } from './LockfileDiffer.js';
+import { sortLockfileSyncIssues } from './LockfileSyncIssue.js';
+import { LockfileSyncValidator } from './LockfileSyncValidator.js';
 import { OutdatedChecker, type OutdatedEntry } from './OutdatedChecker.js';
 import { WhyGraph, type WhyResult } from './WhyGraph.js';
 
@@ -43,6 +54,8 @@ export class PackageManifest {
   private readonly lockSync = new LockfileSync();
   private readonly mutator = new DependencyMutator();
   private readonly differ = new LockfileDiffer();
+  private readonly lockfileSyncValidator: LockfileSyncValidator;
+  private readonly lockfileSyncIssueWriter = new LockfileSyncIssueWriter();
   private readonly outdated: OutdatedChecker;
   private readonly whyGraph = new WhyGraph();
 
@@ -51,6 +64,13 @@ export class PackageManifest {
     this.registryCore = options.registryCore;
     this.resolver = new Resolver(options.registryCore);
     this.outdated = new OutdatedChecker(options.registryCore);
+    this.lockfileSyncValidator = new LockfileSyncValidator(
+      options.registryCore,
+      this.resolver,
+      this.lockSync,
+      this.differ,
+      options.configInstance,
+    );
   }
 
   // -------------------------------------------------------------------
@@ -66,7 +86,11 @@ export class PackageManifest {
   }
 
   async readLockfile(): Promise<Result<Lockfile>> {
-    return this.lockReader.read(this.manifestRoot);
+    return this.lockReader.readRequired(this.manifestRoot);
+  }
+
+  async readLockfileOptional(): Promise<Result<Lockfile | null>> {
+    return this.lockReader.readOptional(this.manifestRoot);
   }
 
   async writeLockfile(lockfile: Lockfile): Promise<Result<void>> {
@@ -107,7 +131,30 @@ export class PackageManifest {
     const bag = new DiagnosticBag();
 
     if (options.frozen) {
-      return this.readLockfile();
+      const lockResult = await this.readLockfile();
+      if (!lockResult.ok) return lockResult;
+
+      const syncResult = await this.validateLockfileSync(lockResult.value);
+      if (!syncResult.ok) return syncResult;
+
+      return ok(lockResult.value, [...lockResult.diagnostics, ...syncResult.diagnostics]);
+    }
+
+    const existingLockResult = await this.readLockfileOptional();
+    if (!existingLockResult.ok) {
+      bag.mergeArray(existingLockResult.diagnostics);
+      return bag.toFailure();
+    }
+    bag.mergeArray(existingLockResult.diagnostics);
+
+    if (existingLockResult.value !== null) {
+      const manifestResult = await this.readManifest();
+      if (!manifestResult.ok) return manifestResult as Result<never>;
+
+      const issues = await this.lockfileSyncValidator.collectIssues(manifestResult.value, existingLockResult.value);
+      if (issues.length === 0) {
+        return bag.toResult(existingLockResult.value);
+      }
     }
 
     const graphResult = await this.resolve(options);
@@ -142,12 +189,17 @@ export class PackageManifest {
 
   /** Remove a dependency from every bucket and persist `uapkg.json`. */
   async removeDependency(name: string): Promise<Result<Manifest>> {
+    const bag = new DiagnosticBag();
     const readResult = await this.readManifest();
     if (!readResult.ok) return readResult;
-    const next = this.mutator.removeDependency(readResult.value, name);
-    const writeResult = await this.writeManifest(next);
+    const removed = this.mutator.removeDependency(readResult.value, name);
+    if (!removed.removed) {
+      bag.add(createDependencyNotFoundDiagnostic(name));
+    }
+
+    const writeResult = await this.writeManifest(removed.manifest);
     if (!writeResult.ok) return writeResult as Result<never>;
-    return ok(next);
+    return bag.toResult(removed.manifest);
   }
 
   // -------------------------------------------------------------------
@@ -162,17 +214,82 @@ export class PackageManifest {
     const bag = new DiagnosticBag();
     const manifestResult = await this.readManifest();
     if (!manifestResult.ok) return manifestResult as Result<never>;
-    const lockResult = await this.readLockfile();
-    if (!lockResult.ok) {
-      bag.mergeArray(lockResult.diagnostics);
+    const lockResult = await this.getLockfileForReadOnly();
+    if (!lockResult.ok) return lockResult as Result<never>;
+    bag.mergeArray(lockResult.diagnostics);
+
+    const outdatedResult = await this.outdated.check(manifestResult.value, lockResult.value);
+    if (!outdatedResult.ok) {
+      bag.mergeArray(outdatedResult.diagnostics);
       return bag.toFailure();
     }
-    return this.outdated.check(manifestResult.value, lockResult.value);
+    return bag.toResult(outdatedResult.value);
   }
 
   async explainWhy(target: PackageName): Promise<Result<WhyResult>> {
+    const bag = new DiagnosticBag();
+    const lockResult = await this.readLockfileOptional();
+    if (!lockResult.ok) return lockResult as Result<never>;
+    bag.mergeArray(lockResult.diagnostics);
+
     const graphResult = await this.resolve();
     if (!graphResult.ok) return graphResult as Result<never>;
-    return ok(this.whyGraph.explain(graphResult.value, target));
+    return bag.toResult(this.whyGraph.explain(graphResult.value, target));
+  }
+
+  async getLockfileForReadOnly(): Promise<Result<Lockfile>> {
+    const bag = new DiagnosticBag();
+    const lockResult = await this.readLockfileOptional();
+    if (!lockResult.ok) return lockResult as Result<never>;
+    bag.mergeArray(lockResult.diagnostics);
+
+    if (lockResult.value !== null) {
+      return bag.toResult(lockResult.value);
+    }
+
+    const resolveResult = await this.resolve();
+    if (!resolveResult.ok) {
+      bag.mergeArray(resolveResult.diagnostics);
+      return bag.toFailure();
+    }
+
+    const lockfile = this.lockSync.buildLockfile(resolveResult.value);
+    return bag.toResult(lockfile);
+  }
+
+  async validateLockfileSync(lockfile: Lockfile): Promise<Result<void>> {
+    const bag = new DiagnosticBag();
+    const manifestResult = await this.readManifest();
+    if (!manifestResult.ok) return manifestResult as Result<never>;
+
+    const issues = await this.lockfileSyncValidator.collectIssues(manifestResult.value, lockfile);
+    if (issues.length === 0) return ok(undefined);
+
+    const sortedIssues = sortLockfileSyncIssues(issues);
+    const topIssues = this.lockfileSyncValidator.topIssues(sortedIssues, 3);
+
+    let logPath = join(this.manifestRoot, '.uapkg', 'logs', 'lockfile-sync.log');
+    const logResult = await this.lockfileSyncIssueWriter.write(this.manifestRoot, sortedIssues);
+    if (logResult.ok) {
+      logPath = logResult.value;
+      bag.mergeArray(logResult.diagnostics);
+    } else {
+      bag.mergeArray(logResult.diagnostics);
+    }
+
+    bag.add(
+      createLockfileOutOfSyncDiagnostic(
+        topIssues.map((issue) => ({
+          severity: issue.severity,
+          code: issue.code,
+          message: issue.message,
+          packageName: issue.packageName,
+        })),
+        sortedIssues.length,
+        logPath,
+      ),
+    );
+
+    return bag.toFailure();
   }
 }

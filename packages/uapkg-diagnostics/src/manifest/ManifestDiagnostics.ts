@@ -22,6 +22,30 @@ export type LockfileInvalidDiagnostic = DiagnosticBase<
   }
 >;
 
+/** Lockfile is missing from disk. */
+export type LockfileMissingDiagnostic = DiagnosticBase<
+  'LOCKFILE_MISSING',
+  {
+    readonly filePath: string;
+  }
+>;
+
+/** Lockfile is present but does not match manifest/config expectations. */
+export type LockfileOutOfSyncDiagnostic = DiagnosticBase<
+  'LOCKFILE_OUT_OF_SYNC',
+  {
+    readonly issues: readonly {
+      readonly severity: 'error' | 'warning' | 'info';
+      readonly code: string;
+      readonly message: string;
+      readonly packageName?: string;
+    }[];
+    readonly totalIssues: number;
+    readonly additionalIssues: number;
+    readonly logFilePath: string;
+  }
+>;
+
 /** Overrides are only allowed in root project manifests. */
 export type ForbiddenOverridesDiagnostic = DiagnosticBase<
   'FORBIDDEN_OVERRIDES',
@@ -58,14 +82,25 @@ export type ManifestWriteErrorDiagnostic = DiagnosticBase<
   }
 >;
 
+/** Remove was requested for a package that does not exist in manifest buckets. */
+export type DependencyNotFoundDiagnostic = DiagnosticBase<
+  'DEPENDENCY_NOT_FOUND',
+  {
+    readonly packageName: string;
+  }
+>;
+
 /** Union of all manifest diagnostics. */
 export type ManifestDiagnostic =
   | ManifestInvalidDiagnostic
   | LockfileInvalidDiagnostic
+  | LockfileMissingDiagnostic
+  | LockfileOutOfSyncDiagnostic
   | ForbiddenOverridesDiagnostic
   | UnresolvedRegistryDiagnostic
   | ManifestReadErrorDiagnostic
-  | ManifestWriteErrorDiagnostic;
+  | ManifestWriteErrorDiagnostic
+  | DependencyNotFoundDiagnostic;
 
 // ---------------------------------------------------------------------------
 // Factory helpers
@@ -94,6 +129,43 @@ export function createLockfileInvalidDiagnostic(
     message: `Lockfile validation failed for "${filePath}".`,
     hint: 'Delete uapkg.lock and re-run install to regenerate.',
     data: { filePath, issues },
+  };
+}
+
+export function createLockfileMissingDiagnostic(
+  filePath: string,
+  level: 'warning' | 'error' = 'warning',
+): LockfileMissingDiagnostic {
+  return {
+    level,
+    code: 'LOCKFILE_MISSING',
+    message: `No lockfile found at "${filePath}".`,
+    hint: 'Run `uapkg install` to generate a lockfile, or use `--frozen` only when one already exists.',
+    data: { filePath },
+  };
+}
+
+export function createLockfileOutOfSyncDiagnostic(
+  issues: readonly {
+    readonly severity: 'error' | 'warning' | 'info';
+    readonly code: string;
+    readonly message: string;
+    readonly packageName?: string;
+  }[],
+  totalIssues: number,
+  logFilePath: string,
+): LockfileOutOfSyncDiagnostic {
+  return {
+    level: 'error',
+    code: 'LOCKFILE_OUT_OF_SYNC',
+    message: 'Lockfile is out of sync with the current manifest and registry state.',
+    hint: 'Run `uapkg install` or `uapkg update` to regenerate the lockfile before using `--frozen`.',
+    data: {
+      issues,
+      totalIssues,
+      additionalIssues: Math.max(0, totalIssues - issues.length),
+      logFilePath,
+    },
   };
 }
 
@@ -140,5 +212,15 @@ export function createManifestWriteErrorDiagnostic(filePath: string, reason: str
     message: `Failed to write "${filePath}": ${reason}.`,
     hint: 'Ensure the directory exists and you have write permissions.',
     data: { filePath, reason },
+  };
+}
+
+export function createDependencyNotFoundDiagnostic(packageName: string): DependencyNotFoundDiagnostic {
+  return {
+    level: 'info',
+    code: 'DEPENDENCY_NOT_FOUND',
+    message: `Package "${packageName}" is not declared in this manifest and will not be removed.`,
+    hint: 'Run `uapkg list` to inspect currently declared dependencies.',
+    data: { packageName },
   };
 }

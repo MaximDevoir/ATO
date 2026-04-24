@@ -3,7 +3,6 @@ import type { RegistryIdentifier } from '@uapkg/common-schema';
 import { ConfigInstance } from '@uapkg/config';
 import { createRegistryNotFoundDiagnostic, DiagnosticBag, ok, type Result } from '@uapkg/diagnostics';
 import type { RegistryCoreOptions, RegistryDescriptor } from '../contracts/RegistryCoreTypes.js';
-import { getRegistryCachePath } from '../paths/RegistryPaths.js';
 import { Registry } from '../registry/Registry.js';
 
 /**
@@ -48,7 +47,7 @@ export class RegistryCore {
     const perRegistryTtl = this.config.get(`registries.${registryName}.ttlSeconds`) as number | null;
     const ttl = perRegistryTtl ?? globalTtl;
 
-    const registry = Registry.create(descriptor, id, shortId, gitBinary, ttl);
+    const registry = Registry.create(registryName, descriptor, id, shortId, gitBinary, ttl);
     this.registries.set(registryName, registry);
 
     return ok(registry);

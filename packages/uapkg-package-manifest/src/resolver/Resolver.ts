@@ -78,9 +78,10 @@ export class Resolver {
     const versionEntry = resolved.value.entry;
     if (versionEntry.dependencies && !this.devPolicy.includeTransitiveDev()) {
       for (const [childName, childDep] of Object.entries(versionEntry.dependencies)) {
+        const childRegistry = childDep.registry ?? dep.registry;
         const child = await this.resolveNode(
           childName,
-          { version: childDep.version, registry: childDep.registry },
+          { version: childDep.version, registry: childRegistry },
           bag,
           nodes,
           visiting,

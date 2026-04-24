@@ -16,9 +16,7 @@ import { sortDiagnostics } from './TextSink.js';
  * One instance is safe to reuse across commands in a single CLI run.
  */
 export class DiagnosticReporter {
-  public constructor(
-    private readonly renderer: DiagnosticRenderer = new InkDiagnosticRenderer(),
-  ) {}
+  public constructor(private readonly renderer: DiagnosticRenderer = new InkDiagnosticRenderer()) {}
 
   public reportAll(diagnostics: readonly Diagnostic[]): void {
     if (diagnostics.length === 0) return;
