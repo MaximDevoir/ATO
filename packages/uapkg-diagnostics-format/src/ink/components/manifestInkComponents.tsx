@@ -13,6 +13,15 @@ import { Box, Text } from 'ink';
 import type { ReactElement } from 'react';
 import type { DiagnosticBodyProps, DiagnosticInkComponentMap } from '../contracts/InkTypes.js';
 
+function buildLockfileIssueKey(issue: {
+  readonly severity: string;
+  readonly code: string;
+  readonly message: string;
+  readonly packageName?: string;
+}): string {
+  return `${issue.severity}:${issue.code}:${issue.packageName ?? ''}:${issue.message}`;
+}
+
 function FileIssues({
   filePath,
   issues,
@@ -110,7 +119,7 @@ function LockfileOutOfSync({ diagnostic }: DiagnosticBodyProps): ReactElement {
     <Box flexDirection="column">
       <Text>Lockfile is out of sync with the following errors:</Text>
       {data.issues.map((issue, index) => (
-        <Text key={`${issue.code}-${index}`}>
+        <Text key={buildLockfileIssueKey(issue)}>
           {' '}
           {index + 1}. [{issue.severity.toUpperCase()} {issue.code}] {issue.message}
         </Text>
