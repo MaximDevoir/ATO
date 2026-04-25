@@ -1,10 +1,4 @@
-import {
-  AssetHashSchema,
-  GitTreeSchema,
-  PackageNameSchema,
-  PackageVersionSchema,
-  RegistryNameSchema,
-} from '@uapkg/common-schema';
+import { AssetHashSchema, GitTreeSchema, PackageVersionSchema, RegistryNameSchema } from '@uapkg/common-schema';
 import { z } from 'zod';
 
 /**

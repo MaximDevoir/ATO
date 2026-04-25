@@ -6,7 +6,7 @@ import type {
   ConfigUnresolvedDefaultRegistryDiagnostic,
 } from '@uapkg/diagnostics';
 import { Box, Text } from 'ink';
-import React, { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import type { DiagnosticBodyProps, DiagnosticInkComponentMap } from '../contracts/InkTypes.js';
 
 function ConfigInvalidJson({ diagnostic }: DiagnosticBodyProps): ReactElement {

@@ -1,4 +1,4 @@
-import type { RegistryIdentifier, RegistryIdentifierShort, UnixTimestamp } from '@uapkg/common-schema';
+import type { RegistryIdentifier, UnixTimestamp } from '@uapkg/common-schema';
 
 // ---------------------------------------------------------------------------
 // Registry descriptor — normalized description of a registry identity

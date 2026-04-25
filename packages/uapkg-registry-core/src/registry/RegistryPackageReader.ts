@@ -6,7 +6,6 @@ import {
   createPackageNotFoundDiagnostic,
   createSchemaInvalidDiagnostic,
   DiagnosticBag,
-  fail,
   ok,
   type Result,
 } from '@uapkg/diagnostics';

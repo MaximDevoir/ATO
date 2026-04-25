@@ -1,6 +1,6 @@
 import type { UpluginMissingDiagnostic } from '@uapkg/diagnostics';
 import { Text } from 'ink';
-import React, { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import type { DiagnosticBodyProps, DiagnosticInkComponentMap } from '../contracts/InkTypes.js';
 
 function UpluginMissing({ diagnostic }: DiagnosticBodyProps): ReactElement {

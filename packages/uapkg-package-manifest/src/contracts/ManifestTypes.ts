@@ -1,4 +1,3 @@
-import type { Result } from '@uapkg/diagnostics';
 import type { Dependency, Lockfile, Manifest } from '@uapkg/package-manifest-schema';
 
 /** Options shared by manifest operations. */

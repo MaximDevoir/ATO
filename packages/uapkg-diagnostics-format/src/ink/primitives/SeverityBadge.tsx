@@ -1,6 +1,6 @@
 import type { Diagnostic } from '@uapkg/diagnostics';
 import { Text } from 'ink';
-import React, { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 const LEVEL_CONFIG: Record<Diagnostic['level'], { readonly icon: string; readonly color: string }> = {
   error: { icon: '✖', color: 'red' },

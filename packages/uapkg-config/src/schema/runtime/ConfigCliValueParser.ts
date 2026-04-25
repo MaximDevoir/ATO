@@ -47,9 +47,6 @@ export class ConfigCliValueParser {
         return this.coerceBoolean(pathToProperty, rawValue);
       case 'number':
         return this.coerceNumber(pathToProperty, rawValue);
-      case 'string':
-      case 'enum':
-      case 'other':
       default:
         return ok(rawValue);
     }

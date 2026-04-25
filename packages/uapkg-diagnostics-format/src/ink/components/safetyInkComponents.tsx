@@ -4,7 +4,7 @@ import type {
   SafetyTargetExistsNoManifestDiagnostic,
 } from '@uapkg/diagnostics';
 import { Box, Text } from 'ink';
-import React, { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import type { DiagnosticBodyProps, DiagnosticInkComponentMap } from '../contracts/InkTypes.js';
 
 function TargetExistsNoManifest({ diagnostic }: DiagnosticBodyProps): ReactElement {

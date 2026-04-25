@@ -1,13 +1,6 @@
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import {
-  createCacheReadErrorDiagnostic,
-  createIoErrorDiagnostic,
-  DiagnosticBag,
-  fail,
-  ok,
-  type Result,
-} from '@uapkg/diagnostics';
+import { createCacheReadErrorDiagnostic, createIoErrorDiagnostic, fail, ok, type Result } from '@uapkg/diagnostics';
 import type { RegistryMetadata } from '../contracts/RegistryCoreTypes.js';
 import { getRegistryMetadataPath } from '../paths/RegistryPaths.js';
 

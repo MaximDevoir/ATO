@@ -219,7 +219,7 @@ export class Installer {
       stream.publish();
       slots.release(slotId);
       return ok(undefined);
-    } catch (err) {
+    } catch (_err) {
       slots.update(slotId, { state: 'failed' });
       stream.publish();
       slots.release(slotId);

@@ -5,7 +5,6 @@ import {
   createInvalidPathDiagnostic,
   createSymlinkOutsideRootDiagnostic,
   DiagnosticBag,
-  fail,
   ok,
   type Result,
 } from '@uapkg/diagnostics';

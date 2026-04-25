@@ -1,6 +1,6 @@
 import type { Diagnostic } from '@uapkg/diagnostics';
 import { Box, Text } from 'ink';
-import React, { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import type { IDiagnosticInkRegistry } from '../contracts/InkTypes.js';
 import { HintLine } from '../primitives/HintLine.js';
 import { PlainTextBody } from '../primitives/PlainTextBody.js';
