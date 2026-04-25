@@ -7,6 +7,7 @@ import { ListCommand } from '../commands/ListCommand.js';
 import { OutdatedCommand } from '../commands/OutdatedCommand.js';
 import { PackCommand } from '../commands/PackCommand.js';
 import { ProjectGetNameCommand } from '../commands/ProjectGetNameCommand.js';
+import { RegistryCommand } from '../commands/RegistryCommand.js';
 import { RemoveCommand } from '../commands/RemoveCommand.js';
 import { UpdateCommand } from '../commands/UpdateCommand.js';
 import { WhyCommand } from '../commands/WhyCommand.js';
@@ -94,6 +95,18 @@ export class UAPKGApplication {
           output: commandLine.output,
           showOrigin: commandLine.showOrigin,
           trace: commandLine.trace,
+        }).execute();
+
+      case 'registry':
+        return new RegistryCommand({
+          cwd: commandLine.cwd,
+          action: commandLine.action,
+          name: commandLine.name,
+          url: commandLine.url,
+          refType: commandLine.refType,
+          refValue: commandLine.refValue,
+          scope: commandLine.scope,
+          output: commandLine.output,
         }).execute();
 
       case 'init':

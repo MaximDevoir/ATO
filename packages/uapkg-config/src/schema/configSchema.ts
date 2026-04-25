@@ -29,6 +29,22 @@ const registryConfigSchema = z
   })
   .strict();
 
+const partialRegistryRefSchema = z
+  .object({
+    type: z.enum(['branch', 'tag', 'rev']).optional(),
+    value: z.string().min(1).optional(),
+  })
+  .strict();
+
+const partialRegistryConfigSchema = z
+  .object({
+    url: z.string().min(1).optional(),
+    ref: partialRegistryRefSchema.optional(),
+    ttlSeconds: z.number().optional(),
+    postInstallPolicy: postInstallPolicySchema.optional(),
+  })
+  .strict();
+
 export const configSchema = z
   .object({
     registry: z.string().min(1),
@@ -78,21 +94,12 @@ export const configSchema = z
       })
       .strict(),
   })
-  .strict()
-  .superRefine((value, context) => {
-    if (!(value.registry in value.registries)) {
-      context.addIssue({
-        code: 'custom',
-        message: `registry must match a key in registries: '${value.registry}' was not found`,
-        path: ['registry'],
-      });
-    }
-  });
+  .strict();
 
 export const partialConfigSchema = z
   .object({
     registry: z.string().min(1).optional(),
-    registries: z.record(z.string(), registryConfigSchema).optional(),
+    registries: z.record(z.string(), partialRegistryConfigSchema).optional(),
     git: z.string().min(1).optional(),
     editor: z.string().min(1).optional(),
     exec: z

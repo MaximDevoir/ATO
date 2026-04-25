@@ -1,7 +1,7 @@
 import path from 'node:path';
 import {
+  createConfigInvalidValueDiagnostic,
   createParseErrorDiagnostic,
-  createSchemaInvalidDiagnostic,
   DiagnosticBag,
   fail,
   ok,
@@ -76,8 +76,9 @@ export class ConfigWriter {
 
     const validation = partialConfigSchema.safeParse(cloned);
     if (!validation.success) {
-      const issues = validation.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
-      bag.add(createSchemaInvalidDiagnostic(targetFile, issues));
+      for (const issue of validation.error.issues) {
+        bag.add(createConfigInvalidValueDiagnostic(issue.path.join('.'), issue.message));
+      }
       return bag.toFailure();
     }
 
@@ -109,8 +110,9 @@ export class ConfigWriter {
 
     const validation = partialConfigSchema.safeParse(cloned);
     if (!validation.success) {
-      const issues = validation.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
-      bag.add(createSchemaInvalidDiagnostic(targetFile, issues));
+      for (const issue of validation.error.issues) {
+        bag.add(createConfigInvalidValueDiagnostic(issue.path.join('.'), issue.message));
+      }
       return bag.toFailure();
     }
 

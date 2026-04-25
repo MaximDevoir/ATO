@@ -12,6 +12,7 @@ import { Registry } from '../registry/Registry.js';
  * configured registry names into runtime `Registry` objects.
  */
 export class RegistryCore {
+  private static readonly registryPool = new Map<string, Registry>();
   private readonly registries = new Map<string, Registry>();
   private readonly config: InstanceType<typeof ConfigInstance>;
 
@@ -47,7 +48,15 @@ export class RegistryCore {
     const perRegistryTtl = this.config.get(`registries.${registryName}.ttlSeconds`) as number | null;
     const ttl = perRegistryTtl ?? globalTtl;
 
+    const globalKey = `${registryName}::${shortId}`;
+    const shared = RegistryCore.registryPool.get(globalKey);
+    if (shared) {
+      this.registries.set(registryName, shared);
+      return ok(shared);
+    }
+
     const registry = Registry.create(registryName, descriptor, id, shortId, gitBinary, ttl);
+    RegistryCore.registryPool.set(globalKey, registry);
     this.registries.set(registryName, registry);
 
     return ok(registry);

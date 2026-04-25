@@ -1,4 +1,5 @@
-import type { ConfigLayer } from '../contracts/ConfigTypes.js';
+import { DiagnosticBag } from '@uapkg/diagnostics';
+import type { ConfigLayer, ConfigLayerBuildResult } from '../contracts/ConfigTypes.js';
 import { ConfigFileRepository } from '../files/ConfigFileRepository.js';
 import { ConfigPathResolver } from '../files/ConfigPathResolver.js';
 import { getDefaultConfig } from '../schema/configSchema.js';
@@ -9,8 +10,9 @@ export class ConfigLayerBuilder {
     private readonly repository = new ConfigFileRepository(),
   ) {}
 
-  build(cwd: string): ConfigLayer[] {
+  build(cwd: string): ConfigLayerBuildResult {
     const paths = this.pathResolver.resolve(cwd);
+    const bag = new DiagnosticBag();
 
     const layers: ConfigLayer[] = [
       {
@@ -20,7 +22,7 @@ export class ConfigLayerBuilder {
       {
         source: 'global',
         file: paths.globalFile,
-        values: this.readValues(paths.globalFile),
+        values: this.readValues(paths.globalFile, bag),
       },
     ];
 
@@ -28,25 +30,26 @@ export class ConfigLayerBuilder {
       layers.push({
         source: 'intermediary',
         file: intermediaryFile,
-        values: this.readValues(intermediaryFile),
+        values: this.readValues(intermediaryFile, bag),
       });
     }
 
     layers.push({
       source: 'local',
       file: paths.localFile,
-      values: this.readValues(paths.localFile),
+      values: this.readValues(paths.localFile, bag),
     });
 
-    return layers;
+    return { layers, diagnostics: bag.all() };
   }
 
-  private readValues(filePath: string): Record<string, unknown> {
+  private readValues(filePath: string, bag: DiagnosticBag): Record<string, unknown> {
     const result = this.repository.read(filePath);
     if (!result.ok) {
-      // Gracefully degrade: skip this layer rather than halting
+      bag.mergeArray(result.diagnostics);
       return {};
     }
+    bag.mergeArray(result.value.diagnostics);
     return result.value.values;
   }
 }

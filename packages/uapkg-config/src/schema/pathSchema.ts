@@ -14,10 +14,15 @@ const directPaths = new Set([
   'network',
   'network.retries',
   'network.timeout',
+  'network.maxConcurrentDownloads',
+  'install',
+  'install.postInstallPolicy',
   'term',
   'term.quiet',
   'term.verbose',
 ]);
+
+const nonLeafPaths = new Set(['registries', 'exec', 'cache', 'registryCache', 'network', 'install', 'term']);
 
 export function validateConfigPath(pathToProperty: string): Result<void> {
   if (isValidConfigPath(pathToProperty)) {
@@ -70,6 +75,20 @@ export function isValidConfigPath(pathToProperty: string) {
   }
 
   return false;
+}
+
+export function isLeafConfigPath(pathToProperty: string): boolean {
+  if (!isValidConfigPath(pathToProperty)) return false;
+  if (nonLeafPaths.has(pathToProperty)) return false;
+
+  const segments = pathToProperty.split('.');
+  if (segments[0] !== 'registries') {
+    return true;
+  }
+
+  if (segments.length === 2) return false;
+  if (segments.length === 3 && segments[2] === 'ref') return false;
+  return true;
 }
 
 export function getValueByPath(data: unknown, pathToProperty?: string): unknown {

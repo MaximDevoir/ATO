@@ -1,5 +1,7 @@
 import type { DiagnosticLevel } from './DiagnosticLevel.js';
 
+export type DiagnosticEmitPolicy = 'always' | 'once';
+
 /**
  * Base shape for all diagnostics. Every concrete diagnostic must extend this
  * interface, discriminating on `code` so that `data` is always strongly typed.
@@ -20,6 +22,12 @@ export interface DiagnosticBase<C extends string = string, D = undefined> {
   /** Actionable hint shown to the user. */
   readonly hint?: string;
 
+  /** Emit strategy for user-facing reporting. */
+  readonly emitPolicy?: DiagnosticEmitPolicy;
+
+  /** Stable dedupe key used when `emitPolicy` is `once`. */
+  readonly emitFingerprint?: string;
+
   /** Strongly typed payload whose shape is determined by `code`. */
   readonly data: D;
 }
@@ -35,6 +43,18 @@ export function createDiagnostic<C extends string, D = undefined>(
   message: string,
   data: D,
   hint?: string,
+  options?: {
+    readonly emitPolicy?: DiagnosticEmitPolicy;
+    readonly emitFingerprint?: string;
+  },
 ): DiagnosticBase<C, D> {
-  return { level, code, message, data, hint };
+  return {
+    level,
+    code,
+    message,
+    data,
+    hint,
+    emitPolicy: options?.emitPolicy,
+    emitFingerprint: options?.emitFingerprint,
+  };
 }

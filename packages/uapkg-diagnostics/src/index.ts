@@ -2,13 +2,29 @@
 // @uapkg/diagnostics — public API
 // ---------------------------------------------------------------------------
 
-export type { DiagnosticBase } from './base/Diagnostic.js';
+export type { DiagnosticBase, DiagnosticEmitPolicy } from './base/Diagnostic.js';
 export { createDiagnostic } from './base/Diagnostic.js';
 export { DiagnosticBag } from './base/DiagnosticBag.js';
 // Base primitives
 export type { DiagnosticLevel } from './base/DiagnosticLevel.js';
 export type { Result, ResultFail, ResultOk } from './base/Result.js';
 export { fail, fromDiagnostics, ok } from './base/Result.js';
+// --- Config family ---
+export type {
+  ConfigDiagnostic,
+  ConfigInvalidJsonDiagnostic,
+  ConfigInvalidValueDiagnostic,
+  ConfigTypeMismatchDiagnostic,
+  ConfigUnknownKeyDiagnostic,
+  ConfigUnresolvedDefaultRegistryDiagnostic,
+} from './config/ConfigDiagnostics.js';
+export {
+  createConfigInvalidJsonDiagnostic,
+  createConfigInvalidValueDiagnostic,
+  createConfigTypeMismatchDiagnostic,
+  createConfigUnknownKeyDiagnostic,
+  createConfigUnresolvedDefaultRegistryDiagnostic,
+} from './config/ConfigDiagnostics.js';
 // --- General family ---
 export type {
   GeneralDiagnostic,
@@ -76,6 +92,7 @@ export type {
   PluginRootNotFoundDiagnostic,
   SymlinkOutsideRootDiagnostic,
   UnresolvedLfsDiagnostic,
+  UpluginMissingDiagnostic,
 } from './pack/PackDiagnostics.js';
 export {
   createCyclicSymlinkDiagnostic,
@@ -86,6 +103,7 @@ export {
   createPluginRootNotFoundDiagnostic,
   createSymlinkOutsideRootDiagnostic,
   createUnresolvedLfsDiagnostic,
+  createUpluginMissingDiagnostic,
 } from './pack/PackDiagnostics.js';
 // --- Postinstall family ---
 export type {

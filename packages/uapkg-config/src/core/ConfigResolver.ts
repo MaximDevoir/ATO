@@ -1,24 +1,35 @@
-import type { ConfigLayer, ConfigTraceEntry, ConfigValueWithOrigin, ResolvedConfig } from '../contracts/ConfigTypes.js';
+import type { Diagnostic } from '@uapkg/diagnostics';
+import type {
+  ConfigLayer,
+  ConfigResolvedResult,
+  ConfigTraceEntry,
+  ConfigValueWithOrigin,
+} from '../contracts/ConfigTypes.js';
 import { ConfigMerger } from '../merge/ConfigMerger.js';
-import { configSchema } from '../schema/configSchema.js';
 import { getValueByPath } from '../schema/pathSchema.js';
+import { ConfigSemanticValidator } from './ConfigSemanticValidator.js';
 
 export class ConfigResolver {
-  constructor(private readonly merger = new ConfigMerger()) {}
+  constructor(
+    private readonly merger = new ConfigMerger(),
+    private readonly semanticValidator = new ConfigSemanticValidator(),
+  ) {}
 
-  resolveAll(layers: ConfigLayer[]): ResolvedConfig {
-    let merged: unknown = {};
-
-    for (const layer of layers) {
-      merged = this.merger.merge(merged, layer.values);
-    }
-
-    return configSchema.parse(merged);
+  resolveAll(layers: ConfigLayer[]): ConfigResolvedResult {
+    const merged = this.merger.mergeLayers(layers);
+    const semanticDiagnostics = this.semanticValidator.validate(merged.value);
+    return {
+      value: merged.value,
+      diagnostics: [...merged.diagnostics, ...semanticDiagnostics],
+    };
   }
 
-  resolvePath(layers: ConfigLayer[], pathToProperty: string) {
-    const merged = this.resolveAll(layers);
-    return getValueByPath(merged, pathToProperty);
+  resolvePath(layers: ConfigLayer[], pathToProperty: string): { value: unknown; diagnostics: readonly Diagnostic[] } {
+    const resolved = this.resolveAll(layers);
+    return {
+      value: getValueByPath(resolved.value, pathToProperty),
+      diagnostics: resolved.diagnostics,
+    };
   }
 
   getWithOrigin(layers: ConfigLayer[], pathToProperty: string): ConfigValueWithOrigin {

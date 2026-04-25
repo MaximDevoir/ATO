@@ -1,6 +1,6 @@
 import type { Diagnostic } from '@uapkg/diagnostics';
 import { Box } from 'ink';
-import type { ReactElement } from 'react';
+import React, { type ReactElement } from 'react';
 import type { IDiagnosticInkRegistry } from '../contracts/InkTypes.js';
 import { DiagnosticView } from './DiagnosticView.js';
 

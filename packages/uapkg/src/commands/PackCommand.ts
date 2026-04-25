@@ -1,5 +1,5 @@
-import Log from '@uapkg/log';
 import { pack } from '@uapkg/pack';
+import { DiagnosticReporter } from '../reporting/DiagnosticReporter.js';
 import type { Command } from './Command.js';
 
 export interface PackCommandOptions {
@@ -21,9 +21,7 @@ export class PackCommand implements Command {
     });
 
     if (!result.ok) {
-      for (const d of result.diagnostics) {
-        Log.error(`[${d.code}] ${d.message}`);
-      }
+      new DiagnosticReporter().reportAll(result.diagnostics);
       return 1;
     }
 

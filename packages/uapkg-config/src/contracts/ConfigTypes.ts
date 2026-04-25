@@ -1,3 +1,5 @@
+import type { Diagnostic } from '@uapkg/diagnostics';
+
 export type ConfigLayerSource = 'default' | 'global' | 'intermediary' | 'local';
 
 export interface RegistryRef {
@@ -98,4 +100,15 @@ export interface ConfigPaths {
 export interface ConfigReadResult {
   values: Record<string, unknown>;
   exists: boolean;
+  diagnostics: readonly Diagnostic[];
+}
+
+export interface ConfigLayerBuildResult {
+  layers: ConfigLayer[];
+  diagnostics: readonly Diagnostic[];
+}
+
+export interface ConfigResolvedResult {
+  value: Record<string, unknown>;
+  diagnostics: readonly Diagnostic[];
 }

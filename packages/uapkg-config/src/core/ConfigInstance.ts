@@ -1,7 +1,8 @@
-import type { Result } from '@uapkg/diagnostics';
+import type { Diagnostic, Result } from '@uapkg/diagnostics';
 import type {
   ConfigCreateOptions,
   ConfigGetOptions,
+  ConfigLayer,
   ConfigListOptions,
   ConfigReloadOptions,
   ConfigTraceEntry,
@@ -16,7 +17,9 @@ import { ConfigWriter } from './ConfigWriter.js';
 
 export class ConfigInstance {
   private cwd: string;
-  private layers = [] as ReturnType<ConfigLayerBuilder['build']>;
+  private layers: ConfigLayer[] = [];
+  private resolved: Record<string, unknown> = {};
+  private diagnostics: readonly Diagnostic[] = [];
 
   constructor(
     options: ConfigCreateOptions = {},
@@ -53,7 +56,7 @@ export class ConfigInstance {
     const pathResult = validateConfigPath(pathToProperty);
     if (!pathResult.ok) return null;
 
-    return this.resolver.resolvePath(this.layers, pathToProperty);
+    return this.getValueFromObject(this.resolved, pathToProperty);
   }
 
   getAll(options: ConfigListOptions = {}): ResolvedConfig | Record<string, unknown> | null {
@@ -63,13 +66,28 @@ export class ConfigInstance {
       return result.value;
     }
 
-    return this.resolver.resolveAll(this.layers);
+    return this.resolved;
   }
 
   getDefaultRegistry() {
-    const config = this.getAll() as ResolvedConfig;
-    const selected = config.registry;
-    return config.registries[selected] ?? null;
+    const selected = this.get('registry');
+    const registries = this.get('registries');
+    if (typeof selected !== 'string') return null;
+    if (typeof registries !== 'object' || registries === null || Array.isArray(registries)) return null;
+
+    const candidate = (registries as Record<string, unknown>)[selected];
+    if (typeof candidate !== 'object' || candidate === null || Array.isArray(candidate)) return null;
+
+    const url = (candidate as Record<string, unknown>).url;
+    const ref = (candidate as Record<string, unknown>).ref;
+    if (typeof url !== 'string') return null;
+    if (typeof ref !== 'object' || ref === null || Array.isArray(ref)) return null;
+
+    const type = (ref as Record<string, unknown>).type;
+    const value = (ref as Record<string, unknown>).value;
+    if (typeof type !== 'string' || typeof value !== 'string') return null;
+
+    return { url, ref: { type, value } };
   }
 
   getWithOrigin(pathToProperty: string): ConfigValueWithOrigin | null {
@@ -107,9 +125,18 @@ export class ConfigInstance {
     return this.writer.toDisplayPath(this.cwd, filePath);
   }
 
+  getDiagnostics(): readonly Diagnostic[] {
+    return this.diagnostics;
+  }
+
   reload(options: ConfigReloadOptions = {}) {
     this.cwd = options.cwd ?? this.cwd;
-    this.layers = this.layerBuilder.build(this.cwd);
+    const buildResult = this.layerBuilder.build(this.cwd);
+    this.layers = buildResult.layers;
+
+    const resolvedResult = this.resolver.resolveAll(this.layers);
+    this.resolved = resolvedResult.value;
+    this.diagnostics = [...buildResult.diagnostics, ...resolvedResult.diagnostics];
     return this;
   }
 

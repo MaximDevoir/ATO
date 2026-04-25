@@ -1,4 +1,5 @@
 import type { Diagnostic } from '@uapkg/diagnostics';
+import { DiagnosticDeduplicator } from './DiagnosticDeduplicator.js';
 import type { DiagnosticRenderer } from './DiagnosticRenderer.js';
 import { InkDiagnosticRenderer } from './InkDiagnosticRenderer.js';
 import { sortDiagnostics } from './TextSink.js';
@@ -16,11 +17,16 @@ import { sortDiagnostics } from './TextSink.js';
  * One instance is safe to reuse across commands in a single CLI run.
  */
 export class DiagnosticReporter {
-  public constructor(private readonly renderer: DiagnosticRenderer = new InkDiagnosticRenderer()) {}
+  public constructor(
+    private readonly renderer: DiagnosticRenderer = new InkDiagnosticRenderer(),
+    private readonly deduplicator: DiagnosticDeduplicator = new DiagnosticDeduplicator(),
+  ) {}
 
   public reportAll(diagnostics: readonly Diagnostic[]): void {
     if (diagnostics.length === 0) return;
-    const sorted = sortDiagnostics(diagnostics);
+    const deduped = this.deduplicator.filter(diagnostics);
+    if (deduped.length === 0) return;
+    const sorted = sortDiagnostics(deduped);
     const errors = sorted.filter((d) => d.level === 'error');
     const others = sorted.filter((d) => d.level !== 'error');
     if (errors.length > 0) this.renderer.render(errors, 'stderr');

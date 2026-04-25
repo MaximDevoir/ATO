@@ -1,3 +1,4 @@
+import type { ConfigDiagnostic } from './config/ConfigDiagnostics.js';
 import type { GeneralDiagnostic } from './general/GeneralDiagnostics.js';
 import type { InstallerDiagnostic } from './installer/InstallerDiagnostics.js';
 import type { ManifestDiagnostic } from './manifest/ManifestDiagnostics.js';
@@ -19,6 +20,7 @@ import type { SpecParseDiagnostic } from './spec/SpecDiagnostics.js';
  */
 export type Diagnostic =
   | ResolverDiagnostic
+  | ConfigDiagnostic
   | RegistryDiagnostic
   | ManifestDiagnostic
   | PackDiagnostic

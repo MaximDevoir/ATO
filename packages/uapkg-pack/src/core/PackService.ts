@@ -17,7 +17,9 @@ import { IgnoreEvaluator } from './IgnoreEvaluator.js';
 import { IgnoreRuleLoader } from './IgnoreRuleLoader.js';
 import { IntegrityWriter } from './IntegrityWriter.js';
 import { LFSPointerDetector } from './LFSPointerDetector.js';
+import { PackArtifactExcluder } from './PackArtifactExcluder.js';
 import { PackManifestReader } from './PackManifestReader.js';
+import { PluginDescriptorGuard } from './PluginDescriptorGuard.js';
 import { PluginRootResolver } from './PluginRootResolver.js';
 import { TarArchiveWriter } from './TarArchiveWriter.js';
 
@@ -30,6 +32,8 @@ export class PackService {
     private readonly fileCrawler = new FileCrawler(),
     private readonly ruleLoader = new IgnoreRuleLoader(),
     private readonly ignoreEvaluator = new IgnoreEvaluator(),
+    private readonly artifactExcluder = new PackArtifactExcluder(),
+    private readonly descriptorGuard = new PluginDescriptorGuard(),
     private readonly lfsPointerDetector = new LFSPointerDetector(),
     private readonly tarWriter = new TarArchiveWriter(),
     private readonly integrityWriter = new IntegrityWriter(),
@@ -69,9 +73,20 @@ export class PackService {
     }
 
     const allFiles = crawlResult.value;
+    const descriptorResult = this.descriptorGuard.validate(roots.pluginRoot, allFiles);
+    if (!descriptorResult.ok) {
+      bag.mergeArray(descriptorResult.diagnostics);
+      return bag.toFailure();
+    }
+
+    const generatedArtifacts = this.artifactExcluder.collect(roots.pluginRoot, archivePath, allFiles);
     const rules = this.ruleLoader.load(roots.gitRoot, roots.pluginRoot);
 
     const filtered = allFiles.filter((file) => {
+      if (generatedArtifacts.has(file.relativePath)) {
+        return false;
+      }
+
       const ignored = this.ignoreEvaluator.shouldIgnore(file.relativePath, file.absolutePath, rules);
 
       if (!ignored) {

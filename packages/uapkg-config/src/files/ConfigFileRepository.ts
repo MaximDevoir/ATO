@@ -1,44 +1,72 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
+  createConfigInvalidJsonDiagnostic,
+  createConfigTypeMismatchDiagnostic,
   createIoErrorDiagnostic,
-  createParseErrorDiagnostic,
-  createSchemaInvalidDiagnostic,
-  fail,
   ok,
   type Result,
 } from '@uapkg/diagnostics';
 import type { ConfigReadResult } from '../contracts/ConfigTypes.js';
-import { partialConfigSchema } from '../schema/configSchema.js';
 
 export class ConfigFileRepository {
   read(filePath: string): Result<ConfigReadResult> {
     if (!fs.existsSync(filePath)) {
-      return ok({ exists: false, values: {} });
+      return ok({ exists: false, values: {}, diagnostics: [] });
     }
 
-    const raw = fs.readFileSync(filePath, 'utf8').trim();
+    let raw: string;
+    try {
+      raw = fs.readFileSync(filePath, 'utf8').trim();
+    } catch (error) {
+      return {
+        ok: true,
+        value: {
+          exists: true,
+          values: {},
+          diagnostics: [createIoErrorDiagnostic(filePath, String(error))],
+        },
+        diagnostics: [],
+      };
+    }
+
     if (raw.length === 0) {
-      return ok({ exists: true, values: {} });
+      return ok({ exists: true, values: {}, diagnostics: [] });
     }
 
     let parsed: unknown;
     try {
       parsed = JSON.parse(raw);
     } catch (error) {
-      const details = error instanceof Error ? error.message : String(error);
-      return fail([createParseErrorDiagnostic(`Invalid JSON in config file ${filePath}: ${details}`, filePath)]);
+      return ok({
+        exists: true,
+        values: {},
+        diagnostics: [
+          createConfigInvalidJsonDiagnostic(filePath, error instanceof Error ? error.message : String(error)),
+        ],
+      });
     }
 
-    const validation = partialConfigSchema.safeParse(parsed);
-    if (!validation.success) {
-      const issues = validation.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
-      return fail([createSchemaInvalidDiagnostic(filePath, issues)]);
+    if (!this.isRecord(parsed)) {
+      return ok({
+        exists: true,
+        values: {},
+        diagnostics: [
+          createConfigTypeMismatchDiagnostic({
+            path: '$',
+            expectedType: 'object',
+            actualType: this.describeType(parsed),
+            source: 'file',
+            filePath,
+          }),
+        ],
+      });
     }
 
     return ok({
       exists: true,
-      values: (validation.data as Record<string, unknown>) ?? {},
+      values: parsed,
+      diagnostics: [],
     });
   }
 
@@ -48,7 +76,20 @@ export class ConfigFileRepository {
       fs.writeFileSync(filePath, `${JSON.stringify(values, null, 2)}\n`, 'utf8');
       return ok(undefined);
     } catch (error) {
-      return fail([createIoErrorDiagnostic(filePath, String(error))]);
+      return {
+        ok: false,
+        diagnostics: [createIoErrorDiagnostic(filePath, String(error))],
+      };
     }
+  }
+
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+  }
+
+  private describeType(value: unknown): string {
+    if (Array.isArray(value)) return 'array';
+    if (value === null) return 'null';
+    return typeof value;
   }
 }

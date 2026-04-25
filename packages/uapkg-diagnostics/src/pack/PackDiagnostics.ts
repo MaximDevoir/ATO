@@ -28,6 +28,9 @@ export type NoFilesSelectedDiagnostic = DiagnosticBase<'NO_FILES_SELECTED', Reco
 /** --outFile resolved to a directory instead of a file. */
 export type OutFileIsDirectoryDiagnostic = DiagnosticBase<'OUTFILE_IS_DIRECTORY', { readonly filePath: string }>;
 
+/** Plugin descriptor (*.uplugin) is required for pack operations. */
+export type UpluginMissingDiagnostic = DiagnosticBase<'UPLUGIN_MISSING', { readonly pluginRoot: string }>;
+
 /** Union of all pack diagnostics. */
 export type PackDiagnostic =
   | CyclicSymlinkDiagnostic
@@ -37,7 +40,8 @@ export type PackDiagnostic =
   | UnresolvedLfsDiagnostic
   | LfsSkippedDiagnostic
   | NoFilesSelectedDiagnostic
-  | OutFileIsDirectoryDiagnostic;
+  | OutFileIsDirectoryDiagnostic
+  | UpluginMissingDiagnostic;
 
 // ---------------------------------------------------------------------------
 // Factory helpers
@@ -109,5 +113,15 @@ export function createOutFileIsDirectoryDiagnostic(filePath: string): OutFileIsD
     code: 'OUTFILE_IS_DIRECTORY',
     message: '--outFile must be a file path, not a directory.',
     data: { filePath },
+  };
+}
+
+export function createUpluginMissingDiagnostic(pluginRoot: string): UpluginMissingDiagnostic {
+  return {
+    level: 'error',
+    code: 'UPLUGIN_MISSING',
+    message: `No plugin descriptor (*.uplugin) was found in "${pluginRoot}".`,
+    hint: 'Ensure your plugin root contains a .uplugin file before running `uapkg pack`.',
+    data: { pluginRoot },
   };
 }

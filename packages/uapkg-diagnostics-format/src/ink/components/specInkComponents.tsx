@@ -4,7 +4,7 @@ import type {
   InvalidVersionRangeDiagnostic,
 } from '@uapkg/diagnostics';
 import { Box, Text } from 'ink';
-import type { ReactElement } from 'react';
+import React, { type ReactElement } from 'react';
 import type { DiagnosticBodyProps, DiagnosticInkComponentMap } from '../contracts/InkTypes.js';
 
 function InvalidPackageSpec({ diagnostic }: DiagnosticBodyProps): ReactElement {

@@ -1,5 +1,7 @@
+import { configInkComponents } from '../components/configInkComponents.js';
 import { installerInkComponents } from '../components/installerInkComponents.js';
 import { manifestInkComponents } from '../components/manifestInkComponents.js';
+import { packInkComponents } from '../components/packInkComponents.js';
 import { postinstallInkComponents } from '../components/postinstallInkComponents.js';
 import { registryInkComponents } from '../components/registryInkComponents.js';
 import { resolverInkComponents } from '../components/resolverInkComponents.js';
@@ -18,8 +20,10 @@ import type { DiagnosticInkComponentMap } from '../contracts/InkTypes.js';
  *   2. Instantiate a {@link DiagnosticInkRegistry} and `.register()` after.
  */
 export const defaultInkComponents: DiagnosticInkComponentMap = {
+  ...configInkComponents,
   ...installerInkComponents,
   ...manifestInkComponents,
+  ...packInkComponents,
   ...postinstallInkComponents,
   ...registryInkComponents,
   ...resolverInkComponents,

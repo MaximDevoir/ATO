@@ -19,6 +19,9 @@ const Config = {
   trace(pathToProperty: string) {
     return singleton.trace(pathToProperty);
   },
+  getDiagnostics() {
+    return singleton.getDiagnostics();
+  },
   reload(options?: { cwd?: string }) {
     singleton.reload(options);
     return Config;
@@ -36,4 +39,5 @@ export type {
   ResolvedConfig,
 } from './contracts/ConfigTypes.js';
 export { PostInstallPolicyResolver } from './core/PostInstallPolicyResolver.js';
+export { isLeafConfigPath, isValidConfigPath, validateConfigPath } from './schema/pathSchema.js';
 export { ConfigInstance, createConfig };

@@ -30,6 +30,7 @@ export {
   ProjectGetNameCommand,
   type ProjectGetNameCommandOptions,
 } from './commands/ProjectGetNameCommand.js';
+export { RegistryCommand, type RegistryCommandOptions } from './commands/RegistryCommand.js';
 export { RemoveCommand, type RemoveCommandOptions } from './commands/RemoveCommand.js';
 export { UpdateCommand, type UpdateCommandOptions } from './commands/UpdateCommand.js';
 export { WhyCommand, type WhyCommandOptions } from './commands/WhyCommand.js';

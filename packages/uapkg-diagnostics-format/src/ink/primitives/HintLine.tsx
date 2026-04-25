@@ -1,5 +1,5 @@
 import { Box, Text } from 'ink';
-import type { ReactElement } from 'react';
+import React, { type ReactElement } from 'react';
 
 export interface HintLineProps {
   readonly hint: string;

@@ -1,5 +1,5 @@
 import { Text } from 'ink';
-import type { ReactElement } from 'react';
+import React, { type ReactElement } from 'react';
 import type { DiagnosticBodyProps } from '../contracts/InkTypes.js';
 
 /**

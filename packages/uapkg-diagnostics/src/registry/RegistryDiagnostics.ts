@@ -119,7 +119,13 @@ export function createRegistryNotFoundDiagnostic(registryName: string): Registry
     level: 'error',
     code: 'REGISTRY_NOT_FOUND',
     message: `Registry "${registryName}" is not defined in configuration.`,
-    hint: 'Add the registry to your uapkg configuration or check the registry name.',
+    hint: `Add the registry. Example:
+  uapkg registry add ${registryName} https://registry.example.com
+
+Or configure manually:
+  uapkg config set registries.${registryName}.url https://registry.example.com
+  uapkg config set registries.${registryName}.ref.type branch
+  uapkg config set registries.${registryName}.ref.value main`,
     data: { registryName },
   };
 }
@@ -159,6 +165,8 @@ export function createRegistryUnreachableDiagnostic(input: {
     level: input.level ?? (input.initialized ? 'warning' : 'error'),
     code: 'REGISTRY_UNREACHABLE',
     message: `The "${input.registryName}" registry could not be reached at ${input.url}.`,
+    emitPolicy: 'once',
+    emitFingerprint: `REGISTRY_UNREACHABLE::${input.registryName}::${input.url}`,
     hint: `Verify the registry URL with 'uapkg config get registries.${input.registryName}.url --trace'.
 The registry may also be temporarily unavailable.`,
     data: {

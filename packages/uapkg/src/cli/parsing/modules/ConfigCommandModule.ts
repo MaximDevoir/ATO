@@ -24,7 +24,7 @@ export class ConfigCommandModule implements UAPKGCommandModule {
           })
           .positional('value', {
             type: 'string',
-            describe: 'JSON value for set action',
+            describe: 'Scalar value for set action',
           })
           .option('json', {
             type: 'boolean',

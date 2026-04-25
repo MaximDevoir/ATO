@@ -9,6 +9,7 @@ import { ListCommandModule } from './modules/ListCommandModule.js';
 import { OutdatedCommandModule } from './modules/OutdatedCommandModule.js';
 import { PackCommandModule } from './modules/PackCommandModule.js';
 import { ProjectGetNameCommandModule } from './modules/ProjectGetNameCommandModule.js';
+import { RegistryCommandModule } from './modules/RegistryCommandModule.js';
 import { RemoveCommandModule } from './modules/RemoveCommandModule.js';
 import { UpdateCommandModule } from './modules/UpdateCommandModule.js';
 import { WhyCommandModule } from './modules/WhyCommandModule.js';
@@ -27,6 +28,7 @@ export class UAPKGParserRegistry {
       new PackCommandModule(),
       new ProjectGetNameCommandModule(),
       new ConfigCommandModule(),
+      new RegistryCommandModule(),
     ],
   ) {}
 

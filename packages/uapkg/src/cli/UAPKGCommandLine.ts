@@ -5,12 +5,14 @@ export type UAPKGCommandName =
   | 'update'
   | 'project-get-name'
   | 'config'
+  | 'registry'
   | 'pack'
   | 'outdated'
   | 'why'
   | 'list'
   | 'remove';
 export type UAPKGConfigAction = 'get' | 'list' | 'set' | 'delete' | 'edit';
+export type UAPKGRegistryAction = 'add' | 'remove' | 'list' | 'use';
 export type UAPKGConfigScope = 'global' | 'local';
 export type UAPKGOutputFormat = 'text' | 'json';
 
@@ -67,6 +69,17 @@ export interface ConfigCommandLine extends BaseCommandLine {
   trace: boolean;
 }
 
+export interface RegistryCommandLine extends BaseCommandLine {
+  command: 'registry';
+  action: UAPKGRegistryAction;
+  name?: string;
+  url?: string;
+  refType?: 'branch' | 'tag' | 'rev';
+  refValue?: string;
+  scope?: UAPKGConfigScope;
+  output: UAPKGOutputFormat;
+}
+
 export interface PackCommandLine extends BaseCommandLine {
   command: 'pack';
   dryRun: boolean;
@@ -104,6 +117,7 @@ export type UAPKGCommandLine =
   | UpdateCommandLine
   | ProjectGetNameCommandLine
   | ConfigCommandLine
+  | RegistryCommandLine
   | PackCommandLine
   | OutdatedCommandLine
   | WhyCommandLine
@@ -154,6 +168,13 @@ export interface RemoveFactoryOptions extends CommonCommandLineOptions {
 export interface ConfigCommonOptions extends CommonCommandLineOptions {
   scope?: UAPKGConfigScope;
   output?: UAPKGOutputFormat;
+}
+
+export interface RegistryCommandLineOptions extends ConfigCommonOptions {
+  name?: string;
+  url?: string;
+  refType?: 'branch' | 'tag' | 'rev';
+  refValue?: string;
 }
 
 export interface ConfigGetOptions extends ConfigCommonOptions {
@@ -318,6 +339,20 @@ export class UAPKGCommandLineFactory {
       output: options.output ?? 'text',
       showOrigin: false,
       trace: false,
+    };
+  }
+
+  createRegistry(action: UAPKGRegistryAction, options: RegistryCommandLineOptions = {}): RegistryCommandLine {
+    return {
+      command: 'registry',
+      action,
+      cwd: this.resolveCwd(options.cwd),
+      name: options.name,
+      url: options.url,
+      refType: options.refType,
+      refValue: options.refValue,
+      scope: options.scope,
+      output: options.output ?? 'text',
     };
   }
 
