@@ -8,11 +8,20 @@ function createTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'uapkg-pack-'));
 }
 
+function writeBasicPluginFixture(root: string) {
+  fs.writeFileSync(path.join(root, 'uapkg.json'), '{"name":"pkg","version":"1.0.0"}\n', 'utf8');
+  fs.writeFileSync(
+    path.join(root, 'Plugin.uplugin'),
+    '{"FileVersion":3,"Version":1,"FriendlyName":"Plugin"}\n',
+    'utf8',
+  );
+  fs.writeFileSync(path.join(root, 'file.txt'), 'hello\n', 'utf8');
+}
+
 describe('PackService', () => {
   it('creates archive and integrity file', async () => {
     const root = createTempDir();
-    fs.writeFileSync(path.join(root, 'uapkg.json'), '{"name":"pkg","version":"1.0.0"}\n', 'utf8');
-    fs.writeFileSync(path.join(root, 'file.txt'), 'hello\n', 'utf8');
+    writeBasicPluginFixture(root);
 
     const result = await new PackService().pack({ cwd: root });
 
@@ -27,8 +36,7 @@ describe('PackService', () => {
 
   it('supports dry-run without writing archive', async () => {
     const root = createTempDir();
-    fs.writeFileSync(path.join(root, 'uapkg.json'), '{"name":"pkg","version":"1.0.0"}\n', 'utf8');
-    fs.writeFileSync(path.join(root, 'file.txt'), 'hello\n', 'utf8');
+    writeBasicPluginFixture(root);
 
     const outFile = 'custom.tgz';
     const result = await new PackService().pack({ cwd: root, dryRun: true, outFile });
