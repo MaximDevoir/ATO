@@ -17,6 +17,11 @@ import { PackageDownloader } from './PackageDownloader.js';
 import { PackageExtractor } from './PackageExtractor.js';
 import { PackageRemover } from './PackageRemover.js';
 
+interface ExecutionRuntime {
+  readonly slots: SlotTable;
+  readonly stream: StatusStream;
+}
+
 export interface InstallerConstructorOptions {
   readonly registryCore: RegistryCore;
   readonly config: InstanceType<typeof ConfigInstance>;
@@ -74,8 +79,7 @@ export class Installer {
   ): Promise<Result<InstallPlan>> {
     const bag = new DiagnosticBag();
     const maxConcurrent = this.readMaxConcurrent();
-    this.slots = new SlotTable(maxConcurrent);
-    this.stream = new StatusStream(this.slots);
+    const runtime = this.createExecutionRuntime(maxConcurrent);
 
     // 1. Inspect disk
     const diskResult = await this.inspector.inspect(options.manifestRoot, lockfile);
@@ -87,7 +91,7 @@ export class Installer {
     const plan = planResult.value;
 
     // Seed totals into SlotTable
-    this.slots.setTotals({
+    runtime.slots.setTotals({
       added: plan.summary.added,
       updated: plan.summary.updated,
       removed: plan.summary.removed,
@@ -95,18 +99,18 @@ export class Installer {
       bytesDone: 0,
       bytesTotal: plan.summary.totalBytes,
     });
-    this.stream.publish();
+    runtime.stream.publish();
 
     // 3. Safety gate
     const verdictsResult = await this.safety.evaluatePlan(options.manifestRoot, plan.actions, options.force ?? false);
     if (!verdictsResult.ok) {
       bag.mergeArray(verdictsResult.diagnostics);
-      this.stream.close();
+      runtime.stream.close();
       return bag.toFailure();
     }
 
     if (options.dryRun) {
-      this.stream.close();
+      runtime.stream.close();
       return ok(plan);
     }
 
@@ -121,13 +125,13 @@ export class Installer {
         .filter((v) => !v.blocked)
         .map((v) =>
           limit(async () => {
-            const res = await this.executeAction(options.manifestRoot, v.action, { retries, timeoutMs });
+            const res = await this.executeAction(options.manifestRoot, v.action, { retries, timeoutMs }, runtime);
             if (!res.ok) bag.mergeArray(res.diagnostics);
           }),
         ),
     );
 
-    this.stream.close();
+    runtime.stream.close();
     if (bag.hasErrors()) return bag.toFailure();
     return ok(plan);
   }
@@ -140,9 +144,9 @@ export class Installer {
     manifestRoot: string,
     action: InstallAction,
     net: { readonly retries: number; readonly timeoutMs: number },
+    runtime: ExecutionRuntime,
   ): Promise<Result<void>> {
-    const slots = this.slots!;
-    const stream = this.stream!;
+    const { slots, stream } = runtime;
 
     if (action.type === 'unchanged') return ok(undefined);
 
@@ -230,6 +234,14 @@ export class Installer {
   private readMaxConcurrent(): number {
     const raw = this.deps.config.get('network.maxConcurrentDownloads');
     return typeof raw === 'number' && raw >= 1 ? Math.floor(raw) : 5;
+  }
+
+  private createExecutionRuntime(maxConcurrent: number): ExecutionRuntime {
+    const slots = new SlotTable(maxConcurrent);
+    const stream = new StatusStream(slots);
+    this.slots = slots;
+    this.stream = stream;
+    return { slots, stream };
   }
 
   private readNumber(key: string, fallback: number): number {
