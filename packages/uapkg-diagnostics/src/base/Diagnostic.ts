@@ -1,3 +1,4 @@
+import { createDiagnosticFingerprint } from './DiagnosticFingerprint.js';
 import type { DiagnosticLevel } from './DiagnosticLevel.js';
 
 export type DiagnosticEmitPolicy = 'always' | 'once';
@@ -45,16 +46,27 @@ export function createDiagnostic<C extends string, D = undefined>(
   hint?: string,
   options?: {
     readonly emitPolicy?: DiagnosticEmitPolicy;
-    readonly emitFingerprint?: string;
   },
 ): DiagnosticBase<C, D> {
+  const emitPolicy = options?.emitPolicy;
+  const emitFingerprint =
+    emitPolicy === 'once'
+      ? createDiagnosticFingerprint({
+          level,
+          code,
+          message,
+          hint,
+          data,
+        })
+      : undefined;
+
   return {
     level,
     code,
     message,
     data,
     hint,
-    emitPolicy: options?.emitPolicy,
-    emitFingerprint: options?.emitFingerprint,
+    emitPolicy,
+    emitFingerprint,
   };
 }

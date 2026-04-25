@@ -5,6 +5,7 @@
 export type { DiagnosticBase, DiagnosticEmitPolicy } from './base/Diagnostic.js';
 export { createDiagnostic } from './base/Diagnostic.js';
 export { DiagnosticBag } from './base/DiagnosticBag.js';
+export { createDiagnosticFingerprint } from './base/DiagnosticFingerprint.js';
 // Base primitives
 export type { DiagnosticLevel } from './base/DiagnosticLevel.js';
 export type { Result, ResultFail, ResultOk } from './base/Result.js';

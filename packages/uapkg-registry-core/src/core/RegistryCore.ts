@@ -48,9 +48,10 @@ export class RegistryCore {
     const perRegistryTtl = this.config.get(`registries.${registryName}.ttlSeconds`) as number | null;
     const ttl = perRegistryTtl ?? globalTtl;
 
-    const globalKey = `${registryName}::${shortId}`;
+    const globalKey = id;
     const shared = RegistryCore.registryPool.get(globalKey);
     if (shared) {
+      shared.registerAlias(registryName, ttl);
       this.registries.set(registryName, shared);
       return ok(shared);
     }

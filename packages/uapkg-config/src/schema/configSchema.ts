@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import type { ResolvedConfig } from '../contracts/ConfigTypes.js';
 
 // Accepted postinstall policy values. The `prompt` value is intentionally
 // omitted — uapkg commands must remain non-interactive.
@@ -144,6 +143,12 @@ export const partialConfigSchema = z
   })
   .strict();
 
+export type ResolvedConfig = z.infer<typeof configSchema>;
+export type PartialConfig = z.infer<typeof partialConfigSchema>;
+export type RegistryConfig = ResolvedConfig['registries'][string];
+export type RegistryRef = RegistryConfig['ref'];
+export type PostInstallPolicyValue = ResolvedConfig['install']['postInstallPolicy'];
+
 function resolveEditorDefault() {
   if (process.env.EDITOR) {
     return process.env.EDITOR;
@@ -166,7 +171,7 @@ function resolveShellDefault() {
 }
 
 export function getDefaultConfig(): ResolvedConfig {
-  return {
+  const defaults: ResolvedConfig = {
     registry: 'default',
     registries: {
       default: {
@@ -201,4 +206,6 @@ export function getDefaultConfig(): ResolvedConfig {
       verbose: false,
     },
   };
+
+  return configSchema.parse(defaults);
 }

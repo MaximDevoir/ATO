@@ -109,7 +109,7 @@ export class LockfileSyncValidator {
         continue;
       }
 
-      const packageResult = await registryResult.value.getPackageManifest(packageName);
+      const packageResult = await registryResult.value.getPackageManifest(packageName, entry.registry);
       if (!packageResult.ok) {
         issues.push({
           severity: 'error',

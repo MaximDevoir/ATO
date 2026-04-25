@@ -132,7 +132,7 @@ export class InstallPlanner {
       bag.mergeArray(registryResult.diagnostics);
       return bag.toFailure();
     }
-    const pkgManifest = await registryResult.value.getPackageManifest(name);
+    const pkgManifest = await registryResult.value.getPackageManifest(name, locked.registry);
     if (!pkgManifest.ok) {
       bag.mergeArray(pkgManifest.diagnostics);
       return bag.toFailure();

@@ -12,13 +12,24 @@ import { configSchema } from '../schema/configSchema.js';
 export class ConfigSemanticValidator {
   public validate(merged: Record<string, unknown>): readonly Diagnostic[] {
     const bag = new DiagnosticBag();
+    bag.mergeArray(this.validateCrossFieldRules(merged));
+    bag.mergeArray(this.validateNarrowSchemaRules(merged));
+    return bag.all();
+  }
 
+  private validateCrossFieldRules(merged: Record<string, unknown>): readonly Diagnostic[] {
+    const bag = new DiagnosticBag();
     const registry = merged.registry;
     const registries = merged.registries;
     if (typeof registry === 'string' && this.isRecord(registries) && !(registry in registries)) {
       bag.add(createConfigUnresolvedDefaultRegistryDiagnostic(registry));
     }
 
+    return bag.all();
+  }
+
+  private validateNarrowSchemaRules(merged: Record<string, unknown>): readonly Diagnostic[] {
+    const bag = new DiagnosticBag();
     const validation = configSchema.safeParse(merged);
     if (!validation.success) {
       for (const issue of validation.error.issues) {

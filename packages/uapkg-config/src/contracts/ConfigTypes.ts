@@ -1,51 +1,13 @@
 import type { Diagnostic } from '@uapkg/diagnostics';
+import type {
+  PartialConfig,
+  PostInstallPolicyValue,
+  RegistryConfig,
+  RegistryRef,
+  ResolvedConfig,
+} from '../schema/configSchema.js';
 
 export type ConfigLayerSource = 'default' | 'global' | 'intermediary' | 'local';
-
-export interface RegistryRef {
-  type: 'branch' | 'tag' | 'rev';
-  value: string;
-}
-
-export type PostInstallPolicyValue = 'allow' | 'deny';
-
-export interface RegistryConfig {
-  url: string;
-  ref: RegistryRef;
-  ttlSeconds?: number;
-  /** Per-registry override of `install.postInstallPolicy`. */
-  postInstallPolicy?: PostInstallPolicyValue;
-}
-
-export interface ResolvedConfig {
-  registry: string;
-  registries: Record<string, RegistryConfig>;
-  git: string;
-  editor: string;
-  exec: {
-    shell: string;
-  };
-  cache: {
-    enabled: boolean;
-  };
-  registryCache: {
-    ttlSeconds: number;
-  };
-  network: {
-    retries: number;
-    timeout: number;
-    /** Maximum simultaneous asset downloads. Default: 5. */
-    maxConcurrentDownloads: number;
-  };
-  install: {
-    /** Global postinstall policy. Default: `deny`. */
-    postInstallPolicy: PostInstallPolicyValue;
-  };
-  term: {
-    quiet: boolean;
-    verbose: boolean;
-  };
-}
 
 export type ConfigValue = unknown;
 
@@ -112,3 +74,5 @@ export interface ConfigResolvedResult {
   value: Record<string, unknown>;
   diagnostics: readonly Diagnostic[];
 }
+
+export type { PartialConfig, PostInstallPolicyValue, RegistryConfig, RegistryRef, ResolvedConfig };

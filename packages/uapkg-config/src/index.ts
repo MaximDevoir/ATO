@@ -39,5 +39,6 @@ export type {
   ResolvedConfig,
 } from './contracts/ConfigTypes.js';
 export { PostInstallPolicyResolver } from './core/PostInstallPolicyResolver.js';
-export { isLeafConfigPath, isValidConfigPath, validateConfigPath } from './schema/pathSchema.js';
+export { getConfigSchemaAtPath, isLeafConfigPath, isValidConfigPath, validateConfigPath } from './schema/pathSchema.js';
+export { parseConfigCliValue } from './schema/runtime/ConfigSchemaRuntimeProvider.js';
 export { ConfigInstance, createConfig };

@@ -26,10 +26,10 @@ import { RegistryUpdater } from './RegistryUpdater.js';
  * Exposes registry-level operations: sync, read manifests, resolve versions.
  */
 export class Registry {
-  public readonly registryName: string;
   public readonly id: RegistryIdentifier;
   public readonly descriptor: RegistryDescriptor;
   public readonly shortId: string;
+  private readonly aliases = new Set<string>();
 
   private hasUpdatedThisProcess = false;
   private initPromise?: Promise<Result<void>>;
@@ -37,17 +37,17 @@ export class Registry {
   private readonly metadataReader: RegistryMetadataReader;
   private readonly updater: RegistryUpdater;
   private readonly packageReader: RegistryPackageReader;
-  private readonly ttlSeconds: number;
+  private ttlSeconds: number;
 
   private constructor(
-    registryName: string,
+    initialAlias: string,
     descriptor: RegistryDescriptor,
     id: RegistryIdentifier,
     shortId: string,
     gitBinary: string,
     ttlSeconds: number,
   ) {
-    this.registryName = registryName;
+    this.aliases.add(initialAlias);
     this.descriptor = descriptor;
     this.id = id;
     this.shortId = shortId;
@@ -59,14 +59,22 @@ export class Registry {
 
   /** Factory — use this instead of `new`. */
   static create(
-    registryName: string,
+    initialAlias: string,
     descriptor: RegistryDescriptor,
     id: RegistryIdentifier,
     shortId: string,
     gitBinary: string,
     ttlSeconds: number,
   ): Registry {
-    return new Registry(registryName, descriptor, id, shortId, gitBinary, ttlSeconds);
+    return new Registry(initialAlias, descriptor, id, shortId, gitBinary, ttlSeconds);
+  }
+
+  public registerAlias(alias: string, ttlSeconds?: number): void {
+    if (alias.trim().length === 0) return;
+    this.aliases.add(alias);
+    if (typeof ttlSeconds === 'number' && Number.isFinite(ttlSeconds)) {
+      this.ttlSeconds = Math.min(this.ttlSeconds, ttlSeconds);
+    }
   }
 
   // -------------------------------------------------------------------
@@ -74,7 +82,9 @@ export class Registry {
   // -------------------------------------------------------------------
 
   /** Ensure the local cache is up-to-date. */
-  async ensureUpToDate(options?: RegistryUpdateOptions): Promise<Result<RegistryUpdateResult>> {
+  async ensureUpToDate(
+    options?: RegistryUpdateOptions & { readonly logicalRegistryName?: string },
+  ): Promise<Result<RegistryUpdateResult>> {
     const forced = options?.bypassFreshnessCheck ?? false;
     const lastSyncAt = await this.getLastSyncTimestamp();
     const initialized = this.metadataReader.exists();
@@ -91,13 +101,16 @@ export class Registry {
       return ok(reason);
     }
 
-    return this.performUpdate(initialized);
+    return this.performUpdate(initialized, options?.logicalRegistryName);
   }
 
   /** Read a package registry manifest from the local cache. */
-  async getPackageManifest(packageName: string): Promise<Result<PackageRegistryManifest>> {
+  async getPackageManifest(
+    packageName: string,
+    logicalRegistryName?: string,
+  ): Promise<Result<PackageRegistryManifest>> {
     const bag = new DiagnosticBag();
-    const readyResult = await this.ensureReady();
+    const readyResult = await this.ensureReady(logicalRegistryName);
     if (!readyResult.ok) return readyResult as Result<never>;
     bag.mergeArray(readyResult.diagnostics);
 
@@ -118,7 +131,7 @@ export class Registry {
     current?: string,
   ): Promise<Result<ResolvedVersion>> {
     const bag = new DiagnosticBag();
-    const manifestResult = await this.getPackageManifest(packageName);
+    const manifestResult = await this.getPackageManifest(packageName, registryName);
     if (!manifestResult.ok) return manifestResult as Result<never>;
     bag.mergeArray(manifestResult.diagnostics);
 
@@ -135,14 +148,19 @@ export class Registry {
   // Internal
   // -------------------------------------------------------------------
 
-  private async ensureReady(): Promise<Result<void>> {
+  private async ensureReady(logicalRegistryName?: string): Promise<Result<void>> {
     if (!this.initPromise) {
-      this.initPromise = this.ensureUpToDate().then((r) => (r.ok ? ok(undefined, r.diagnostics) : r));
+      this.initPromise = this.ensureUpToDate({ logicalRegistryName }).then((r) =>
+        r.ok ? ok(undefined, r.diagnostics) : r,
+      );
     }
     return this.initPromise;
   }
 
-  private async performUpdate(initialized: boolean): Promise<Result<RegistryUpdateResult>> {
+  private async performUpdate(
+    initialized: boolean,
+    logicalRegistryName?: string,
+  ): Promise<Result<RegistryUpdateResult>> {
     const bag = new DiagnosticBag();
     const lock = new RegistryLock(getRegistryLockPath(this.shortId));
 
@@ -169,7 +187,11 @@ export class Registry {
 
       const updateResult = await this.updater.update();
       if (!updateResult.ok) {
-        const unreachable = this.toRegistryUnreachableDiagnostic(updateResult.diagnostics, initialized);
+        const unreachable = this.toRegistryUnreachableDiagnostic(
+          updateResult.diagnostics,
+          initialized,
+          logicalRegistryName,
+        );
         if (initialized) {
           this.hasUpdatedThisProcess = true;
           return ok('Failed', [unreachable]);
@@ -197,13 +219,17 @@ export class Registry {
     await this.metadataReader.write({ lastRegistrySyncAt: now, registryIdentifier: this.id });
   }
 
-  private toRegistryUnreachableDiagnostic(diagnostics: readonly Diagnostic[], initialized: boolean) {
+  private toRegistryUnreachableDiagnostic(
+    diagnostics: readonly Diagnostic[],
+    initialized: boolean,
+    logicalRegistryName?: string,
+  ) {
     const first = diagnostics[0];
     const cause = first?.message ?? 'Registry update failed.';
     const httpStatus = this.extractHttpStatus(cause);
 
     return createRegistryUnreachableDiagnostic({
-      registryName: this.registryName,
+      registryName: this.resolveDiagnosticRegistryName(logicalRegistryName),
       url: this.descriptor.url,
       cause,
       initialized,
@@ -216,5 +242,16 @@ export class Registry {
     const match = text.match(/\b([1-5][0-9][0-9])\b/);
     if (!match) return undefined;
     return Number(match[1]);
+  }
+
+  private resolveDiagnosticRegistryName(logicalRegistryName?: string): string {
+    if (logicalRegistryName && logicalRegistryName.trim().length > 0) {
+      return logicalRegistryName;
+    }
+
+    const aliases = [...this.aliases].sort((a, b) => a.localeCompare(b));
+    if (aliases.length === 0) return this.shortId;
+    if (aliases.length === 1) return aliases[0];
+    return `${aliases[0]} (+${aliases.length - 1} aliases)`;
   }
 }

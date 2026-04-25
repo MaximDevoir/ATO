@@ -1,13 +1,18 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { type ConfigInstance, createConfig, isLeafConfigPath, validateConfigPath } from '@uapkg/config';
+import {
+  type ConfigInstance,
+  createConfig,
+  isLeafConfigPath,
+  parseConfigCliValue,
+  validateConfigPath,
+} from '@uapkg/config';
 import { createParseErrorDiagnostic, type Diagnostic } from '@uapkg/diagnostics';
 import Log from '@uapkg/log';
 import type { UAPKGConfigAction, UAPKGConfigScope, UAPKGOutputFormat } from '../cli/UAPKGCommandLine.js';
 import { DiagnosticReporter } from '../reporting/DiagnosticReporter.js';
 import type { Command } from './Command.js';
-import { ConfigValueParser } from './config/ConfigValueParser.js';
 
 export interface ConfigCommandOptions {
   cwd: string;
@@ -22,7 +27,6 @@ export interface ConfigCommandOptions {
 
 export class ConfigCommand implements Command {
   private readonly reporter = new DiagnosticReporter();
-  private readonly valueParser = new ConfigValueParser();
 
   constructor(private readonly options: ConfigCommandOptions) {}
 
@@ -147,7 +151,7 @@ export class ConfigCommand implements Command {
       ]);
     }
 
-    const parsedValue = this.valueParser.parse(pathToProperty, rawValue);
+    const parsedValue = parseConfigCliValue(pathToProperty, rawValue);
     if (!parsedValue.ok) return this.fail(parsedValue.diagnostics);
 
     const plan = config.set(pathToProperty, parsedValue.value, this.options.scope ? { scope: this.options.scope } : {});

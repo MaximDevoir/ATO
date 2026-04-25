@@ -55,7 +55,7 @@ export class OutdatedChecker {
         continue;
       }
       const registry = registryResult.value;
-      const pkgResult = await registry.getPackageManifest(name);
+      const pkgResult = await registry.getPackageManifest(name, decl.registry);
       if (!pkgResult.ok) {
         bag.mergeArray(pkgResult.diagnostics);
         continue;

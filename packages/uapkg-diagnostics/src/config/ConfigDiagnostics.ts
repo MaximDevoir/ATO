@@ -104,7 +104,6 @@ export function createConfigUnresolvedDefaultRegistryDiagnostic(
     code: 'CONFIG_UNRESOLVED_DEFAULT_REGISTRY',
     message: `Default registry "${registryName}" is not defined under "registries".`,
     emitPolicy: 'once',
-    emitFingerprint: `CONFIG_UNRESOLVED_DEFAULT_REGISTRY::${registryName}`,
     hint: `Add "registries.${registryName}" or set a different default with 'uapkg registry use <name>'.`,
     data: { registryName },
   };

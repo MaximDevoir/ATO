@@ -166,7 +166,6 @@ export function createRegistryUnreachableDiagnostic(input: {
     code: 'REGISTRY_UNREACHABLE',
     message: `The "${input.registryName}" registry could not be reached at ${input.url}.`,
     emitPolicy: 'once',
-    emitFingerprint: `REGISTRY_UNREACHABLE::${input.registryName}::${input.url}`,
     hint: `Verify the registry URL with 'uapkg config get registries.${input.registryName}.url --trace'.
 The registry may also be temporarily unavailable.`,
     data: {

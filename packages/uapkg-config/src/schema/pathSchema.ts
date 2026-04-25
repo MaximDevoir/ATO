@@ -1,31 +1,11 @@
 import { createParseErrorDiagnostic, fail, ok, type Result } from '@uapkg/diagnostics';
+import type { ZodTypeAny } from 'zod';
+import { getConfigSchemaRuntime } from './runtime/ConfigSchemaRuntimeProvider.js';
 
-const directPaths = new Set([
-  'registry',
-  'registries',
-  'git',
-  'editor',
-  'exec',
-  'exec.shell',
-  'cache',
-  'cache.enabled',
-  'registryCache',
-  'registryCache.ttlSeconds',
-  'network',
-  'network.retries',
-  'network.timeout',
-  'network.maxConcurrentDownloads',
-  'install',
-  'install.postInstallPolicy',
-  'term',
-  'term.quiet',
-  'term.verbose',
-]);
-
-const nonLeafPaths = new Set(['registries', 'exec', 'cache', 'registryCache', 'network', 'install', 'term']);
+const runtime = getConfigSchemaRuntime();
 
 export function validateConfigPath(pathToProperty: string): Result<void> {
-  if (isValidConfigPath(pathToProperty)) {
+  if (runtime.isValidPath(pathToProperty)) {
     return ok(undefined);
   }
 
@@ -33,62 +13,15 @@ export function validateConfigPath(pathToProperty: string): Result<void> {
 }
 
 export function isValidConfigPath(pathToProperty: string) {
-  if (!pathToProperty.trim()) {
-    return false;
-  }
-
-  if (directPaths.has(pathToProperty)) {
-    return true;
-  }
-
-  const segments = pathToProperty.split('.');
-  if (segments[0] !== 'registries') {
-    return false;
-  }
-
-  if (segments.length < 2 || segments[1].trim().length === 0) {
-    return false;
-  }
-
-  if (segments.length === 2) {
-    return true;
-  }
-
-  if (segments.length === 3 && segments[2] === 'url') {
-    return true;
-  }
-
-  if (segments.length === 3 && segments[2] === 'ref') {
-    return true;
-  }
-
-  if (segments.length === 4 && segments[2] === 'ref' && (segments[3] === 'type' || segments[3] === 'value')) {
-    return true;
-  }
-
-  if (segments.length === 3 && segments[2] === 'ttlSeconds') {
-    return true;
-  }
-
-  if (segments.length === 3 && segments[2] === 'postInstallPolicy') {
-    return true;
-  }
-
-  return false;
+  return runtime.isValidPath(pathToProperty);
 }
 
 export function isLeafConfigPath(pathToProperty: string): boolean {
-  if (!isValidConfigPath(pathToProperty)) return false;
-  if (nonLeafPaths.has(pathToProperty)) return false;
+  return runtime.isLeafPath(pathToProperty);
+}
 
-  const segments = pathToProperty.split('.');
-  if (segments[0] !== 'registries') {
-    return true;
-  }
-
-  if (segments.length === 2) return false;
-  if (segments.length === 3 && segments[2] === 'ref') return false;
-  return true;
+export function getConfigSchemaAtPath(pathToProperty: string): ZodTypeAny | null {
+  return runtime.getSchemaAtPath(pathToProperty);
 }
 
 export function getValueByPath(data: unknown, pathToProperty?: string): unknown {

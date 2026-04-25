@@ -1,5 +1,4 @@
-import { stableStringify } from '@uapkg/common';
-import type { Diagnostic } from '@uapkg/diagnostics';
+import { createDiagnosticFingerprint, type Diagnostic } from '@uapkg/diagnostics';
 
 /**
  * Suppresses diagnostics marked as `emitPolicy: "once"` across the current
@@ -32,12 +31,12 @@ export class DiagnosticDeduplicator {
       return diagnostic.emitFingerprint;
     }
 
-    return stableStringify({
+    return createDiagnosticFingerprint({
       level: diagnostic.level,
       code: diagnostic.code,
       message: diagnostic.message,
-      hint: diagnostic.hint ?? null,
-      data: diagnostic.data ?? null,
+      hint: diagnostic.hint,
+      data: diagnostic.data,
     });
   }
 }
