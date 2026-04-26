@@ -1,53 +1,41 @@
 import { BuildService } from './BuildService';
-import { GlobalLinkService } from './GlobalLinkService';
-import { LocalCommandShimService } from './LocalCommandShimService';
+import { DevBuildStatusPrinter } from './DevBuildStatusPrinter';
+import { GlobalUapkgDevModeService } from './GlobalUapkgDevModeService';
+import { GlobalUapkgSnapshotStore } from './GlobalUapkgSnapshotStore';
+import { GlobalUapkgStateService } from './GlobalUapkgStateService';
 import { ProcessRunner } from './ProcessRunner';
-import { WorkspacePackageCatalog } from './WorkspacePackageCatalog';
 
 export class DevBuildOrchestrator {
-  private readonly runner: ProcessRunner;
-  private readonly catalog: WorkspacePackageCatalog;
   private readonly buildService: BuildService;
-  private readonly linkService: GlobalLinkService;
-  private readonly shimService: LocalCommandShimService;
+  private readonly devModeService: GlobalUapkgDevModeService;
 
   constructor(private readonly workspaceRoot: string) {
-    this.runner = new ProcessRunner();
-    this.catalog = new WorkspacePackageCatalog(this.workspaceRoot);
-    this.buildService = new BuildService(this.runner, this.workspaceRoot);
-    this.linkService = new GlobalLinkService(this.runner);
-    this.shimService = new LocalCommandShimService();
+    const runner = new ProcessRunner();
+    this.buildService = new BuildService(runner, this.workspaceRoot);
+
+    const stateService = new GlobalUapkgStateService(runner, this.workspaceRoot);
+    const snapshotStore = new GlobalUapkgSnapshotStore(this.workspaceRoot);
+    const statusPrinter = new DevBuildStatusPrinter();
+    this.devModeService = new GlobalUapkgDevModeService(this.buildService, stateService, snapshotStore, statusPrinter);
   }
 
   buildAll() {
-    const packages = this.catalog.listUapkgPackages();
-    this.buildService.buildAll(packages.map((workspacePackage) => workspacePackage.projectName));
+    this.buildService.buildAll();
   }
 
-  buildAndRelinkAllOnce() {
-    const packages = this.catalog.listUapkgPackages();
-    this.buildAll();
-
-    for (const workspacePackage of packages) {
-      this.linkService.relinkPackage(workspacePackage, this.workspaceRoot);
-    }
-
-    this.shimService.writeUapkgShims(this.workspaceRoot);
+  link(options: { force: boolean }) {
+    this.devModeService.link(options);
   }
 
-  watchAndRebuildAndRelink() {
-    this.runner.run(
-      'pnpm',
-      [
-        'nx',
-        'watch',
-        '--projects=uapkg,uapkg-config,uapkg-log,uapkg-pack',
-        '--includeDependentProjects',
-        '--',
-        'pnpm',
-        'build:devOnce',
-      ],
-      this.workspaceRoot,
-    );
+  watch() {
+    this.buildService.watchCliAndDependents();
+  }
+
+  unlink(options: { force: boolean }) {
+    this.devModeService.unlink(options);
+  }
+
+  status() {
+    this.devModeService.printStatus();
   }
 }
