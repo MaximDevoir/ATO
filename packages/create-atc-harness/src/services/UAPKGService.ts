@@ -1,6 +1,6 @@
 import * as path from 'node:path';
+import { createUAPKGCommandLineFactory, UAPKGApplication } from '@uapkg/cli';
 import { ManifestReader } from '@uapkg/package-manifest';
-import { createUAPKGCommandLineFactory, UAPKGApplication } from 'uapkg';
 import type { FileSystem } from './FileSystem';
 
 export interface AddDependencyOptions {

@@ -1,5 +1,5 @@
 {
-  "name": "uapkg",
+  "name": "@uapkg/cli",
   "version": "1.1.3",
   "type": "module",
   "sideEffects": false,

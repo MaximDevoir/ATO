@@ -94,6 +94,9 @@ importers:
       '@types/yargs':
         specifier: 17.0.35
         version: 17.0.35
+      '@uapkg/cli':
+        specifier: workspace:*
+        version: link:../uapkg
       '@uapkg/package-manifest':
         specifier: workspace:*
         version: link:../uapkg-package-manifest
@@ -115,9 +118,6 @@ importers:
       simple-git:
         specifier: 3.35.1
         version: 3.35.1
-      uapkg:
-        specifier: workspace:*
-        version: link:../uapkg
       yargs:
         specifier: 18.0.0
         version: 18.0.0
