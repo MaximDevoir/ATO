@@ -1,4 +1,4 @@
-# @maximdevoir/ati
+# @maximdevoir/engine-association-resolver
 
 ## 1.1.3
 
@@ -14,11 +14,7 @@
   - Added tests for lockfile writing, safety policy, and updated commands.
   - Introduced `@iarna/toml` dependency for TOML handling.
 
-- [`cc46958`](https://github.com/MaximDevoir/ATO/commit/cc4695829dfa298dfda9faba4fed8fd351033f01) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - chore: remove unused CookMaps option from SimpleAutoBuild
-
 - [`8b12b9c`](https://github.com/MaximDevoir/ATO/commit/8b12b9c3192dff8f19998682081a9f05015292d5) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - feat: create-atc-harness
-
-- [`cb63148`](https://github.com/MaximDevoir/ATO/commit/cb631486b4e4cddf13ab4b2e2911f9fce4dc6f4d) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - Implemented the `SimpleAutoBuild` flow
 
 - [`4d5f7cd`](https://github.com/MaximDevoir/ATO/commit/4d5f7cd51f9220cbec8867051b549613a7e004b7) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - chore: rename to uapkg
 
@@ -170,8 +166,6 @@
   - `pack-service.test.ts`
     Unwraps `Result` before accessing values
 
-- [`ced0752`](https://github.com/MaximDevoir/ATO/commit/ced075238a8eec8aa37740d5aef347393b21ef23) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - ato: fix process shutdown tracking
-
 - [`23d234f`](https://github.com/MaximDevoir/ATO/commit/23d234f18f7b9d7869977d2ccbe0f9d61018a514) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - feat: add `EngineAssociationResolver` module for Unreal Engine directory resolution
 
 - [`7eb25bc`](https://github.com/MaximDevoir/ATO/commit/7eb25bcf841b17218aa2781befd48de737d82ea9) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - ## What Changed
@@ -242,26 +236,6 @@
   - Fixed runtime `React is not defined` crashes in diagnostics ink views/components by adding runtime React imports in
     TSX files using JSX.
 
-- [`eca2115`](https://github.com/MaximDevoir/ATO/commit/eca2115e4da38632f174474f1435ec56d007736c) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - chore: add auto-generated comment to BuildGraph XML in SimpleAutoBuild
-
 - [`3b9d01a`](https://github.com/MaximDevoir/ATO/commit/3b9d01afb678d003809e92f6457c5c704b4a4f0e) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - release patch bump
 
 - [`0bb07e6`](https://github.com/MaximDevoir/ATO/commit/0bb07e62abe70d716019a5089650f829c380a44b) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - feat: add @uapkg/config and @uapkg/log
-
-## 1.1.2
-
-### Patch Changes
-
-- [`82dd28d`](https://github.com/MaximDevoir/ATO/commit/82dd28da0d4a7ec72ad3ad698a614d1d853af530) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - bump changes
-
-## 1.1.1
-
-### Patch Changes
-
-- [`5ba087c`](https://github.com/MaximDevoir/ATO/commit/5ba087ce1d856377e643b1d968e55f60f0bc4cd1) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - bump changes
-
-## 1.1.0
-
-### Minor Changes
-
-- [`a677976`](https://github.com/MaximDevoir/ATO/commit/a677976f46169e190c768c6ee3fe9e9de5d0771c) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - change bump
