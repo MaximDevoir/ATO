@@ -74,17 +74,6 @@ export class GlobalUapkgStateService {
     this.runner.run('pnpm', ['link', '--global'], this.getCliPackageDirectory());
   }
 
-  resolveBinaryPath() {
-    const command = process.platform === 'win32' ? 'where' : 'which';
-    const result = this.runner.runAndCapture(command, ['uapkg'], this.workspaceRoot, { ignoreFailure: true });
-    const firstLine = result.stdout
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .find((line) => line.length > 0);
-
-    return firstLine ?? null;
-  }
-
   private tryParseList(rawJson: string): PnpmGlobalListRoot[] {
     try {
       const parsed = JSON.parse(rawJson) as unknown;

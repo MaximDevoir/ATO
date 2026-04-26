@@ -45,12 +45,19 @@ export class DevBuildStatusPrinter {
     console.log(`[dev-build] Snapshot removed: ${snapshotPath}`);
   }
 
+  printGlobalShimUpdated(shimPath: string) {
+    console.log(`[dev-build] Updated global uapkg shim: ${shimPath}`);
+  }
+
   printStatus(args: {
     snapshotPath: string;
     snapshot: GlobalUapkgSnapshot | null;
     current: CurrentGlobalUapkgState;
     isLinkedToWorkspace: boolean;
     binaryPath: string | null;
+    globalBinDir: string | null;
+    isGlobalBinOnPath: boolean;
+    workspaceShimPath: string | null;
   }) {
     const devMode = args.isLinkedToWorkspace ? 'ACTIVE' : 'INACTIVE';
     console.log(`Dev Mode: ${devMode}`);
@@ -63,7 +70,14 @@ export class DevBuildStatusPrinter {
       console.log('Previous: unavailable (no snapshot)');
     }
 
+    console.log(`Global Bin: ${args.globalBinDir ?? 'unknown'}`);
+    console.log(`Global Bin In PATH: ${args.isGlobalBinOnPath ? 'yes' : 'no'}`);
+    console.log(`Workspace Shim: ${args.workspaceShimPath ?? 'not found'}`);
     console.log(`Binary: ${args.binaryPath ?? 'not found on PATH'}`);
+
+    if (args.globalBinDir && !args.isGlobalBinOnPath) {
+      console.log(`[dev-build] Add this to PATH and open a new terminal: ${args.globalBinDir}`);
+    }
   }
 
   private describeCurrent(current: CurrentGlobalUapkgState) {

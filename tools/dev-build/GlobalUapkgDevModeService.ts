@@ -1,5 +1,6 @@
 import type { BuildService } from './BuildService';
 import type { DevBuildStatusPrinter } from './DevBuildStatusPrinter';
+import type { GlobalCommandShimService } from './GlobalCommandShimService';
 import type { GlobalUapkgSnapshotStore } from './GlobalUapkgSnapshotStore';
 import type { GlobalUapkgStateService } from './GlobalUapkgStateService';
 import type { CurrentGlobalUapkgState, SavedGlobalUapkgState } from './types';
@@ -10,6 +11,7 @@ export class GlobalUapkgDevModeService {
     private readonly stateService: GlobalUapkgStateService,
     private readonly snapshotStore: GlobalUapkgSnapshotStore,
     private readonly statusPrinter: DevBuildStatusPrinter,
+    private readonly shimService: GlobalCommandShimService,
   ) {}
 
   link(options: { force: boolean }) {
@@ -21,6 +23,12 @@ export class GlobalUapkgDevModeService {
     this.stateService.removeGlobalUapkg(true);
     this.stateService.linkCurrentWorkspaceCli();
 
+    const shim = this.shimService.ensureWorkspaceGlobalShims();
+    if (shim) {
+      this.statusPrinter.printGlobalShimUpdated(shim.activeShimPath);
+    }
+
+    this.shimService.cleanupLegacyWorkspaceRootShims();
     this.printStatus();
   }
 
@@ -29,12 +37,14 @@ export class GlobalUapkgDevModeService {
 
     if (!snapshot) {
       this.unlinkWithoutSnapshot(options.force);
+      this.shimService.cleanupLegacyWorkspaceRootShims();
       this.printStatus();
       return;
     }
 
     try {
       this.stateService.removeGlobalUapkg(true);
+      this.shimService.removeWorkspaceGlobalShims();
       this.restoreFromSnapshot(snapshot.previous);
       this.snapshotStore.remove();
       this.statusPrinter.printSnapshotRemoved(this.snapshotStore.getSnapshotPath());
@@ -43,6 +53,7 @@ export class GlobalUapkgDevModeService {
       throw error;
     }
 
+    this.shimService.cleanupLegacyWorkspaceRootShims();
     this.printStatus();
   }
 
@@ -50,7 +61,10 @@ export class GlobalUapkgDevModeService {
     const snapshot = this.snapshotStore.read();
     const current = this.stateService.detectCurrentState();
     const isLinkedToWorkspace = this.stateService.isLinkedToWorkspace(current);
-    const binaryPath = this.stateService.resolveBinaryPath();
+    const globalBinDir = this.shimService.getGlobalBinDir();
+    const isGlobalBinOnPath = globalBinDir ? this.shimService.isGlobalBinOnPath(globalBinDir) : false;
+    const workspaceShimPath = this.shimService.resolveWorkspaceShimPath();
+    const binaryPath = workspaceShimPath ?? this.shimService.resolveBinaryFromPath();
 
     this.statusPrinter.printStatus({
       snapshotPath: this.snapshotStore.getSnapshotPath(),
@@ -58,6 +72,9 @@ export class GlobalUapkgDevModeService {
       current,
       isLinkedToWorkspace,
       binaryPath,
+      globalBinDir,
+      isGlobalBinOnPath,
+      workspaceShimPath,
     });
   }
 
@@ -90,15 +107,18 @@ export class GlobalUapkgDevModeService {
 
     if (this.stateService.isLinkedToWorkspace(current)) {
       this.stateService.removeGlobalUapkg(true);
+      this.shimService.removeWorkspaceGlobalShims();
       return;
     }
 
     if (force) {
       this.stateService.removeGlobalUapkg(true);
+      this.shimService.removeWorkspaceGlobalShims();
       return;
     }
 
     if (current.kind === 'none') {
+      this.shimService.removeWorkspaceGlobalShims();
       return;
     }
 

@@ -17,10 +17,10 @@ This folder contains local development tooling executed directly with `tsx`.
 ## Behavior
 
 - `build`: normal monorepo build via Nx.
-- `build:link`: build `uapkg` with dependencies and globally link only `packages/uapkg`.
+- `build:link`: build `uapkg`, globally link only `packages/uapkg`, and write global command shims in `pnpm bin --global` so `uapkg` works from any terminal.
 - `build:watch`: watch only `uapkg` with `--includeDependentProjects`, then run `build:link` on changes.
 - `build:unlink`: remove the active global dev link and restore only safe previous state.
-- `build:status`: inspect snapshot state, current global state, and binary resolution.
+- `build:status`: inspect snapshot state, current global state, global-bin/path health, and binary resolution.
 
 Snapshot file:
 
@@ -32,6 +32,21 @@ Snapshot file:
 - `pnpm run build:unlink -- --force`
 
 `--force` allows overriding conservative defaults, but external dev links are still never auto-restored.
+
+## Running from Anywhere
+
+After `build:link`, `uapkg` is expected to resolve from the pnpm global bin directory, not from the monorepo root.
+
+Quick checks:
+
+```powershell
+pnpm run build:link
+pnpm run build:status
+pnpm bin --global
+where.exe uapkg
+```
+
+If `build:status` shows `Global Bin In PATH: no`, add the printed global bin directory to your user `PATH` and open a new terminal.
 
 ## Do Not
 
@@ -55,6 +70,7 @@ CI must not run:
 
 - `pnpm run build:link` globally links `uapkg` to `packages/uapkg`.
 - `pnpm list -g --depth 0` shows `uapkg@link:<workspace>/packages/uapkg`.
+- `where.exe uapkg` resolves from `pnpm bin --global` after linking.
 - Running `build:link` twice does not overwrite the original snapshot.
 - `pnpm run build:unlink` restores published `uapkg@<version>` if that was the prior state.
 - If prior state was another dev link, unlink removes current link but does not restore the external link.

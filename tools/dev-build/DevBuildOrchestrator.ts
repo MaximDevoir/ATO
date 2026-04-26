@@ -1,5 +1,6 @@
 import { BuildService } from './BuildService';
 import { DevBuildStatusPrinter } from './DevBuildStatusPrinter';
+import { GlobalCommandShimService } from './GlobalCommandShimService';
 import { GlobalUapkgDevModeService } from './GlobalUapkgDevModeService';
 import { GlobalUapkgSnapshotStore } from './GlobalUapkgSnapshotStore';
 import { GlobalUapkgStateService } from './GlobalUapkgStateService';
@@ -16,7 +17,14 @@ export class DevBuildOrchestrator {
     const stateService = new GlobalUapkgStateService(runner, this.workspaceRoot);
     const snapshotStore = new GlobalUapkgSnapshotStore(this.workspaceRoot);
     const statusPrinter = new DevBuildStatusPrinter();
-    this.devModeService = new GlobalUapkgDevModeService(this.buildService, stateService, snapshotStore, statusPrinter);
+    const shimService = new GlobalCommandShimService(runner, this.workspaceRoot);
+    this.devModeService = new GlobalUapkgDevModeService(
+      this.buildService,
+      stateService,
+      snapshotStore,
+      statusPrinter,
+      shimService,
+    );
   }
 
   buildAll() {
