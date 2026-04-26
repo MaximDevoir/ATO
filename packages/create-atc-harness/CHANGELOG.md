@@ -1,5 +1,14 @@
 # @maximdevoir/create-atc-harness
 
+## 1.1.5
+
+### Patch Changes
+
+- [`bec35a3`](https://github.com/MaximDevoir/ATO/commit/bec35a3ebf9aa65cb4269a6553e65c800e455962) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - Finish monorepo split
+
+- Updated dependencies [[`bec35a3`](https://github.com/MaximDevoir/ATO/commit/bec35a3ebf9aa65cb4269a6553e65c800e455962)]:
+  - @maximdevoir/engine-association-resolver@1.1.5
+
 ## 1.1.4
 
 ### Patch Changes
