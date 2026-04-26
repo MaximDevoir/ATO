@@ -8,15 +8,15 @@ import { UnrealLag } from '@maximdevoir/unreal-lag/UnrealLag';
 import isInteractive from 'is-interactive';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { ATC_CLIENT_REQUEST_LOG_PREFIX, ATC_RUN_TESTS_COMMAND } from './ATCAutomationNames';
-import { checkExistsSync } from './ATO._helpers';
-import { mergeCoverageReports as mergeCoverageReportsInDirectory } from './ATO.CoverageMerger';
+import { ATC_CLIENT_REQUEST_LOG_PREFIX, ATC_RUN_TESTS_COMMAND } from './ATCAutomationNames.js';
+import { checkExistsSync } from './ATO._helpers.js';
+import { mergeCoverageReports as mergeCoverageReportsInDirectory } from './ATO.CoverageMerger.js';
 import {
   buildCoverageWrappedLaunch,
   isCodeCoverageExecutableAvailable,
   resolveCodeCoverageExecutable,
-} from './ATO.codecov';
-import { hasProcessExited, killProcessTree, spawnProcess, waitForUdpPortFromProcessTree } from './ATO.helpers';
+} from './ATO.codecov.js';
+import { hasProcessExited, killProcessTree, spawnProcess, waitForUdpPortFromProcessTree } from './ATO.helpers.js';
 import type {
   ATIEndpointOptions,
   ATINDJSONConsumerOptions,
@@ -30,18 +30,18 @@ import type {
   ProcessLaunchOptions,
   ServerOptions,
   UnrealLagProxyOptions,
-} from './ATO.options';
-import { CoordinatorMode, RuntimePresets } from './ATO.options';
-import { createATORunOutput } from './ATORunOutput';
-import { resolveAutomationContext } from './AutomationContextResolver';
-import { FrameworkValidationReporter, formatFrameworkValidationSummaryLines } from './FrameworkValidationReporter';
-import { SimpleAutoBuildService } from './SimpleAutoBuild';
-import { resolveEngineEditorCandidates, resolveProjectBinaryCandidates } from './UnrealPlatform';
+} from './ATO.options.js';
+import { CoordinatorMode, RuntimePresets } from './ATO.options.js';
+import { createATORunOutput } from './ATORunOutput.js';
+import { resolveAutomationContext } from './AutomationContextResolver.js';
+import { FrameworkValidationReporter, formatFrameworkValidationSummaryLines } from './FrameworkValidationReporter.js';
+import { SimpleAutoBuildService } from './SimpleAutoBuild.js';
+import { resolveEngineEditorCandidates, resolveProjectBinaryCandidates } from './UnrealPlatform.js';
 
-export * from './ATCAutomationNames';
-export { ATC_RUN_TESTS_COMMAND } from './ATCAutomationNames';
-export { CoordinatorMode, RuntimePresets } from './ATO.options';
-export * from './FrameworkValidationReporter';
+export * from './ATCAutomationNames.js';
+export { ATC_RUN_TESTS_COMMAND } from './ATCAutomationNames.js';
+export { CoordinatorMode, RuntimePresets } from './ATO.options.js';
+export * from './FrameworkValidationReporter.js';
 
 interface ATOInit {
   runtimeOptions?: E2ERuntimeOptions;

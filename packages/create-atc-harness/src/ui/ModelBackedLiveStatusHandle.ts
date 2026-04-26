@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import type { LiveStatusHandle } from '../domain/LiveStatusHandle';
-import type { LiveStatusModelLike } from './LiveStatusModel';
+import type { LiveStatusHandle } from '../domain/LiveStatusHandle.js';
+import type { LiveStatusModelLike } from './LiveStatusModel.js';
 
 export class ModelBackedLiveStatusHandle implements LiveStatusHandle {
   constructor(private readonly model: LiveStatusModelLike) {}

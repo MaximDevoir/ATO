@@ -1,46 +1,11 @@
 #!/usr/bin/env sh
-set +e
+set -e
 
+echo "Checking formatting..."
 pnpm format:check
-FORMAT_STATUS=$?
 
-if [ $FORMAT_STATUS -ne 0 ]; then
-  echo ""
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "❌ Formatting check failed"
-  echo "👉 Run: pnpm format"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  exit 1;
-fi
+echo "Running Nx affected checks..."
+pnpm nx affected -t lint,typecheck,test --uncommitted --parallel=10
 
-pnpm lint
-LINT_STATUS=$?
-if [ $LINT_STATUS -ne 0 ]; then
-  echo ""
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "❌ Lint failed"
-  echo "👉 Run: pnpm lint --fix"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  exit 1;
-fi
-
-pnpm typecheck
-TYPECHECK_STATUS=$?
-if [ $TYPECHECK_STATUS -ne 0 ]; then
-  echo ""
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "❌ Typecheck failed"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  exit 1;
-fi
-
-pnpm test
-TEST_STATUS=$?
-if [ $TEST_STATUS -ne 0 ]; then
-  echo ""
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "❌ Tests failed"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  exit 1;
-fi
-
+echo ""
+echo "✅ Pre-commit checks passed"

@@ -1,4 +1,4 @@
-import type { HarnessCreator } from './HarnessCreator';
+import type { HarnessCreator } from './HarnessCreator.js';
 
 export class Harness {
   private readonly harnessCreators: HarnessCreator[] = [];

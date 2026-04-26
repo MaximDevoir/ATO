@@ -1,9 +1,9 @@
-import type { HarnessCreationResult } from '../domain/HarnessCreationResult';
-import type { HarnessCreationSettings } from '../domain/HarnessCreationSettings';
-import type { LiveStatusHandle } from '../domain/LiveStatusHandle';
-import type { GitService } from '../services/GitService';
-import { isGitLikeReference, parseGitReference } from '../services/GitUrl';
-import type { HarnessCreator } from './HarnessCreator';
+import type { HarnessCreationResult } from '../domain/HarnessCreationResult.js';
+import type { HarnessCreationSettings } from '../domain/HarnessCreationSettings.js';
+import type { LiveStatusHandle } from '../domain/LiveStatusHandle.js';
+import type { GitService } from '../services/GitService.js';
+import { isGitLikeReference, parseGitReference } from '../services/GitUrl.js';
+import type { HarnessCreator } from './HarnessCreator.js';
 
 export class GitHarnessCreator implements HarnessCreator {
   readonly name = 'Git';

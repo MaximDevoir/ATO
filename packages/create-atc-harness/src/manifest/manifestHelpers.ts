@@ -1,6 +1,6 @@
 import * as path from 'node:path';
-import type { FileSystem } from '../services/FileSystem';
-import { parseAndValidateATCManifest } from './ATCManifest';
+import type { FileSystem } from '../services/FileSystem.js';
+import { parseAndValidateATCManifest } from './ATCManifest.js';
 
 export function resolveManifestPath(fileSystem: FileSystem, manifestString: string) {
   const resolvedInput = path.resolve(manifestString);

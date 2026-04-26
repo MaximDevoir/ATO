@@ -2,8 +2,8 @@ import type { WriteStream } from 'node:fs';
 import { createWriteStream, mkdirSync } from 'node:fs';
 import { rename, stat } from 'node:fs/promises';
 import * as path from 'node:path';
-import type { ATIContext, IATIConsumer } from '../ATIConsumer';
-import type { ATCEvent } from '../ATIEvents';
+import type { ATIContext, IATIConsumer } from '../ATIConsumer.js';
+import type { ATCEvent } from '../ATIEvents.js';
 
 export type NDJSONConsumerOptions = {
   directory: string;

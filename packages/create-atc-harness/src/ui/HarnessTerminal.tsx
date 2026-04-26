@@ -1,8 +1,8 @@
 import { render } from 'ink';
 // biome-ignore lint/correctness/noUnusedImports: React is required at runtime for JSX
 import React from 'react';
-import { CreateATCHarnessApp } from './CreateATCHarnessApp';
-import { LiveStatusModel } from './LiveStatusModel';
+import { CreateATCHarnessApp } from './CreateATCHarnessApp.js';
+import { LiveStatusModel } from './LiveStatusModel.js';
 
 export class HarnessTerminal {
   private readonly model = new LiveStatusModel();

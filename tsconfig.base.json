@@ -13,20 +13,9 @@
     "verbatimModuleSyntax": true,
     "types": ["node"],
     "paths": {
-      "@uapkg/config": ["./packages/uapkg-config/src/index.ts"],
-      "@uapkg/log": ["./packages/uapkg-log/src/index.ts"],
-      "@uapkg/pack": ["./packages/uapkg-pack/src/index.ts"],
-      "@uapkg/diagnostics": ["./packages/uapkg-diagnostics/src/index.ts"],
-      "@uapkg/diagnostics-format": ["./packages/uapkg-diagnostics-format/src/index.ts"],
-      "@uapkg/diagnostics-format/ink": ["./packages/uapkg-diagnostics-format/src/ink/index.ts"],
-      "@uapkg/common": ["./packages/uapkg-common/src/index.ts"],
-      "@uapkg/common-schema": ["./packages/uapkg-common-schema/src/index.ts"],
-      "@uapkg/registry-schema": ["./packages/uapkg-registry-schema/src/index.ts"],
-      "@uapkg/registry-core": ["./packages/uapkg-registry-core/src/index.ts"],
-      "@uapkg/package-manifest-schema": ["./packages/uapkg-package-manifest-schema/src/index.ts"],
-      "@uapkg/package-manifest": ["./packages/uapkg-package-manifest/src/index.ts"],
       "@maximdevoir/unreal-lag": ["./packages/unreal-lag/src/index.ts"],
       "@maximdevoir/ato": ["./packages/ato/src/index.ts"],
+      "@maximdevoir/ati": ["./packages/ati/src/index.ts"],
       "@maximdevoir/create-atc-harness": ["./packages/create-atc-harness/src/index.ts"],
       "@maximdevoir/engine-association-resolver": ["./packages/engine-association-resolver/src/index.ts"]
     }

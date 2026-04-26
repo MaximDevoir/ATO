@@ -2,10 +2,10 @@ import * as dgram from 'node:dgram';
 import { EventEmitter } from 'node:events';
 import type { AddressInfo } from 'node:net';
 
-import { UnrealLagProfiles } from './profiles';
-import { RandomSource } from './random';
-import { evaluateRoute, resolvePeerSelection } from './resolve';
-import { PacketScheduler, type ScheduledItem } from './scheduler';
+import { UnrealLagProfiles } from './profiles.js';
+import { RandomSource } from './random.js';
+import { evaluateRoute, resolvePeerSelection } from './resolve.js';
+import { PacketScheduler, type ScheduledItem } from './scheduler.js';
 import type {
   BindInfo,
   PeerEndpoint,
@@ -17,7 +17,7 @@ import type {
   UnrealLagLogger,
   UnrealLagOptions,
   UnrealLagStatsSnapshot,
-} from './types';
+} from './types.js';
 
 interface RuntimePeer {
   id: string;

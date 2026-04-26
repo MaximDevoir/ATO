@@ -1,4 +1,4 @@
-import type { ATCEvent } from './ATIEvents';
+import type { ATCEvent } from './ATIEvents.js';
 
 export type ATIContext = {
   sessionId: string;

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { runCreateATCHarnessCLI } from './cli/runCreateATCHarness';
+import { runCreateATCHarnessCLI } from './cli/runCreateATCHarness.js';
 
 runCreateATCHarnessCLI(process.argv)
   .then((exitCode) => {

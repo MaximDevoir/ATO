@@ -1,4 +1,4 @@
-import { compareSequence, SequenceCounter, type SequenceId } from './sequence';
+import { compareSequence, SequenceCounter, type SequenceId } from './sequence.js';
 
 export interface ScheduledItem<T> {
   releaseAtMs: number;

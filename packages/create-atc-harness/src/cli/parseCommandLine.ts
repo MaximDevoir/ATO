@@ -1,6 +1,6 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import type { CommandLineOptions } from '../domain/CommandLineOptions';
+import type { CommandLineOptions } from '../domain/CommandLineOptions.js';
 
 export async function parseCreateATCHarnessCommandLine(rawArgv = process.argv): Promise<CommandLineOptions> {
   const parser = yargs(hideBin(rawArgv))

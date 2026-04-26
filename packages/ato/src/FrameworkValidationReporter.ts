@@ -1,5 +1,5 @@
 import type { ATISimpleReporter } from '@maximdevoir/ati';
-import { matchFileSnapshot } from './FileSnapshot';
+import { matchFileSnapshot } from './FileSnapshot.js';
 
 export type FrameworkValidationCoordinatorLabel = 'DEDICATED' | 'LISTEN' | 'STANDALONE' | 'PIE' | 'SERVER';
 export type FrameworkValidationTestResult = 'Success' | 'Fail' | 'Error' | 'NotRun' | 'Unknown';

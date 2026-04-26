@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process';
 import os from 'node:os';
 import * as path from 'node:path';
 import { EngineAssociationResolver } from '@maximdevoir/engine-association-resolver';
-import type { FileSystem } from './FileSystem';
+import type { FileSystem } from './FileSystem.js';
 
 const WINDOWS_ENGINE_BUILDS_REGISTRY_KEY = 'HKCU\\Software\\Epic Games\\Unreal Engine\\Builds';
 

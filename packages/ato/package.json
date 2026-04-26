@@ -4,16 +4,16 @@
   "type": "module",
   "sideEffects": false,
   "files": [
-    "src",
+    "dist",
     "README.md"
   ],
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
-  "types": "./src/index.ts",
+  "types": "./dist/index.d.ts",
   "dependencies": {
     "@maximdevoir/ati": "workspace:^",
     "@maximdevoir/engine-association-resolver": "workspace:^",
@@ -24,6 +24,9 @@
     "yargs": "18.0.0"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "prepack": "pnpm run build",
     "lint": "biome lint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --config vitest.config.ts",

@@ -95,11 +95,11 @@ importers:
         specifier: 17.0.35
         version: 17.0.35
       '@uapkg/cli':
-        specifier: workspace:*
-        version: link:../uapkg
+        specifier: ^1.1.9
+        version: 1.1.9(@types/react@19.2.14)(react-devtools-core@7.0.1)
       '@uapkg/package-manifest':
-        specifier: workspace:*
-        version: link:../uapkg-package-manifest
+        specifier: ^1.1.9
+        version: 1.1.9
       dotenv:
         specifier: 17.4.1
         version: 17.4.1
@@ -127,276 +127,6 @@ importers:
         version: 19.2.14
 
   packages/engine-association-resolver: {}
-
-  packages/uapkg:
-    dependencies:
-      '@amplication/csharp-ast':
-        specifier: 0.1.0
-        version: 0.1.0
-      '@types/yargs':
-        specifier: 17.0.35
-        version: 17.0.35
-      '@uapkg/common':
-        specifier: workspace:^
-        version: link:../uapkg-common
-      '@uapkg/common-schema':
-        specifier: workspace:^
-        version: link:../uapkg-common-schema
-      '@uapkg/config':
-        specifier: workspace:^
-        version: link:../uapkg-config
-      '@uapkg/diagnostics':
-        specifier: workspace:^
-        version: link:../uapkg-diagnostics
-      '@uapkg/diagnostics-format':
-        specifier: workspace:^
-        version: link:../uapkg-diagnostics-format
-      '@uapkg/installer':
-        specifier: workspace:^
-        version: link:../uapkg-installer
-      '@uapkg/log':
-        specifier: workspace:^
-        version: link:../uapkg-log
-      '@uapkg/pack':
-        specifier: workspace:^
-        version: link:../uapkg-pack
-      '@uapkg/package-manifest':
-        specifier: workspace:^
-        version: link:../uapkg-package-manifest
-      '@uapkg/package-manifest-schema':
-        specifier: workspace:^
-        version: link:../uapkg-package-manifest-schema
-      '@uapkg/registry-core':
-        specifier: workspace:^
-        version: link:../uapkg-registry-core
-      esbuild:
-        specifier: 0.28.0
-        version: 0.28.0
-      ink:
-        specifier: 6.8.0
-        version: 6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4)
-      ink-select-input:
-        specifier: 6.2.0
-        version: 6.2.0(ink@6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4))(react@19.2.4)
-      ink-text-input:
-        specifier: 6.0.0
-        version: 6.0.0(ink@6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4))(react@19.2.4)
-      is-ci:
-        specifier: 4.1.0
-        version: 4.1.0
-      react:
-        specifier: 19.2.4
-        version: 19.2.4
-      yargs:
-        specifier: 18.0.0
-        version: 18.0.0
-      zod:
-        specifier: 4.3.6
-        version: 4.3.6
-    devDependencies:
-      '@types/react':
-        specifier: 19.2.14
-        version: 19.2.14
-
-  packages/uapkg-common:
-    dependencies:
-      '@uapkg/common-schema':
-        specifier: workspace:^
-        version: link:../uapkg-common-schema
-      '@uapkg/diagnostics':
-        specifier: workspace:^
-        version: link:../uapkg-diagnostics
-      semver:
-        specifier: 7.7.1
-        version: 7.7.1
-    devDependencies:
-      '@types/semver':
-        specifier: 7.7.0
-        version: 7.7.0
-
-  packages/uapkg-common-schema:
-    dependencies:
-      '@uapkg/diagnostics':
-        specifier: workspace:^
-        version: link:../uapkg-diagnostics
-      semver:
-        specifier: 7.7.1
-        version: 7.7.1
-      zod:
-        specifier: 4.3.6
-        version: 4.3.6
-    devDependencies:
-      '@types/semver':
-        specifier: 7.7.0
-        version: 7.7.0
-
-  packages/uapkg-config:
-    dependencies:
-      '@uapkg/diagnostics':
-        specifier: workspace:^
-        version: link:../uapkg-diagnostics
-      zod:
-        specifier: 4.3.6
-        version: 4.3.6
-
-  packages/uapkg-diagnostics: {}
-
-  packages/uapkg-diagnostics-format:
-    dependencies:
-      '@uapkg/diagnostics':
-        specifier: workspace:^
-        version: link:../uapkg-diagnostics
-      ink:
-        specifier: 6.8.0
-        version: 6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4)
-      react:
-        specifier: 19.2.4
-        version: 19.2.4
-    devDependencies:
-      '@types/react':
-        specifier: 19.2.14
-        version: 19.2.14
-
-  packages/uapkg-installer:
-    dependencies:
-      '@uapkg/common':
-        specifier: workspace:^
-        version: link:../uapkg-common
-      '@uapkg/common-schema':
-        specifier: workspace:^
-        version: link:../uapkg-common-schema
-      '@uapkg/config':
-        specifier: workspace:^
-        version: link:../uapkg-config
-      '@uapkg/diagnostics':
-        specifier: workspace:^
-        version: link:../uapkg-diagnostics
-      '@uapkg/package-manifest':
-        specifier: workspace:^
-        version: link:../uapkg-package-manifest
-      '@uapkg/package-manifest-schema':
-        specifier: workspace:^
-        version: link:../uapkg-package-manifest-schema
-      '@uapkg/registry-core':
-        specifier: workspace:^
-        version: link:../uapkg-registry-core
-      p-limit:
-        specifier: 7.1.1
-        version: 7.1.1
-      tar:
-        specifier: 7.5.13
-        version: 7.5.13
-      undici:
-        specifier: 7.18.0
-        version: 7.18.0
-
-  packages/uapkg-log:
-    dependencies:
-      winston:
-        specifier: 3.19.0
-        version: 3.19.0
-
-  packages/uapkg-pack:
-    dependencies:
-      '@uapkg/diagnostics':
-        specifier: workspace:^
-        version: link:../uapkg-diagnostics
-      '@uapkg/log':
-        specifier: workspace:^
-        version: link:../uapkg-log
-      ignore:
-        specifier: 7.0.5
-        version: 7.0.5
-      semver:
-        specifier: 7.7.4
-        version: 7.7.4
-      tar:
-        specifier: 7.5.13
-        version: 7.5.13
-      zod:
-        specifier: 4.3.6
-        version: 4.3.6
-    devDependencies:
-      '@types/semver':
-        specifier: 7.7.1
-        version: 7.7.1
-
-  packages/uapkg-package-manifest:
-    dependencies:
-      '@uapkg/common':
-        specifier: workspace:^
-        version: link:../uapkg-common
-      '@uapkg/common-schema':
-        specifier: workspace:^
-        version: link:../uapkg-common-schema
-      '@uapkg/config':
-        specifier: workspace:^
-        version: link:../uapkg-config
-      '@uapkg/diagnostics':
-        specifier: workspace:^
-        version: link:../uapkg-diagnostics
-      '@uapkg/package-manifest-schema':
-        specifier: workspace:^
-        version: link:../uapkg-package-manifest-schema
-      '@uapkg/registry-core':
-        specifier: workspace:^
-        version: link:../uapkg-registry-core
-      semver:
-        specifier: 7.7.1
-        version: 7.7.1
-    devDependencies:
-      '@types/semver':
-        specifier: 7.7.0
-        version: 7.7.0
-
-  packages/uapkg-package-manifest-schema:
-    dependencies:
-      '@uapkg/common-schema':
-        specifier: workspace:^
-        version: link:../uapkg-common-schema
-      '@uapkg/diagnostics':
-        specifier: workspace:^
-        version: link:../uapkg-diagnostics
-      zod:
-        specifier: 4.3.6
-        version: 4.3.6
-
-  packages/uapkg-registry-core:
-    dependencies:
-      '@uapkg/common':
-        specifier: workspace:^
-        version: link:../uapkg-common
-      '@uapkg/common-schema':
-        specifier: workspace:^
-        version: link:../uapkg-common-schema
-      '@uapkg/config':
-        specifier: workspace:^
-        version: link:../uapkg-config
-      '@uapkg/diagnostics':
-        specifier: workspace:^
-        version: link:../uapkg-diagnostics
-      '@uapkg/registry-schema':
-        specifier: workspace:^
-        version: link:../uapkg-registry-schema
-      semver:
-        specifier: 7.7.1
-        version: 7.7.1
-    devDependencies:
-      '@types/semver':
-        specifier: 7.7.0
-        version: 7.7.0
-
-  packages/uapkg-registry-schema:
-    dependencies:
-      '@uapkg/common-schema':
-        specifier: workspace:^
-        version: link:../uapkg-common-schema
-      '@uapkg/diagnostics':
-        specifier: workspace:^
-        version: link:../uapkg-diagnostics
-      zod:
-        specifier: 4.3.6
-        version: 4.3.6
 
   packages/unreal-lag: {}
 
@@ -1176,12 +906,6 @@ packages:
   '@types/react@19.2.14':
     resolution: {integrity: sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w==}
 
-  '@types/semver@7.7.0':
-    resolution: {integrity: sha512-k107IF4+Xr7UHjwDc7Cfd6PRQfbdkiRabXGRjo07b4WyPahFBZCZ1sE+BNxYIJPPg73UkfOsVOLwqVc/6ETrIA==}
-
-  '@types/semver@7.7.1':
-    resolution: {integrity: sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==}
-
   '@types/triple-beam@1.3.5':
     resolution: {integrity: sha512-6WaYesThRMCl19iryMYP7/x2OVgCtbIVflDGFpWnb9irXI3UjYE4AzmYuiUKY1AJstGijoY+MgUszMgRxIYTYw==}
 
@@ -1190,6 +914,46 @@ packages:
 
   '@types/yargs@17.0.35':
     resolution: {integrity: sha512-qUHkeCyQFxMXg79wQfTtfndEC+N9ZZg76HJftDJp+qH2tV7Gj4OJi7l+PiWwJ+pWtW8GwSmqsDj/oymhrTWXjg==}
+
+  '@uapkg/cli@1.1.9':
+    resolution: {integrity: sha512-veazKaltOuBPiXH8KqZwlQnqv6QlCm00jqyT1soQ15nBG28avnTRdiJqNZgKzVA+kxJfsuscmsUsSEwtN14xsA==}
+    hasBin: true
+
+  '@uapkg/common-schema@1.1.9':
+    resolution: {integrity: sha512-gfPhKx5wxihKbnWLbxcI3STU47TGJoNwDfC7F6NjvI2Y8tLjvzdF5yH8PrMrUFx3dAK4e6KD5V9vlwfb713jwQ==}
+
+  '@uapkg/common@1.1.9':
+    resolution: {integrity: sha512-A3MnFl2IHvd+AReStgPmUkZWRFUeq/OuvaWPwYzPOZOhd/FQuuXwImM1YVyDOBrYg5db/nazdUzv+ly2ASWH2Q==}
+
+  '@uapkg/config@1.1.9':
+    resolution: {integrity: sha512-p+1higCSg70AnP5+rud4XPVmQDi4Ek9Q0kFxz1ZJ9JxIJga2XUDPlu6ETjHKuDZo8q60E8prjhDmC3Ohzi5ooQ==}
+
+  '@uapkg/diagnostics-format@1.1.9':
+    resolution: {integrity: sha512-QwK6/Z4C3GD//n3i4Hvx+C1ebzcRjCA5VygucNyTS79gX5X2pF5EhFmCWFaOzvMhm7l19/gHXBH/efanoGt8+g==}
+
+  '@uapkg/diagnostics@1.1.9':
+    resolution: {integrity: sha512-3umVuzvvPMNjaBIWQs66pdgWVpNOR30939CdGMPXdmz1oUACGacWhBJmXz267ghOAnpJGkyFJtq8Oyiop/trZQ==}
+
+  '@uapkg/installer@1.1.9':
+    resolution: {integrity: sha512-Uml8mUPIDeTRevanGLjo8tF5ynZnalHRy+4CT6jOucL8rKqtfYfyaRZIiE4K4J+jd3we35mIcbdlvfsO3LgzTQ==}
+
+  '@uapkg/log@1.1.9':
+    resolution: {integrity: sha512-LD6gu5ney9a69eBPKTkSLRl7zp0n3hlhs0OI6OQLu9jzHTXPjX0Ic5syMO1RBY14Cfj9XIWhpf9S3VeEQm6gBw==}
+
+  '@uapkg/pack@1.1.9':
+    resolution: {integrity: sha512-Ueqtk7dD0dm26Mty0t2mevrrwhOp5eG9UZCBUOCZy553V1jpRN/9PLMS0Y8R89+SPN2YcynJhB+WDahqMS3teg==}
+
+  '@uapkg/package-manifest-schema@1.1.9':
+    resolution: {integrity: sha512-Y7Ftu379m1iZGApFysqF8PoUmPRNPX0lL+UoRuE/r3dEETb2WIv5HQLoKdSQBrxM3piUDIFCkkpNXm0Q/2uhfA==}
+
+  '@uapkg/package-manifest@1.1.9':
+    resolution: {integrity: sha512-wvs0GX+ZOyM2Lr1CoFQ7lXvWLQC8LquJ5yS5JuRTatshQeQPUqqI+maMlf44NVowdWzwM87Qnb4ON3EtMrZ65A==}
+
+  '@uapkg/registry-core@1.1.9':
+    resolution: {integrity: sha512-ettHO3GiJeZ2h6i0GNiuDWKxHz0p7zMmGYysdZmwQFSaaN2R1NnncmHaR33woHw950EtYjB2TyAQu0l8cokuUg==}
+
+  '@uapkg/registry-schema@1.1.9':
+    resolution: {integrity: sha512-fcnNx/ITIZ/a+1LDFPet0DaI85o4PibTz7LkfANRsG1HD5gvOyYcwCzspcesLufNp7lp/ThcFtpE0+e85Ua8ag==}
 
   '@vitest/coverage-v8@4.1.2':
     resolution: {integrity: sha512-sPK//PHO+kAkScb8XITeB1bf7fsk85Km7+rt4eeuRR3VS1/crD47cmV5wicisJmjNdfeokTZwjMk4Mj2d58Mgg==}
@@ -2072,8 +1836,8 @@ packages:
     resolution: {integrity: sha512-uB80kBFb/tfd68bVleG9T5GGsGPjJrLAUpR5PZIrhBnIaRTQRjqdJSsIKkOP6OAIFbj7GOrcudc5pNjZ+geV2g==}
     engines: {node: '>=6'}
 
-  postcss@8.5.10:
-    resolution: {integrity: sha512-pMMHxBOZKFU6HgAZ4eyGnwXF/EvPGGqUr0MnZ5+99485wwW41kW91A4LOGxSHhgugZmSChL5AlElNdwlNgcnLQ==}
+  postcss@8.5.12:
+    resolution: {integrity: sha512-W62t/Se6rA0Az3DfCL0AqJwXuKwBeYg6nOaIgzP+xZ7N5BFCI7DYi1qs6ygUYT6rvfi6t9k65UMLJC+PHZpDAA==}
     engines: {node: ^10 || ^12 || >=14}
 
   prettier@2.8.8:
@@ -3159,10 +2923,6 @@ snapshots:
     dependencies:
       csstype: 3.2.3
 
-  '@types/semver@7.7.0': {}
-
-  '@types/semver@7.7.1': {}
-
   '@types/triple-beam@1.3.5': {}
 
   '@types/yargs-parser@21.0.3': {}
@@ -3170,6 +2930,122 @@ snapshots:
   '@types/yargs@17.0.35':
     dependencies:
       '@types/yargs-parser': 21.0.3
+
+  '@uapkg/cli@1.1.9(@types/react@19.2.14)(react-devtools-core@7.0.1)':
+    dependencies:
+      '@amplication/csharp-ast': 0.1.0
+      '@types/yargs': 17.0.35
+      '@uapkg/common': 1.1.9
+      '@uapkg/common-schema': 1.1.9
+      '@uapkg/config': 1.1.9
+      '@uapkg/diagnostics': 1.1.9
+      '@uapkg/diagnostics-format': 1.1.9(@types/react@19.2.14)(react-devtools-core@7.0.1)
+      '@uapkg/installer': 1.1.9
+      '@uapkg/log': 1.1.9
+      '@uapkg/pack': 1.1.9
+      '@uapkg/package-manifest': 1.1.9
+      '@uapkg/package-manifest-schema': 1.1.9
+      '@uapkg/registry-core': 1.1.9
+      esbuild: 0.28.0
+      ink: 6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4)
+      ink-select-input: 6.2.0(ink@6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4))(react@19.2.4)
+      ink-text-input: 6.0.0(ink@6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4))(react@19.2.4)
+      is-ci: 4.1.0
+      react: 19.2.4
+      yargs: 18.0.0
+      zod: 4.3.6
+    transitivePeerDependencies:
+      - '@types/react'
+      - bufferutil
+      - react-devtools-core
+      - utf-8-validate
+
+  '@uapkg/common-schema@1.1.9':
+    dependencies:
+      '@uapkg/diagnostics': 1.1.9
+      semver: 7.7.1
+      zod: 4.3.6
+
+  '@uapkg/common@1.1.9':
+    dependencies:
+      '@uapkg/common-schema': 1.1.9
+      '@uapkg/diagnostics': 1.1.9
+      semver: 7.7.1
+
+  '@uapkg/config@1.1.9':
+    dependencies:
+      '@uapkg/diagnostics': 1.1.9
+      zod: 4.3.6
+
+  '@uapkg/diagnostics-format@1.1.9(@types/react@19.2.14)(react-devtools-core@7.0.1)':
+    dependencies:
+      '@uapkg/diagnostics': 1.1.9
+      ink: 6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4)
+      react: 19.2.4
+    transitivePeerDependencies:
+      - '@types/react'
+      - bufferutil
+      - react-devtools-core
+      - utf-8-validate
+
+  '@uapkg/diagnostics@1.1.9': {}
+
+  '@uapkg/installer@1.1.9':
+    dependencies:
+      '@uapkg/common': 1.1.9
+      '@uapkg/common-schema': 1.1.9
+      '@uapkg/config': 1.1.9
+      '@uapkg/diagnostics': 1.1.9
+      '@uapkg/package-manifest': 1.1.9
+      '@uapkg/package-manifest-schema': 1.1.9
+      '@uapkg/registry-core': 1.1.9
+      p-limit: 7.1.1
+      tar: 7.5.13
+      undici: 7.18.0
+
+  '@uapkg/log@1.1.9':
+    dependencies:
+      winston: 3.19.0
+
+  '@uapkg/pack@1.1.9':
+    dependencies:
+      '@uapkg/diagnostics': 1.1.9
+      '@uapkg/log': 1.1.9
+      ignore: 7.0.5
+      semver: 7.7.4
+      tar: 7.5.13
+      zod: 4.3.6
+
+  '@uapkg/package-manifest-schema@1.1.9':
+    dependencies:
+      '@uapkg/common-schema': 1.1.9
+      '@uapkg/diagnostics': 1.1.9
+      zod: 4.3.6
+
+  '@uapkg/package-manifest@1.1.9':
+    dependencies:
+      '@uapkg/common': 1.1.9
+      '@uapkg/common-schema': 1.1.9
+      '@uapkg/config': 1.1.9
+      '@uapkg/diagnostics': 1.1.9
+      '@uapkg/package-manifest-schema': 1.1.9
+      '@uapkg/registry-core': 1.1.9
+      semver: 7.7.1
+
+  '@uapkg/registry-core@1.1.9':
+    dependencies:
+      '@uapkg/common': 1.1.9
+      '@uapkg/common-schema': 1.1.9
+      '@uapkg/config': 1.1.9
+      '@uapkg/diagnostics': 1.1.9
+      '@uapkg/registry-schema': 1.1.9
+      semver: 7.7.1
+
+  '@uapkg/registry-schema@1.1.9':
+    dependencies:
+      '@uapkg/common-schema': 1.1.9
+      '@uapkg/diagnostics': 1.1.9
+      zod: 4.3.6
 
   '@vitest/coverage-v8@4.1.2(vitest@4.1.2(@types/node@25.5.2)(vite@7.3.1(@types/node@25.5.2)(tsx@4.21.0)(yaml@2.8.3)))':
     dependencies:
@@ -4065,7 +3941,7 @@ snapshots:
 
   pify@4.0.1: {}
 
-  postcss@8.5.10:
+  postcss@8.5.12:
     dependencies:
       nanoid: 3.3.11
       picocolors: 1.1.1
@@ -4354,7 +4230,7 @@ snapshots:
       esbuild: 0.27.7
       fdir: 6.5.0(picomatch@4.0.4)
       picomatch: 4.0.4
-      postcss: 8.5.10
+      postcss: 8.5.12
       rollup: 4.60.2
       tinyglobby: 0.2.16
     optionalDependencies:

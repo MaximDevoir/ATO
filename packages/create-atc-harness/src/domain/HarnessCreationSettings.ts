@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import type { CommandLineOptions } from './CommandLineOptions';
+import type { CommandLineOptions } from './CommandLineOptions.js';
 
 export interface HarnessCreationSettingsInit {
   rootFolder: string;

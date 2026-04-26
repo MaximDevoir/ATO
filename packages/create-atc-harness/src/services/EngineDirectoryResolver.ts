@@ -4,8 +4,8 @@ import readline from 'node:readline/promises';
 import { EngineAssociationResolver, isValidEngineDirectory } from '@maximdevoir/engine-association-resolver';
 import dotenv from 'dotenv';
 import isCI from 'is-ci';
-import type { FileSystem } from './FileSystem';
-import type { InstalledEngineLocator } from './InstalledEngineLocator';
+import type { FileSystem } from './FileSystem.js';
+import type { InstalledEngineLocator } from './InstalledEngineLocator.js';
 
 export interface ResolvedEngineContext {
   engineDirectory?: string;

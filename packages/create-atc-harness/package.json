@@ -4,23 +4,25 @@
   "type": "module",
   "sideEffects": false,
   "bin": {
-    "create-atc-harness": "./src/cli.ts"
+    "create-atc-harness": "./bin/create-atc-harness.cjs"
   },
   "files": [
-    "src"
+    "bin",
+    "dist",
+    "README.md"
   ],
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
-  "types": "./src/index.ts",
+  "types": "./dist/index.d.ts",
   "dependencies": {
     "@maximdevoir/engine-association-resolver": "workspace:*",
     "@types/yargs": "17.0.35",
-    "@uapkg/cli": "workspace:*",
-    "@uapkg/package-manifest": "workspace:*",
+    "@uapkg/cli": "^1.1.9",
+    "@uapkg/package-manifest": "^1.1.9",
     "dotenv": "17.4.1",
     "ink": "6.8.0",
     "ink-select-input": "6.2.0",
@@ -33,7 +35,11 @@
     "@types/react": "19.2.14"
   },
   "scripts": {
-    "create-atc-harness": "tsx src/cli.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "prepack": "pnpm run build",
+    "create-atc-harness": "node ./dist/cli.js",
+    "create-atc-harness:dev": "tsx src/cli.ts",
     "lint": "biome lint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --config vitest.config.ts",

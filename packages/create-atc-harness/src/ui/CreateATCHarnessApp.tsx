@@ -1,7 +1,7 @@
 import { Box, Static, Text } from 'ink';
 // biome-ignore lint/style/useImportType: React is required at runtime for JSX
 import React, { useEffect, useState } from 'react';
-import type { LiveStatusModel, LiveStatusSnapshot } from './LiveStatusModel';
+import type { LiveStatusModel, LiveStatusSnapshot } from './LiveStatusModel.js';
 
 interface CreateATCHarnessAppProps {
   model: LiveStatusModel;

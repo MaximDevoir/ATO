@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import * as path from 'node:path';
-import { coerceInstalledEnginePathToEngineDirectory } from './engineValidation';
+import { coerceInstalledEnginePathToEngineDirectory } from './engineValidation.js';
 
 const WINDOWS_ENGINE_BUILDS_REGISTRY_KEY = 'HKCU\\Software\\Epic Games\\Unreal Engine\\Builds';
 

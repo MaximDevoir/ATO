@@ -2,8 +2,8 @@ import { createReadStream } from 'node:fs';
 import { readdir } from 'node:fs/promises';
 import * as path from 'node:path';
 import readline from 'node:readline';
-import { ATISimpleReporter } from './ATISimpleReporter';
-import { parseATCEvent } from './validation';
+import { ATISimpleReporter } from './ATISimpleReporter.js';
+import { parseATCEvent } from './validation.js';
 
 export async function loadATISimpleReporterFromNDJSONFile(filePath: string) {
   const reporter = new ATISimpleReporter();

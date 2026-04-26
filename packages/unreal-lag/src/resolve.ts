@@ -1,5 +1,5 @@
-import { UnrealLagProfiles } from './profiles';
-import type { RandomSource } from './random';
+import { UnrealLagProfiles } from './profiles.js';
+import type { RandomSource } from './random.js';
 import type {
   CommonNetworkOptions,
   NetworkProfile,
@@ -7,7 +7,7 @@ import type {
   ResolvedDirectionalNetworkOptions,
   ResolvedPeerConfig,
   RouteDecision,
-} from './types';
+} from './types.js';
 
 function clampPct(value: number | undefined): number {
   if (value === undefined || Number.isNaN(value)) return 0;

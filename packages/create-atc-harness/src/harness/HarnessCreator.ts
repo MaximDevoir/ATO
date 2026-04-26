@@ -1,6 +1,6 @@
-import type { HarnessCreationResult } from '../domain/HarnessCreationResult';
-import type { HarnessCreationSettings } from '../domain/HarnessCreationSettings';
-import type { LiveStatusHandle } from '../domain/LiveStatusHandle';
+import type { HarnessCreationResult } from '../domain/HarnessCreationResult.js';
+import type { HarnessCreationSettings } from '../domain/HarnessCreationSettings.js';
+import type { LiveStatusHandle } from '../domain/LiveStatusHandle.js';
 
 export interface HarnessCreator {
   readonly name: string;

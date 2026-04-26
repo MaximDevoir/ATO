@@ -1,14 +1,14 @@
 import { Box, render, Static, Text } from 'ink';
 // biome-ignore lint/style/useImportType: React is required at runtime for JSX
 import React, { useEffect, useState } from 'react';
-import type { ATISimpleReporter } from '../ATISimpleReporter';
+import type { ATISimpleReporter } from '../ATISimpleReporter.js';
 import type {
   ATITerminalDisplayedStatus,
   ATITerminalDisplayedTest,
   ATITerminalMessageLine,
   ATITerminalState,
-} from './ATITerminalState';
-import { createATITerminalState, formatATITerminalSessionSummary, updateATITerminalState } from './ATITerminalState';
+} from './ATITerminalState.js';
+import { createATITerminalState, formatATITerminalSessionSummary, updateATITerminalState } from './ATITerminalState.js';
 
 const spinnerFrames = ['-', '\\', '|', '/'] as const;
 const spinnerIntervalMs = 80;

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import * as path from 'node:path';
-import type { FileSystem } from './FileSystem';
+import type { FileSystem } from './FileSystem.js';
 
 export class NodeFileSystem implements FileSystem {
   exists(filePath: string) {

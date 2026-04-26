@@ -1,4 +1,4 @@
-import type { ATCEvent, ATCParameterBinding } from './ATIEvents';
+import type { ATCEvent, ATCParameterBinding } from './ATIEvents.js';
 
 export type ATIAssertionResult = {
   message: string;

@@ -4,6 +4,20 @@
   "sourceRoot": "packages/ato/src",
   "projectType": "library",
   "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "pnpm run build"
+      }
+    },
+    "clean": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "pnpm run clean"
+      }
+    },
     "lint": {
       "executor": "nx:run-commands",
       "options": {

@@ -1,7 +1,7 @@
-import type { IATIConsumer } from '../ATIConsumer';
-import type { ATCEvent } from '../ATIEvents';
-import { ATISimpleReporter } from '../ATISimpleReporter';
-import { ATITerminalReporter } from '../terminal/ATITerminalReporter';
+import type { IATIConsumer } from '../ATIConsumer.js';
+import type { ATCEvent } from '../ATIEvents.js';
+import { ATISimpleReporter } from '../ATISimpleReporter.js';
+import { ATITerminalReporter } from '../terminal/ATITerminalReporter.js';
 import {
   type ATITerminalDisplayedTest,
   type ATITerminalFormattedLine,
@@ -10,7 +10,7 @@ import {
   formatATITerminalDisplayedTestSummary,
   formatATITerminalSessionSummary,
   updateATITerminalState,
-} from '../terminal/ATITerminalState';
+} from '../terminal/ATITerminalState.js';
 
 export type ATITerminalReporterMode = 'default' | 'basic';
 

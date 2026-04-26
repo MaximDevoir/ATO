@@ -1,9 +1,9 @@
 import { randomInt } from 'node:crypto';
 import { mkdirSync, readdirSync } from 'node:fs';
 import * as path from 'node:path';
-import { checkExistsSync } from './ATO._helpers';
-import { commandExistsSync } from './ATO.helpers';
-import { CoordinatorMode } from './ATO.options';
+import { checkExistsSync } from './ATO._helpers.js';
+import { commandExistsSync } from './ATO.helpers.js';
+import { CoordinatorMode } from './ATO.options.js';
 
 export interface CoverageWrappedLaunch {
   exe: string;

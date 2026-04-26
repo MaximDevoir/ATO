@@ -1,9 +1,9 @@
 import { once } from 'node:events';
 import type { SocketAddress } from 'node:net';
 import net from 'node:net';
-import type { ATIConsumerBackpressure, ATIContext, IATIConsumer } from './ATIConsumer';
-import type { ATCEvent, ATCSessionFinishedEvent, ATCSessionStartedEvent } from './ATIEvents';
-import { parseATCEvent } from './validation';
+import type { ATIConsumerBackpressure, ATIContext, IATIConsumer } from './ATIConsumer.js';
+import type { ATCEvent, ATCSessionFinishedEvent, ATCSessionStartedEvent } from './ATIEvents.js';
+import { parseATCEvent } from './validation.js';
 
 export type ATIServiceOptions = {
   host: string;

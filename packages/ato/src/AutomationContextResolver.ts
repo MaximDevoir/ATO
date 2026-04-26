@@ -2,8 +2,8 @@ import fs from 'node:fs';
 import * as path from 'node:path';
 import { EngineAssociationResolver, isValidEngineDirectory } from '@maximdevoir/engine-association-resolver';
 import dotenv from 'dotenv';
-import type { E2ECommandLineContext } from './ATO.options';
-import { ProjectResolver } from './ProjectResolver';
+import type { E2ECommandLineContext } from './ATO.options.js';
+import { ProjectResolver } from './ProjectResolver.js';
 
 export interface AutomationContextResolutionOptions {
   explicitProjectPath?: string;

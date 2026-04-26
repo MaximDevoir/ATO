@@ -1,4 +1,4 @@
-import type { CoordinatorMode } from './ATO.options';
+import type { CoordinatorMode } from './ATO.options.js';
 
 export const ATC_RUN_TESTS_COMMAND = 'ATC.RunTests';
 export const ATC_CLIENT_BOOTSTRAP_TEST = 'ATC.ClientBootstrap';

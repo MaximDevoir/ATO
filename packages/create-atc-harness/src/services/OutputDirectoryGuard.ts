@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import type { FileSystem } from './FileSystem';
+import type { FileSystem } from './FileSystem.js';
 
 export class OutputDirectoryGuard {
   constructor(private readonly fileSystem: FileSystem) {}

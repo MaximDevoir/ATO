@@ -1,6 +1,6 @@
 import { readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
-import { checkExistsSync } from './ATO._helpers';
+import { checkExistsSync } from './ATO._helpers.js';
 
 export interface MergedCoverageFile {
   sourceFilePath: string;

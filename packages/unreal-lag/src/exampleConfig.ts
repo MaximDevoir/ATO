@@ -1,4 +1,4 @@
-import type { UnrealLagOptions } from './types';
+import type { UnrealLagOptions } from './types.js';
 
 const exampleConfig: UnrealLagOptions = {
   bindAddress: '127.0.0.1',

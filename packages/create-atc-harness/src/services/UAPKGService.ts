@@ -1,7 +1,7 @@
 import * as path from 'node:path';
 import { createUAPKGCommandLineFactory, UAPKGApplication } from '@uapkg/cli';
 import { ManifestReader } from '@uapkg/package-manifest';
-import type { FileSystem } from './FileSystem';
+import type { FileSystem } from './FileSystem.js';
 
 export interface AddDependencyOptions {
   pin?: boolean;

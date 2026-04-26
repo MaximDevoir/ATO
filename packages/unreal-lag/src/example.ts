@@ -1,6 +1,6 @@
-import { getExampleConfig } from './exampleConfig';
-import type { PeerSelection, ServerTargetConfig, UnrealLagOptions } from './types';
-import { UnrealLag } from './UnrealLag';
+import { getExampleConfig } from './exampleConfig.js';
+import type { PeerSelection, ServerTargetConfig, UnrealLagOptions } from './types.js';
+import { UnrealLag } from './UnrealLag.js';
 
 function mergeSelection(
   base: PeerSelection | undefined,

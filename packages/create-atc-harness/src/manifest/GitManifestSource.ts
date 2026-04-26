@@ -1,16 +1,16 @@
 import * as path from 'node:path';
-import type { HarnessCreationResult } from '../domain/HarnessCreationResult';
-import type { HarnessCreationSettings } from '../domain/HarnessCreationSettings';
-import type { LiveStatusHandle } from '../domain/LiveStatusHandle';
-import type { FileSystem } from '../services/FileSystem';
-import type { GitService } from '../services/GitService';
-import { isGitLikeReference, parseGitReference } from '../services/GitUrl';
-import type { ManifestResolutionContext, ManifestSource } from './ManifestSource';
+import type { HarnessCreationResult } from '../domain/HarnessCreationResult.js';
+import type { HarnessCreationSettings } from '../domain/HarnessCreationSettings.js';
+import type { LiveStatusHandle } from '../domain/LiveStatusHandle.js';
+import type { FileSystem } from '../services/FileSystem.js';
+import type { GitService } from '../services/GitService.js';
+import { isGitLikeReference, parseGitReference } from '../services/GitUrl.js';
+import type { ManifestResolutionContext, ManifestSource } from './ManifestSource.js';
 import {
   readManifestAtPath,
   resolvePluginInstallDirectoryName,
   resolvePluginRootFromManifestFolder,
-} from './manifestHelpers';
+} from './manifestHelpers.js';
 
 export class GitManifestSource implements ManifestSource {
   readonly name = 'GitManifestSource';

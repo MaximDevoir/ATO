@@ -1,6 +1,6 @@
-import { CreateATCHarness } from '../app/CreateATCHarness';
-import { HarnessResultState } from '../domain/HarnessCreationResult';
-import { parseCreateATCHarnessCommandLine } from './parseCommandLine';
+import { CreateATCHarness } from '../app/CreateATCHarness.js';
+import { HarnessResultState } from '../domain/HarnessCreationResult.js';
+import { parseCreateATCHarnessCommandLine } from './parseCommandLine.js';
 
 export async function runCreateATCHarnessCLI(rawArgv = process.argv) {
   const commandLine = await parseCreateATCHarnessCommandLine(rawArgv);

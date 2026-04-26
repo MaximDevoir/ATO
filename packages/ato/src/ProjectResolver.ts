@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import * as path from 'node:path';
-import { isValidUProjectFile } from './UnrealPlatform';
+import { isValidUProjectFile } from './UnrealPlatform.js';
 
 export interface ProjectResolutionOptions {
   explicitProjectPath?: string;

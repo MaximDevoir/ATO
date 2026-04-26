@@ -1,4 +1,4 @@
-import type { ATCEvent, ATCParameterBinding } from './ATIEvents';
+import type { ATCEvent, ATCParameterBinding } from './ATIEvents.js';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);

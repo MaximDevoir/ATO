@@ -1,8 +1,8 @@
 import { spawn } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
-import { CoordinatorMode } from './ATO.options';
-import { normalizePathSlashes, resolveBuildGraphSchemaLocation, resolveUnrealHostPlatform } from './UnrealPlatform';
+import { CoordinatorMode } from './ATO.options.js';
+import { normalizePathSlashes, resolveBuildGraphSchemaLocation, resolveUnrealHostPlatform } from './UnrealPlatform.js';
 
 const SIMPLE_AUTO_BUILD_TARGET = 'SimpleAutoBuild';
 

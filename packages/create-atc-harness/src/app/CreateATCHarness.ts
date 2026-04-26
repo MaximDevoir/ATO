@@ -1,30 +1,30 @@
 import * as path from 'node:path';
-import type { CommandLineOptions } from '../domain/CommandLineOptions';
-import { HarnessCreationResult, HarnessResultState } from '../domain/HarnessCreationResult';
-import { HarnessCreationSettings } from '../domain/HarnessCreationSettings';
-import { EngineTemplateHarnessCreator } from '../harness/EngineTemplateHarnessCreator';
-import { GitHarnessCreator } from '../harness/GitHarnessCreator';
-import { Harness } from '../harness/Harness';
-import type { HarnessCreator } from '../harness/HarnessCreator';
-import { GitManifestSource } from '../manifest/GitManifestSource';
-import { LocalPathManifestSource } from '../manifest/LocalPathManifestSource';
-import type { ManifestResolution, ManifestSource } from '../manifest/ManifestSource';
+import type { CommandLineOptions } from '../domain/CommandLineOptions.js';
+import { HarnessCreationResult, HarnessResultState } from '../domain/HarnessCreationResult.js';
+import { HarnessCreationSettings } from '../domain/HarnessCreationSettings.js';
+import { EngineTemplateHarnessCreator } from '../harness/EngineTemplateHarnessCreator.js';
+import { GitHarnessCreator } from '../harness/GitHarnessCreator.js';
+import { Harness } from '../harness/Harness.js';
+import type { HarnessCreator } from '../harness/HarnessCreator.js';
+import { GitManifestSource } from '../manifest/GitManifestSource.js';
+import { LocalPathManifestSource } from '../manifest/LocalPathManifestSource.js';
+import type { ManifestResolution, ManifestSource } from '../manifest/ManifestSource.js';
 import {
   resolvePluginFileStemFromManifestFolder,
   resolvePluginRootFromManifestFolder,
-} from '../manifest/manifestHelpers';
-import { EngineDirectoryResolver } from '../services/EngineDirectoryResolver';
-import type { FileSystem } from '../services/FileSystem';
-import type { GitService } from '../services/GitService';
-import { SimpleGitService } from '../services/GitService';
-import { isGitLikeReference, parseGitReference } from '../services/GitUrl';
-import { InstalledEngineLocator } from '../services/InstalledEngineLocator';
-import { NodeFileSystem } from '../services/NodeFileSystem';
-import { OutputDirectoryGuard } from '../services/OutputDirectoryGuard';
-import { UAPKGService, type UAPKGServiceLike } from '../services/UAPKGService';
-import { HarnessTerminal } from '../ui/HarnessTerminal';
-import type { LiveStatusModelLike } from '../ui/LiveStatusModel';
-import { ModelBackedLiveStatusHandle } from '../ui/ModelBackedLiveStatusHandle';
+} from '../manifest/manifestHelpers.js';
+import { EngineDirectoryResolver } from '../services/EngineDirectoryResolver.js';
+import type { FileSystem } from '../services/FileSystem.js';
+import type { GitService } from '../services/GitService.js';
+import { SimpleGitService } from '../services/GitService.js';
+import { isGitLikeReference, parseGitReference } from '../services/GitUrl.js';
+import { InstalledEngineLocator } from '../services/InstalledEngineLocator.js';
+import { NodeFileSystem } from '../services/NodeFileSystem.js';
+import { OutputDirectoryGuard } from '../services/OutputDirectoryGuard.js';
+import { UAPKGService, type UAPKGServiceLike } from '../services/UAPKGService.js';
+import { HarnessTerminal } from '../ui/HarnessTerminal.js';
+import type { LiveStatusModelLike } from '../ui/LiveStatusModel.js';
+import { ModelBackedLiveStatusHandle } from '../ui/ModelBackedLiveStatusHandle.js';
 
 export interface OutputDirectoryValidator {
   validate(targetDirectory: string): void;

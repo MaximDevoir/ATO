@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import { checkExistsSync } from './ATO._helpers';
+import { checkExistsSync } from './ATO._helpers.js';
 
 export {
   coerceInstalledEnginePathToEngineDirectory,

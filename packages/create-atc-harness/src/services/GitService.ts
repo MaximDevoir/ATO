@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import * as path from 'node:path';
 import { simpleGit } from 'simple-git';
-import type { FileSystem } from './FileSystem';
+import type { FileSystem } from './FileSystem.js';
 
 export interface GitService {
   isGitAvailable(): boolean;

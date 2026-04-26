@@ -1,3 +1,3 @@
-export type { EngineAssociationResolverDependencies } from './EngineAssociationResolver';
-export { EngineAssociationResolver } from './EngineAssociationResolver';
-export { coerceInstalledEnginePathToEngineDirectory, isValidEngineDirectory } from './engineValidation';
+export type { EngineAssociationResolverDependencies } from './EngineAssociationResolver.js';
+export { EngineAssociationResolver } from './EngineAssociationResolver.js';
+export { coerceInstalledEnginePathToEngineDirectory, isValidEngineDirectory } from './engineValidation.js';

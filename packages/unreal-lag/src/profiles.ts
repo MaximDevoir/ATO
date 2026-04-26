@@ -1,4 +1,4 @@
-import type { NetworkProfile, UnrealLagLogger } from './types';
+import type { NetworkProfile, UnrealLagLogger } from './types.js';
 
 export const UnrealLagProfiles = {
   NoLag: {

@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import { checkExistsSync } from './fileHelpers';
+import { checkExistsSync } from './fileHelpers.js';
 
 export function isValidEngineDirectory(engineDir: string) {
   if (!engineDir) {

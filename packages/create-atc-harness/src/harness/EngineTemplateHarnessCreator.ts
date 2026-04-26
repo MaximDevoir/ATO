@@ -1,9 +1,9 @@
 import * as path from 'node:path';
-import type { HarnessCreationResult } from '../domain/HarnessCreationResult';
-import type { HarnessCreationSettings } from '../domain/HarnessCreationSettings';
-import type { LiveStatusHandle } from '../domain/LiveStatusHandle';
-import type { FileSystem } from '../services/FileSystem';
-import type { HarnessCreator } from './HarnessCreator';
+import type { HarnessCreationResult } from '../domain/HarnessCreationResult.js';
+import type { HarnessCreationSettings } from '../domain/HarnessCreationSettings.js';
+import type { LiveStatusHandle } from '../domain/LiveStatusHandle.js';
+import type { FileSystem } from '../services/FileSystem.js';
+import type { HarnessCreator } from './HarnessCreator.js';
 
 const ENGINE_TEMPLATE_NAMES = new Set(['EngineTemplate', 'engine-template', 'template']);
 

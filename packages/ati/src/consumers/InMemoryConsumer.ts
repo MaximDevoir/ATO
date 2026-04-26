@@ -1,5 +1,5 @@
-import type { ATIContext, IATIConsumer } from '../ATIConsumer';
-import type { ATCEvent } from '../ATIEvents';
+import type { ATIContext, IATIConsumer } from '../ATIConsumer.js';
+import type { ATCEvent } from '../ATIEvents.js';
 
 export class InMemoryConsumer implements IATIConsumer {
   readonly id = 'memory';

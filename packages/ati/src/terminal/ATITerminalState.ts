@@ -1,5 +1,5 @@
-import type { ATCEvent, ATCMessageEvent } from '../ATIEvents';
-import type { ATISession, ATISimpleReporter, ATITest } from '../ATISimpleReporter';
+import type { ATCEvent, ATCMessageEvent } from '../ATIEvents.js';
+import type { ATISession, ATISimpleReporter, ATITest } from '../ATISimpleReporter.js';
 
 export type ATITerminalMessageLevel = 'log' | 'warn' | 'error';
 export type ATITerminalDisplayedStatus = 'running' | 'passed' | 'failed' | 'skipped';
