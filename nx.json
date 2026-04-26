@@ -20,7 +20,8 @@
       "inputs": ["default", "^default"]
     },
     "typecheck": {
-      "inputs": ["default", "^default"]
+      "inputs": ["default", "^default"],
+      "dependsOn": ["^build"]
     },
     "test": {
       "inputs": ["default", "^default"]
