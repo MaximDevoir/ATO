@@ -1,4 +1,4 @@
-export type DevBuildMode = 'build' | 'link' | 'watch' | 'unlink' | 'status';
+export type DevBuildMode = 'build' | 'link' | 'watch' | 'unlink' | 'status' | 'clean' | 'cleanAll';
 
 export type CurrentGlobalUapkgState =
   | { kind: 'none' }

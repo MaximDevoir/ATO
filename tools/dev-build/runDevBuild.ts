@@ -29,6 +29,14 @@ function normalizeMode(rawMode: string | undefined): DevBuildMode {
     return 'status';
   }
 
+  if (rawMode === 'clean') {
+    return 'clean';
+  }
+
+  if (rawMode === 'cleanAll') {
+    return 'cleanAll';
+  }
+
   throw new Error(`[dev-build] Unsupported mode: ${rawMode}`);
 }
 
@@ -50,6 +58,10 @@ if (mode === 'build') {
   orchestrator.watch();
 } else if (mode === 'unlink') {
   orchestrator.unlink(options);
-} else {
+} else if (mode === 'status') {
   orchestrator.status();
+} else if (mode === 'clean') {
+  orchestrator.clean();
+} else if (mode === 'cleanAll') {
+  orchestrator.cleanAll();
 }

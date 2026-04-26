@@ -10,7 +10,9 @@ This folder contains local development tooling executed directly with `tsx`.
   "build:link": "tsx tools/dev-build/runDevBuild.ts link",
   "build:watch": "tsx tools/dev-build/runDevBuild.ts watch",
   "build:unlink": "tsx tools/dev-build/runDevBuild.ts unlink",
-  "build:status": "tsx tools/dev-build/runDevBuild.ts status"
+  "build:status": "tsx tools/dev-build/runDevBuild.ts status",
+  "build:clean": "tsx tools/dev-build/runDevBuild.ts clean",
+  "clean:all": "tsx tools/dev-build/runDevBuild.ts cleanAll"
 }
 ```
 
@@ -21,6 +23,8 @@ This folder contains local development tooling executed directly with `tsx`.
 - `build:watch`: watch only `uapkg` with `--includeDependentProjects`, then run `build:link` on changes.
 - `build:unlink`: remove the active global dev link and restore only safe previous state.
 - `build:status`: inspect snapshot state, current global state, global-bin/path health, and binary resolution.
+- `build:clean`: remove build artifacts (`dist`, `build`, `coverage`, Nx cache/workspace-data, `*.tsbuildinfo`) across root and workspace packages.
+- `clean:all`: run unlink with force, then run `build:clean`, remove workspace `node_modules`, remove workspace `.pnpm-store` directories, and prune pnpm store metadata.
 
 Snapshot file:
 
@@ -65,6 +69,7 @@ CI must not run:
 - `build:link`
 - `build:watch`
 - `build:unlink`
+- `clean:all`
 
 ## Acceptance Tests
 
@@ -75,5 +80,6 @@ CI must not run:
 - `pnpm run build:unlink` restores published `uapkg@<version>` if that was the prior state.
 - If prior state was another dev link, unlink removes current link but does not restore the external link.
 - `pnpm run build:watch` does not contain a manually maintained project list.
+- `pnpm run build:clean` removes build outputs and leaves install state untouched.
+- `pnpm run clean:all` removes install/build state from root and workspace packages.
 - CI typecheck still passes without global links.
-
