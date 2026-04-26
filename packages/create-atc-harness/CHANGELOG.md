@@ -1,5 +1,16 @@
 # @maximdevoir/create-atc-harness
 
+## 1.1.4
+
+### Patch Changes
+
+- [`9a201d9`](https://github.com/MaximDevoir/ATO/commit/9a201d991610054f0fcde5d3d4e352809af10d9d) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - fix: refactor to replace `uapkg` package with `@uapkg/cli` across dependencies and services
+
+- Updated dependencies [[`9a201d9`](https://github.com/MaximDevoir/ATO/commit/9a201d991610054f0fcde5d3d4e352809af10d9d)]:
+  - @uapkg/cli@1.1.4
+  - @maximdevoir/engine-association-resolver@1.1.4
+  - @uapkg/package-manifest@0.1.2
+
 ## 1.1.3
 
 ### Patch Changes

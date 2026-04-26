@@ -1,5 +1,24 @@
 # uapkg
 
+## 1.1.4
+
+### Patch Changes
+
+- [`9a201d9`](https://github.com/MaximDevoir/ATO/commit/9a201d991610054f0fcde5d3d4e352809af10d9d) Thanks [@MaximDevoir](https://github.com/MaximDevoir)! - fix: refactor to replace `uapkg` package with `@uapkg/cli` across dependencies and services
+
+- Updated dependencies [[`9a201d9`](https://github.com/MaximDevoir/ATO/commit/9a201d991610054f0fcde5d3d4e352809af10d9d)]:
+  - @uapkg/common@0.1.2
+  - @uapkg/common-schema@0.1.2
+  - @uapkg/config@0.1.2
+  - @uapkg/diagnostics@0.1.2
+  - @uapkg/diagnostics-format@0.1.2
+  - @uapkg/installer@0.1.2
+  - @uapkg/log@0.1.2
+  - @uapkg/pack@0.1.2
+  - @uapkg/package-manifest@0.1.2
+  - @uapkg/package-manifest-schema@0.1.2
+  - @uapkg/registry-core@0.1.2
+
 ## 1.1.3
 
 ### Patch Changes
